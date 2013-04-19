@@ -29,8 +29,8 @@ classdef DecaDAC < handle
 			chan = qd.ins.DecaDACChannel(obj, n);
 		end
 
-		function r = query(obj, str)
-			r = query(obj.com, str);
+		function rep = query(obj, req)
+			rep = query(obj.com, req);
 		end
 	end
 end

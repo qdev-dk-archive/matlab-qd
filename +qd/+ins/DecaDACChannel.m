@@ -68,6 +68,11 @@ classdef DecaDACChannel < handle
 			end
 		end
 
+		function val = get(obj)
+			raw = qd.util.match(obj.parent.query('d;'), 'd%d!');
+			val = raw / (2^16-1) * obj.range_span() + obj.range_low;
+		end
+
 		function set_ramp_rate(obj, rate)
 		% chan.set_ramp_rate(rate)
 		%
