@@ -10,6 +10,7 @@ classdef DecaDACChannel < handle
 		function obj = DecaDACChannel(parent, num)
 			obj.parent = parent;
 			obj.num = num;
+			warning('These drivers only support mode 2 so far (16 bit resolution).');
 			warning('No handling of DecaDAC range yet, setting -10V to 10V.');
 			obj.range_low = -10.0;
 			obj.range_high = 10.0;
