@@ -5,33 +5,48 @@ classdef Record < handle
 		creation
 	end
 
-	properties(GetAcces=public)
+	properties(GetAccess=public)
 		meta
+		read_only
 	end
 
 	methods(Static)
 		function obj = new(loc, meta)
 			% See if meta is json representable
-			json.dumps(meta);
+			json.dump(meta);
 			obj = qd.data.Record(loc);
+			obj.read_only = false;
 			obj.meta = meta;
 			obj.creation = clock();
-			assert(~exist(loc, 'file'));
+			qd.util.assert(~exist(loc, 'file'));
 			mkdir(loc);
-			% to get the absolute path corresponding to loc. We cd into it and
-			% call pwd.
-			save_dir = pwd();
-			cd(loc);
-			obj.loc = pwd();
-			cd(save_dir);
+			obj.loc = qd.util.absdir(loc);
 			obj.save_meta();
 		end
 	end
 
 	methods
 		function r = make_run(obj, name)
-			r = qd.data.Run(obj, name)
+			qd.util.assert(~obj.read_only);
+			r = qd.data.DataOut(obj, name)
 			obj.runs{end + 1} = r;
+		end
+
+		function r = load_run_data(obj, name)
+			run_path = fullfile(obj.loc, [name '.run']);
+			meta_path = fullfile(obj.loc, [name '.json']);
+			if ~exist(run_path, 'file')
+				error('Could not locate run');
+			end
+			meta = json.read(meta_path);
+			data = dlmread(run_path);
+			r = {};
+			i = 1;
+			for c = meta
+				c.data = transpose(data(:, i));
+				r{end+1} = c;
+				i = i + 1;
+			end
 		end
 
 		function loc = location(obj)
@@ -39,8 +54,9 @@ classdef Record < handle
 		end
 
 		function set_meta(obj, meta)
+			qd.util.assert(~obj.read_only);
 			meta_bak = [obj.meta_path() '.bak'];
-			assert(~file.exists(meta_bak))
+			qd.util.assert(~file.exists(meta_bak))
 			movefile(obj.meta_path(), meta_bak);
 			obj.meta = meta;
 			obj.save_meta();

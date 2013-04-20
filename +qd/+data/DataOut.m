@@ -1,4 +1,4 @@
-classdef Run < handle
+classdef DataOut < handle
 	properties(Access=private)
 		parent
 		name
@@ -8,8 +8,9 @@ classdef Run < handle
 	end
 	
 	methods(Access=[?qd.data.Record])
-		function obj = Run(parent, name)
-			obj.parent = parent; 
+		function obj = DataOut(parent, name)
+			qd.util.assert(~parent.read_only);
+			obj.parent = parent;
 			obj.name = name;
 			obj.columns = [];
 			obj.initialized = false;
