@@ -1,14 +1,12 @@
-classdef DecaDACChannel < handle
+classdef DecaDACChannel < qd.classes.Channel
     properties(Access=private)
-        parent
         num
         range_low
         range_high
         ramp_rate % volts per second
     end
     methods
-        function obj = DecaDACChannel(parent, num)
-            obj.parent = parent;
+        function obj = DecaDACChannel(num)
             obj.num = num;
             warning('These drivers only support mode 2 so far (16 bit resolution).');
             warning('No handling of DecaDAC range yet, setting -10V to 10V.');
@@ -19,6 +17,8 @@ classdef DecaDACChannel < handle
         end
 
         function set(obj, val)
+            % Short hand for obj.instrument
+            ins = obj.instrument;
             % Validate the input for common errors.
             qd.util.assert(isnumeric(val));
             if (val > obj.range_high) || (val < obj.range_low)
@@ -33,14 +33,14 @@ classdef DecaDACChannel < handle
             obj.select();
             if isempty(obj.ramp_rate)
                 % Do not ramp, just set the output.
-                obj.parent.query(sprintf('D%d;', goal));
+                ins.queryf('D%d;', goal);
             else % The else part is a ramping set.
-                current = qd.util.match(obj.parent.query('d;'), 'd%d!');
+                current = ins.querym('d;', 'd%d!');
                 % set the limit for the ramp
                 if current < goal
-                    obj.parent.query(sprintf('U%d;', goal));
+                    ins.queryf('U%d;', goal);
                 elseif current > goal
-                    obj.parent.query(sprintf('L%d;', goal));
+                    ins.queryf('L%d;', goal);
                 else
                     % No need to change anything.
                     return;
@@ -53,10 +53,10 @@ classdef DecaDACChannel < handle
                 slope = ceil((obj.ramp_rate / obj.range_span() * ramp_clock * 1E-6) * (2^32));
                 slope = slope * sign(goal - current);
                 % Initiate the ramp.
-                obj.parent.query(sprintf('T%d;G0;S%d;', ramp_clock, slope));
+                ins.queryf('T%d;G0;S%d;', ramp_clock, slope);
                 % Now we wait until the goal has been reached
                 while true
-                    val = qd.util.match(obj.parent.query('d;'), 'd%d!');
+                    val = ins.querym('d;', 'd%d!');
                     if val == goal
                         break;
                     end
@@ -64,12 +64,12 @@ classdef DecaDACChannel < handle
                     % TODO, if this is taking too long. Abort the ramp with an error.
                 end
                 % Set back everything
-                obj.parent.query(sprintf('S0;L0;U%d;', 2^16-1));
+                ins.queryf('S0;L0;U%d;', 2^16-1);
             end
         end
 
         function val = get(obj)
-            raw = qd.util.match(obj.parent.query('d;'), 'd%d!');
+            raw = obj.instrument.querym('d;', 'd%d!');
             val = raw / (2^16-1) * obj.range_span() + obj.range_low;
         end
 
@@ -85,7 +85,7 @@ classdef DecaDACChannel < handle
     methods(Access=private)
         function select(obj)
             % Select this channel on the DAC.
-            obj.parent.query(sprintf('B%d;C%d;', floor(obj.num/4), mod(obj.num, 4)));
+            obj.instrument.queryf('B%d;C%d;', floor(obj.num/4), mod(obj.num, 4));
         end
 
         function span = range_span(obj)

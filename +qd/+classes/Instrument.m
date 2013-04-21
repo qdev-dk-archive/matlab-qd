@@ -1,25 +1,67 @@
-classdef Instrument < handle
+classdef Instrument < qd.classes.Nameable
     properties(Access=private)
-        defined_name
+        disable_default = false
     end
     methods
+        function r = model(obj)
+        % The name of the type of instrument as given by the manufacturer. For
+        % instance, this could be 'SR530' for a model 530 lock-in amplifier
 
-        function r = model_name(obj)
-            error(['This function should be overwritten in instruments to '...
-                'return the name of the instrument type.']);
+            % The default implementation returns the name of the class.
+            m = metaclass(obj);
+            p = qd.util.strsplit(m.Name, '.');
+            r = p(end);
         end
 
-        function r = name(obj)
-            if isempty(obj.defined_name)
-                r = obj.model_name;
+        function r = default_name(obj)
+            r = obj.model();
+        end
+
+        function r = channels(obj)
+            r = {}
+        end
+
+        function chan = channel(obj, id)
+            if obj.has_channel(id)
+                if obj.disable_default
+                    error('Not supported by this channel.');
+                end
+                chan = qd.classes.Channel();
+                chan.instrument = obj;
+                chan.channel_id = id;
             else
-                r = obj.defined_name;
+                error(sprintf('Channel not found (%s)', id));
             end
         end
 
-        function set_name(obj, name)
-            obj.defined_name = name;
+        function r = has_channel(obj, channel)
+            r = ~isempty(find(strcmp(obj.channels(), channel)));
         end
 
+        function val = getc(obj, channel)
+            chan = channel_if_reimplemented(channel);
+            val = chan.get();
+        end
+
+        function setc(obj, channel, val)
+            chan = channel_if_reimplemented(channel);
+            chan.set(val);
+        end
+    end
+    methods(Access=private)
+        function chan = channel_if_reimplemented(obj, id)
+            % The default implementation of Instrument::channel is to return a
+            % channel which will call back getc and setc, this will cause an
+            % infinite loop. Here we set disable_default = true to disable the
+            % default implementation of channel for the duration of this call.
+            obj.disable_default = true;
+            try
+                chan = obj.channel(channel);
+            catch err
+                obj.disable_default = false;
+                rethrow(err)
+            end
+            obj.disable_default = false;
+        end
     end
 end
