@@ -1,4 +1,4 @@
-classdef DecaDAC < handle
+classdef DecaDAC < qd.classes.Instrument
     properties(Access=private)
         com
     end

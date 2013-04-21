@@ -1,4 +1,4 @@
-classdef SRLockIn < handle
+classdef SRLockIn < qd.classes.Instrument
     properties(Access=private)
         com
     end
