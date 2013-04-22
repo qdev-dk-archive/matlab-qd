@@ -56,7 +56,8 @@ classdef Simple < handle
                 chan = obj.setup.find_channel(name_or_channel);
             end
             for other = obj.sweeps
-                if strcmp(other.name(), chan.name())
+                other = other{1};
+                if strcmp(other.chan.name, chan.name)
                     error('A channel of this name is already being swept.');
                 end
             end
@@ -69,6 +70,7 @@ classdef Simple < handle
             if ischar(name_or_channel) && ~isempty(obj.setup)
                 chan = obj.setup.find_channel(name_or_channel);
             end
+            obj.inputs{end + 1} = chan;
         end
 
         function run(obj)
@@ -83,9 +85,18 @@ classdef Simple < handle
             if ~isempty(obj.setup)
                 meta.setup = obj.setup.describe();
             end
-            meta.inputs = qd.util.map(@(chan) chan.describe(), obj.inputs);
+            meta.inputs = {};
+            for inp = obj.inputs
+                inp = inp{1};
+                if ismember(inp, obj.setup.instruments)
+                    meta.inputs{end + 1} = inp.describe_without_instrument();
+                else
+                    meta.inputs{end + 1} = inp.describe();
+                end
+            end
             meta.sweeps = {};
             for sweep = obj.sweeps
+                sweep = sweep{1};
                 s = struct();
                 s.from = sweep.from;
                 s.to = sweep.to;
@@ -95,13 +106,13 @@ classdef Simple < handle
                 if ismember(sweep.chan, obj.setup.instruments)
                     s.chan = sweep.chan.describe_without_instrument();
                 else
-                    s.chan = sweep.describe();
+                    s.chan = sweep.chan.describe();
                 end
             end
 
             % Get a directory to store the output.
-            if ~isempty(obj.output_directory)
-                out_dir = obj.output_directory;
+            if ~isempty(obj.directory)
+                out_dir = obj.directory;
             else
                 out_dir = obj.store.new_dir();
             end
@@ -110,24 +121,26 @@ classdef Simple < handle
             json.write(meta, fullfile(out_dir, 'meta.json'));
 
             % This table will hold the data collected.
-            table = qd.util.TableWriter(out_dir, 'data');
+            table = qd.data.TableWriter(out_dir, 'data');
             for sweep = obj.sweeps
+                sweep = sweep{1};
                  % TODO. No proper handling of units yet.
                 table.add_column(sweep.chan.name, '');
             end
             for inp = obj.inputs
+                inp = inp{1};
                  % TODO. No proper handling of units yet.
                 table.add_column(inp.name, '');
             end
             table.init();
 
             % Now perform all the measurements.
-            obj.handle_sweeps(sweeps, [], 0, inputs, table);
+            obj.handle_sweeps(obj.sweeps, [], 0, obj.inputs, table);
         end
     end
 
     methods(Access=private)
-        function handle_sweeps(sweeps, earlier_values, settle, inputs, table)
+        function handle_sweeps(obj, sweeps, earlier_values, settle, inputs, table)
             % If there are no more sweeps left, let the system settle, then
             % measure one point.
             if isempty(sweeps)
@@ -136,6 +149,7 @@ classdef Simple < handle
                 end
                 values = [earlier_values];
                 for inp = inputs
+                    inp = inp{1};
                     values(end+1) = inp.get();
                 end
                 table.add_point(values);
@@ -149,7 +163,11 @@ classdef Simple < handle
             for value = linspace(sweep.from, sweep.to, sweep.points)
                 sweep.chan.set(value);
                 settle = max(settle, sweep.settle);
-                handle_sweeps(next_sweeps, [earlier_values value], settle, inputs, table);
+                obj.handle_sweeps(next_sweeps, [earlier_values value], settle, inputs, table);
+                if ~isempty(next_sweeps)
+                    % Nicely seperate everything for gnuplot.
+                    table.add_divider();
+                end
             end
         end
     end

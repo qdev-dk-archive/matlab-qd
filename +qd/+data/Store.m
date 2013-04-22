@@ -13,7 +13,7 @@ classdef Store < handle
             while true
                 directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', i)]);
                 % TODO, do not fill in holes.
-                if ~exist(l, 'file')
+                if ~exist(directory, 'file')
                     break
                 end
                 i = i + 1;
