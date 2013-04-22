@@ -1,4 +1,4 @@
-classdef Simple < handle
+classdef StandardRun < handle
     properties
         name = ''
         setup
@@ -10,7 +10,7 @@ classdef Simple < handle
         store
     end
     methods
-        function obj = Simple()
+        function obj = StandardRun()
             obj.sweeps = {};
         end
 
@@ -76,7 +76,7 @@ classdef Simple < handle
         function run(obj)
             % Setup meta data
             meta = struct();
-            meta.type = 'simple run';
+            meta.type = 'standard run';
             meta.version = '0.0.1';
             meta.timestamp = datestr(clock(),31);
             meta.meta = obj.meta;
