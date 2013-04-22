@@ -142,8 +142,8 @@ classdef Simple < handle
                 return
             end
 
-            % Sweep one channel, recursively call this function in the loop
-            % with one less channel to sweep.
+            % Sweep one channel. Within the loop, recusively call this
+            % function with one less channel to sweep.
             sweep = sweeps{1};
             next_sweeps = sweeps(2:end);
             for value = linspace(sweep.from, sweep.to, sweep.points)
