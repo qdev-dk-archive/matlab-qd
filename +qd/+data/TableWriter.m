@@ -39,7 +39,7 @@ classdef TableWriter < handle
             if ~obj.initialized
                 obj.init()
             end
-            qd.util.assert(numel(data) == numel(obj.columns));
+            qd.util.assert(length(data) == length(obj.columns));
             fprintf(obj.file, '%.16G\t', data);
             fprintf(obj.file, '\n');
         end

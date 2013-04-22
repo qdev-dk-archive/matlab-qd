@@ -17,7 +17,7 @@ classdef DecaDACChannel < qd.classes.Channel
         end
 
         function set(obj, val)
-            % Short hand for obj.instrument
+            % Shorthand for obj.instrument
             ins = obj.instrument;
             % Validate the input for common errors.
             qd.util.assert(isnumeric(val));
@@ -30,11 +30,13 @@ classdef DecaDACChannel < qd.classes.Channel
             % DecaDACs expect a number between 0 and 2^16-1 representing the output range.
             goal = round((2^16 - 1)*frac);
 
+            % Set this as the active channel on the decadac.
             obj.select();
             if isempty(obj.ramp_rate)
                 % Do not ramp, just set the output.
                 ins.queryf('D%d;', goal);
             else % The else part is a ramping set.
+                % Get the current value.
                 current = ins.querym('d;', 'd%d!');
                 % set the limit for the ramp
                 if current < goal
@@ -45,9 +47,9 @@ classdef DecaDACChannel < qd.classes.Channel
                     % No need to change anything.
                     return;
                 end
-                % We set the ramp clock period to 1000 us.
-                % Changing the clock is not supported for all DACs it seems,
-                % for those that do not support it, I hope the default is always 1000.
+                % We set the ramp clock period to 1000 us. Changing the clock
+                % is not supported for all DACs it seems, for those that do
+                % not support it, I hope the default is always 1000.
                 ramp_clock = 1000;
                 % Calculate the required slope (see the DecaDAC docs)
                 slope = ceil((obj.ramp_rate / obj.range_span() * ramp_clock * 1E-6) * (2^32));
@@ -69,6 +71,7 @@ classdef DecaDACChannel < qd.classes.Channel
         end
 
         function val = get(obj)
+            obj.select();
             raw = obj.instrument.querym('d;', 'd%d!');
             val = raw / (2^16-1) * obj.range_span() + obj.range_low;
         end

@@ -1,11 +1,11 @@
 classdef Simple < handle
-    properties(Access=private)
-        name_
-        setup_
+    properties
+        name = ''
+        setup
         sweeps
         inputs
-        meta_
-        comment_
+        meta = struct
+        comment = ''
         directory
         store
     end
@@ -14,23 +14,23 @@ classdef Simple < handle
             obj.sweeps = {};
         end
 
-        function obj = name(obj, name)
-            obj.name_ = name;
+        function obj = set_name(obj, name)
+            obj.name = name;
         end
 
-        function obj = setup(obj, setup)
-            obj.setup_ = setup;
+        function obj = set_setup(obj, setup)
+            obj.setup = setup;
         end
 
-        function obj = meta(obj, meta)
-            obj.meta_ = meta;
+        function obj = set_meta(obj, meta)
+            obj.meta = meta;
         end
 
-        function obj = comment(obj, comment)
-            obj.comment_ = comment;
+        function obj = set_comment(obj, comment)
+            obj.comment = comment;
         end
 
-        function obj = output_directory(obj, director)
+        function obj = set_directory(obj, director)
             obj.directory = directory;
         end
 
@@ -38,7 +38,19 @@ classdef Simple < handle
             obj.store = store;
         end
 
-        function obj = sweep(obj, name_or_channel, from, to, points)
+        function obj = sweep(obj, name_or_channel, from, to, points, varargin)
+            sweep = struct();
+            sweep.from = from;
+            sweep.to = to;
+            sweep.points = points;
+            switch length(varargin)
+                case 0
+                    sweep.settle = 0;
+                case 1
+                    sweep.settle = varargin(1);
+                otherwise
+                    error('Got too many arguments.');
+            end
             chan = name_or_channel;
             if ischar(name_or_channel) && ~isempty(obj.setup)
                 chan = obj.setup.find_channel(name_or_channel);
@@ -48,11 +60,7 @@ classdef Simple < handle
                     error('A channel of this name is already being swept.');
                 end
             end
-            sweep = struct();
             sweep.chan = chan;
-            sweep.from = from;
-            sweep.to = to;
-            sweep.points = points;
             obj.sweeps{end + 1} = sweep;
         end
 
@@ -68,16 +76,18 @@ classdef Simple < handle
             meta.type = 'simple run';
             meta.version = '0.0.1';
             meta.timestamp = datestr(clock(),31);
-            if ~isempty(obj.meta_)
-                meta.meta = obj.meta_;
+            if ~isempty(obj.meta)
+                meta.meta = obj.meta;
             end
-            if ~isempty(obj.comment_)
-                meta.comment = obj.comment_;
+            if ~isempty(obj.comment)
+                meta.comment = obj.comment;
             end
-            if ~isempty(obj.name_)
-                meta.name = obj.name_;
+            if ~isempty(obj.name)
+                meta.name = obj.name;
             end
-            % TODO add setup to meta
+            if ~isempty(obj.setup)
+                meta.setup = obj.setup.describe();
+            end
             % TODO add inputs to meta
             % TODO add sweeps to meta
             % TODO set up columns

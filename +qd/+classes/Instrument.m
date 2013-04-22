@@ -18,7 +18,7 @@ classdef Instrument < qd.classes.Nameable
         end
 
         function r = channels(obj)
-            r = {}
+            r = {};
         end
 
         function chan = channel(obj, id)
