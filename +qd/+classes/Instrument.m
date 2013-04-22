@@ -21,6 +21,15 @@ classdef Instrument < qd.classes.Nameable
             r = {};
         end
 
+        function r = describe(obj)
+            r = struct;
+            r.name = obj.name;
+            r.model = obj.model;
+            metacl = metaclass(obj);
+            r.class = metacl.Name;
+            r.channels = obj.channels;
+        end
+
         function chan = channel(obj, id)
             if obj.has_channel(id)
                 if obj.disable_default
