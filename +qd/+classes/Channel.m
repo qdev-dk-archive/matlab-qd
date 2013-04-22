@@ -11,7 +11,7 @@ classdef Channel < qd.classes.Nameable
         function r = describe_without_instrument(obj)
             r = struct();
             r.name = obj.name;
-            r.default_name = obb.default_name;
+            r.default_name = obj.default_name;
             r.channel_id = obj.channel_id;
             r.instrument_name = obj.instrument.name;
         end

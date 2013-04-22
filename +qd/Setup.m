@@ -1,4 +1,4 @@
-classdef setup < handle
+classdef Setup < handle
     properties
         instruments = {}
         channels = {}
@@ -22,11 +22,12 @@ classdef setup < handle
         % This function returns the added channel.
             chan = obj.find_in_instruments(id);
             chan.name = name;
-            obj.add_channel(channel);
+            obj.add_channel(chan);
         end
 
         function chan = find_channel(obj, id)
             for ch = obj.channels
+                ch = ch{1};
                 if strcmp(ch.name, id)
                     chan = ch;
                     return;
@@ -40,28 +41,45 @@ classdef setup < handle
         function meta = describe(obj)
             meta = struct();
             meta.meta = obj.meta;
-            % TODO describe instruments and channels.
+            instrs = {};
+            chans = {};
+            for ins = obj.instruments
+                ins = ins{1};
+                instrs{end + 1} = ins.describe();
+            end
+            meta.instruments = instrs;
+            for chan = obj.channels
+                chan = chan{1};
+                if ismember(chan.instrument, obj.instruments)
+                    chans{end + 1} = chan.describe_without_instrument();
+                else
+                    chans{end + 1} = chan.describe();
+                end
+            end
+            meta.channels = chans;
         end
     end
     methods(Access=private)
         function chan = find_in_instruments(obj, id)
             parts = qd.util.strsplit(id, '/');
             if length(parts) ~= 2
-                error(['Input should contain one "/" delimiting the '
+                error(['Input should contain one "/" delimiting the '...
                     'instrument name from the channel name']);
             end
             [ins_name, chan_name] = parts{:};
             ins = [];
             for instr = obj.instruments
+                instr = instr{1};
                 if strcmp(instr.name, ins_name)
-                    ins = instr
+                    ins = instr;
                 end
             end
             if isempty(ins)
                 error('No such instrument');
             end
-            chan = []
+            chan = [];
             for name = ins.channels()
+                name = name{1};
                 if strcmp(name, chan_name)
                     chan = ins.channel(name);
                 end
