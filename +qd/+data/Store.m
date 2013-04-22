@@ -10,7 +10,9 @@ classdef Store < handle
 
         function cd(obj, d)
             d = fullfile(obj.loc, d);
-            qd.util.assert(exist(d, 'file'));
+            if ~exist(d, 'file')
+                mkdir(d);
+            end
             obj.loc = d;
         end
 

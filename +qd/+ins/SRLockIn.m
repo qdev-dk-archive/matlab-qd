@@ -10,14 +10,33 @@ classdef SRLockIn < qd.classes.FileLikeInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R' 'theta'};
+            r = {'X' 'Y' 'R' 'theta' 'freq'};
         end
 
         function val = getc(obj, channel)
-            qd.util.assert(obj.has_channel(channel));
+            switch channel
+                case 'X'
+                    val = obj.querym('OUTP?1', '%f');
+                case 'Y'
+                    val = obj.querym('OUTP?2', '%f');
+                case 'R'
+                    val = obj.querym('OUTP?3', '%f');
+                case 'theta'
+                    val = obj.querym('OUTP?4', '%f');
+                case 'freq'
+                    val = obj.querym('FREQ?', '%f');
+                otherwise
+                    error('Not supported.')
+            end
+        end
 
-            num = find(strcmp(obj.channels(), channel));
-            val = obj.querym('OUTP?%d', num, '%f');
+        function setc(obj, channel, value)
+            switch channel
+            case 'freq'
+                obj.sendf('FREQ %.6f', value);
+            otherwise
+                error('Not supported');
+            end
         end
     end
 end

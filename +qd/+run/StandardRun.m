@@ -69,6 +69,10 @@ classdef StandardRun < handle
             obj.sweeps{end + 1} = sweep;
         end
 
+        function obj = clear_sweeps(obj)
+            obj.sweeps = {};
+        end
+        
         function obj = input(obj, name_or_channel)
             chan = name_or_channel;
             if ischar(name_or_channel) && ~isempty(obj.setup)

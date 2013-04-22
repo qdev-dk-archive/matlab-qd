@@ -35,7 +35,9 @@ classdef Setup < handle
             end
             if length(qd.util.strsplit(id, '/')) == 2
                 chan = obj.find_in_instruments(id);
+                return
             end
+            error('Channel not found.')
         end
 
         function meta = describe(obj)
