@@ -17,8 +17,8 @@ classdef Channel < qd.classes.Nameable
         end
 
         function r = describe(obj)
-            r = obj.describe_without_instrument;
-            rmfield(r, 'instrument_name');
+            r = obj.describe_without_instrument();
+            r = rmfield(r, 'instrument_name');
             r.instrument = obj.instrument.describe();
         end
 

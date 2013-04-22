@@ -14,7 +14,7 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
         end
 
         function r = channels(obj)
-            r = qd.util.map(@(n)['CH' num2str(n)], 0:19)
+            r = qd.util.map(@(n)['CH' num2str(n)], 0:19);
         end
 
         function chan = channel(obj, id)
@@ -24,7 +24,7 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
             end
             chan = qd.ins.DecaDACChannel(n);
             chan.channel_id = id;
-            chan.Instrument = obj;
+            chan.instrument = obj;
         end
     end
 end

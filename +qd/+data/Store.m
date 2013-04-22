@@ -8,6 +8,12 @@ classdef Store < handle
             obj.loc = qd.util.absdir(loc);
         end
 
+        function cd(obj, d)
+            d = fullfile(obj.loc, d);
+            qd.util.assert(exist(d, 'file'));
+            obj.loc = d;
+        end
+
         function directory = new_dir(obj)
             i = 0;
             while true

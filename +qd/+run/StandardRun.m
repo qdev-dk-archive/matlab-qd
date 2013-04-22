@@ -47,12 +47,16 @@ classdef StandardRun < handle
                 case 0
                     sweep.settle = 0;
                 case 1
-                    sweep.settle = varargin(1);
+                    sweep.settle = varargin{1};
                 otherwise
                     error('Got too many arguments.');
             end
             chan = name_or_channel;
-            if ischar(name_or_channel) && ~isempty(obj.setup)
+            if ischar(name_or_channel)
+                if isempty(obj.setup)
+                    error(['You need to configure a setup for this run before '...
+                        'you can add a channel by name.']);
+                end
                 chan = obj.setup.find_channel(name_or_channel);
             end
             for other = obj.sweeps
@@ -88,7 +92,7 @@ classdef StandardRun < handle
             meta.inputs = {};
             for inp = obj.inputs
                 inp = inp{1};
-                if ismember(inp, obj.setup.instruments)
+                if qd.util.cellmember(inp.instrument, obj.setup.instruments)
                     meta.inputs{end + 1} = inp.describe_without_instrument();
                 else
                     meta.inputs{end + 1} = inp.describe();
@@ -98,12 +102,13 @@ classdef StandardRun < handle
             for sweep = obj.sweeps
                 sweep = sweep{1};
                 s = struct();
+                s.chan = sweep.chan.name;
                 s.from = sweep.from;
                 s.to = sweep.to;
                 s.points = sweep.points;
                 s.settle = sweep.settle;
                 meta.sweeps{end+1} = s;
-                if ismember(sweep.chan, obj.setup.instruments)
+                if qd.util.cellmember(sweep.chan, obj.setup.instruments)
                     s.chan = sweep.chan.describe_without_instrument();
                 else
                     s.chan = sweep.chan.describe();

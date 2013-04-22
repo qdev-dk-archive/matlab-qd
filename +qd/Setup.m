@@ -50,7 +50,7 @@ classdef Setup < handle
             meta.instruments = instrs;
             for chan = obj.channels
                 chan = chan{1};
-                if ismember(chan.instrument, obj.instruments)
+                if qd.util.cellmember(chan.instrument, obj.instruments)
                     chans{end + 1} = chan.describe_without_instrument();
                 else
                     chans{end + 1} = chan.describe();
