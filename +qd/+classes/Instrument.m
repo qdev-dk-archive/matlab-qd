@@ -48,17 +48,17 @@ classdef Instrument < qd.classes.Nameable
         end
 
         function val = getc(obj, channel)
-            chan = channel_if_reimplemented(channel);
+            chan = obj.channel_if_reimplemented(channel);
             val = chan.get();
         end
 
         function setc(obj, channel, val)
-            chan = channel_if_reimplemented(channel);
+            chan = obj.channel_if_reimplemented(channel);
             chan.set(val);
         end
     end
     methods(Access=private)
-        function chan = channel_if_reimplemented(obj, id)
+        function chan = channel_if_reimplemented(obj, channel)
             % The default implementation of Instrument::channel is to return a
             % channel which will call back getc and setc, this will cause an
             % infinite loop. Here we set disable_default = true to disable the

@@ -13,7 +13,7 @@ classdef Store < handle
             if ~exist(d, 'file')
                 mkdir(d);
             end
-            obj.loc = d;
+            obj.loc = qd.util.absdir(d);
         end
 
         function directory = new_dir(obj)

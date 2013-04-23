@@ -81,7 +81,7 @@ classdef StandardRun < handle
             obj.inputs{end + 1} = chan;
         end
 
-        function run(obj)
+        function out_dir = run(obj)
             % Setup meta data
             meta = struct();
             meta.type = 'standard run';
