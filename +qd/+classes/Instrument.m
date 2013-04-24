@@ -8,9 +8,7 @@ classdef Instrument < qd.classes.Nameable
         % instance, this could be 'SR530' for a model 530 lock-in amplifier
 
             % The default implementation returns the name of the class.
-            m = metaclass(obj);
-            p = qd.util.strsplit(m.Name, '.');
-            r = p(end);
+            r = qd.util.class_name(obj);
         end
 
         function r = default_name(obj)
@@ -25,8 +23,7 @@ classdef Instrument < qd.classes.Nameable
             r = struct;
             r.name = obj.name;
             r.model = obj.model;
-            metacl = metaclass(obj);
-            r.class = metacl.Name;
+            r.class = class_name(obj, 'full');
             r.channels = obj.channels;
         end
 
