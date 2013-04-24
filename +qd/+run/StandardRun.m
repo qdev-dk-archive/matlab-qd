@@ -40,8 +40,7 @@ classdef StandardRun < qd.run.Run
         function add_to_meta(obj, meta)
             meta.inputs = {};
             for inp = obj.inputs
-                inp = inp{1};
-                meta.inputs{end + 1} = obj.describe_channel(inp);
+                meta.inputs{end + 1} = obj.describe_channel(inp{1});
             end
             meta.sweeps = {};
             for sweep = obj.sweeps
@@ -60,14 +59,10 @@ classdef StandardRun < qd.run.Run
             % This table will hold the data collected.
             table = qd.data.TableWriter(out_dir, 'data');
             for sweep = obj.sweeps
-                sweep = sweep{1};
-                 % TODO. No proper handling of units yet.
-                table.add_column(sweep.chan.name, '');
+                table.add_channel_column(sweep{1}.chan);
             end
             for inp = obj.inputs
-                inp = inp{1};
-                 % TODO. No proper handling of units yet.
-                table.add_column(inp.name, '');
+                table.add_channel_column(inp{1});
             end
             table.init();
 
@@ -86,8 +81,7 @@ classdef StandardRun < qd.run.Run
                 end
                 values = [earlier_values];
                 for inp = inputs
-                    inp = inp{1};
-                    values(end+1) = inp.get();
+                    values(end+1) = inp{1}.get();
                 end
                 table.add_point(values);
                 return

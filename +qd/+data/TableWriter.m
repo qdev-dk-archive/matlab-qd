@@ -2,29 +2,27 @@ classdef TableWriter < handle
     properties(Access=private)
         meta_path
         data_path
-        columns
-        initialized
+        columns = {}
+        initialized = false
         file
     end
     
     methods
     
         function obj = TableWriter(directory, name);
-            obj.initialized = false;
             obj.meta_path = fullfile(directory, [name '.json']);
             obj.data_path = fullfile(directory, [name '.dat']);
-            obj.columns = [];
             qd.util.assert(~exist(obj.meta_path));
             qd.util.assert(~exist(obj.data_path));
         end
 
         function add_column(obj, name, unit)
-            column = struct('name', name, 'unit', unit);
-            if isempty(obj.columns)
-                obj.columns = column;
-            else
-                obj.columns(end + 1) = column;
-            end
+            obj.columns{end + 1} = struct('name', name, 'unit', unit); 
+        end
+
+        function add_channel_column(obj, chan)
+            obj.columns{end + 1} = struct('name', chan.name, 'unit', '');
+            % TODO proper handling of units.
         end
 
         function init(obj)

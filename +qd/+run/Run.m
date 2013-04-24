@@ -2,7 +2,6 @@ classdef Run < handle
     properties
         name = ''
         setup
-        inputs
         meta = struct
         comment = ''
         directory
