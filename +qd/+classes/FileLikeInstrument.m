@@ -4,6 +4,11 @@ classdef FileLikeInstrument < qd.classes.Instrument
     end
     methods
 
+        function obj = FileLikeInstrument(obj, com)
+            obj.com = com;
+            fopen(obj.com);
+        end
+
         function rep = query(obj, req)
             rep = query(obj.com, req);
         end

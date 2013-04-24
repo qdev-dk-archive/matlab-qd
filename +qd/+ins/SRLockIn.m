@@ -1,9 +1,5 @@
 classdef SRLockIn < qd.classes.FileLikeInstrument
     methods
-        function obj = SRLockIn(vendor, board, address)
-            obj.com = gpib(vendor, board, address);
-            fopen(obj.com); % will be closed on delete by FileLikeInstrument.
-        end
 
         function r = model(obj)
             r = 'SR830';
