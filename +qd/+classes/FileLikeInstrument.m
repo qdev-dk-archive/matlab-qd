@@ -13,7 +13,7 @@ classdef FileLikeInstrument < qd.classes.Instrument
         end
 
         function rep = query(obj, req)
-            rep = query(obj.com, req);
+            rep = query(obj.com, req, '%s\n', '%s\n');
         end
 
         function rep = queryf(obj, req, varargin)
