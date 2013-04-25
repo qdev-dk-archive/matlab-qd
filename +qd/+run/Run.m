@@ -41,7 +41,7 @@ classdef Run < handle
             obj.store = store;
         end
 
-        function chan = resolve_channel(name_or_channel)
+        function chan = resolve_channel(obj, name_or_channel)
             chan = name_or_channel;
             if ischar(name_or_channel)
                 if isempty(obj.setup)
@@ -60,18 +60,18 @@ classdef Run < handle
             r = '0.0.1';
         end
 
-        function meta = describe_channel(chan)
+        function meta = describe_channel(obj, chan)
             if qd.util.cellmember(chan.instrument, obj.setup.instruments)
-                meta = inp.describe_without_instrument();
+                meta = chan.describe_without_instrument();
             else
-                meta = inp.describe();
+                meta = chan.describe();
             end
         end
 
         function out_dir = run(obj)
             % Setup meta data
             meta = struct();
-            meta.type = obj.type();
+            meta.type = obj.get_type();
             meta.version = obj.version();
             meta.timestamp = datestr(clock(),31);
             meta.meta = obj.meta;

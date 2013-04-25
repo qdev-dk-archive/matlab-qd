@@ -6,6 +6,6 @@ function r = class_name(obj, varargin)
         r = m.Name;
     else
         p = qd.util.strsplit(m.Name, '.');
-        r = p(end);
+        r = p{end};
     end
 end

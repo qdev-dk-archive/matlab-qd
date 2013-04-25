@@ -4,9 +4,12 @@ classdef FileLikeInstrument < qd.classes.Instrument
     end
     methods
 
-        function obj = FileLikeInstrument(obj, com)
-            obj.com = com;
-            fopen(obj.com);
+        function obj = FileLikeInstrument(varargin)
+            qd.util.assert(length(varargin) <= 1);
+            if ~isempty(varargin)
+                obj.com = varargin{1};
+                fopen(obj.com);
+            end
         end
 
         function rep = query(obj, req)

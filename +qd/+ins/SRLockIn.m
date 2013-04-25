@@ -1,6 +1,10 @@
 classdef SRLockIn < qd.classes.FileLikeInstrument
     methods
 
+        function obj = SRLockIn(com)
+            obj@qd.classes.FileLikeInstrument(com);
+        end
+
         function r = model(obj)
             r = 'SR830';
         end

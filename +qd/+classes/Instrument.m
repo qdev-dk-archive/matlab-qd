@@ -23,7 +23,7 @@ classdef Instrument < qd.classes.Nameable
             r = struct;
             r.name = obj.name;
             r.model = obj.model;
-            r.class = class_name(obj, 'full');
+            r.class = qd.util.class_name(obj, 'full');
             r.channels = obj.channels;
         end
 

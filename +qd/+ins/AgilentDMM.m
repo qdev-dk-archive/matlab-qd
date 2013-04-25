@@ -1,10 +1,10 @@
 classdef AgilentDMM < qd.classes.FileLikeInstrument
     methods
-        function obj = AgilentDMM(vendor, board, address)
-            obj.com = gpib(vendor, board, address);
-            fopen(obj.com); % will be closed on delete by FileLikeInstrument.
-        end
 
+        function  obj = AgilentDMM(com)
+            obj@qd.classes.FileLikeInstrument(com);
+        end
+        
         function r = model(obj)
             r = 'AgilentA34410';
         end
