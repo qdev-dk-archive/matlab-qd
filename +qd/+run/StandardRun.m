@@ -1,12 +1,9 @@
 classdef StandardRun < qd.run.Run
     properties
-        sweeps
-        inputs
+        sweeps = {}
+        inputs = {}
     end
     methods
-        function obj = StandardRun()
-            obj.sweeps = {};
-        end
 
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
             sweep = struct();
@@ -67,12 +64,12 @@ classdef StandardRun < qd.run.Run
             table.init();
 
             % Now perform all the measurements.
-            obj.handle_sweeps(obj.sweeps, [], 0, obj.inputs, table);
+            obj.handle_sweeps(obj.sweeps, [], 0, table);
         end
     end
 
     methods(Access=private)
-        function handle_sweeps(obj, sweeps, earlier_values, settle, inputs, table)
+        function handle_sweeps(obj, sweeps, earlier_values, settle, table)
             % If there are no more sweeps left, let the system settle, then
             % measure one point.
             if isempty(sweeps)
@@ -80,7 +77,7 @@ classdef StandardRun < qd.run.Run
                     pause(settle/1000);
                 end
                 values = [earlier_values];
-                for inp = inputs
+                for inp = obj.inputs
                     values(end+1) = inp{1}.get();
                 end
                 table.add_point(values);
@@ -94,7 +91,7 @@ classdef StandardRun < qd.run.Run
             for value = linspace(sweep.from, sweep.to, sweep.points)
                 sweep.chan.set(value);
                 settle = max(settle, sweep.settle);
-                obj.handle_sweeps(next_sweeps, [earlier_values value], settle, inputs, table);
+                obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table);
                 if ~isempty(next_sweeps)
                     % Nicely seperate everything for gnuplot.
                     table.add_divider();
