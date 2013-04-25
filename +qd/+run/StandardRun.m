@@ -66,10 +66,20 @@ classdef StandardRun < qd.run.Run
             % Now perform all the measurements.
             obj.handle_sweeps(obj.sweeps, [], 0, table);
         end
-    end
 
-    methods(Access=private)
         function handle_sweeps(obj, sweeps, earlier_values, settle, table)
+        % obj.handle_sweeps(sweeps, earlier_values, settle, table)
+        % 
+        % Sweeps the channels in sweeps, takes measurements and puts them in
+        % table.
+        %
+        % sweeps is a cell array of structs with the fields: from, to, points,
+        % chan, and settle. Rows will be added to table which look like:
+        % [earlier_values sweeps inputs] where earlier_values is an array of
+        % doubles, sweeps, is the current value of each swept parameter, and
+        % inputs are the measured inputs (the channels in obj.inputs). Settle
+        % is the amount of time to wait before measuring a sample (in ms).
+
             % If there are no more sweeps left, let the system settle, then
             % measure one point.
             if isempty(sweeps)
@@ -92,6 +102,12 @@ classdef StandardRun < qd.run.Run
                 sweep.chan.set(value);
                 settle = max(settle, sweep.settle);
                 obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table);
+                % In the first iteration of the loop, we need to wait for the
+                % previously changed value to settle. We also need to wait for
+                % this value to settle, whichever is greater. In the next
+                % iteration of the loop, we only need to wait for this value,
+                % therefore settle is set to 0 here.
+                settle = 0;
                 if ~isempty(next_sweeps)
                     % Nicely seperate everything for gnuplot.
                     table.add_divider();
