@@ -5,6 +5,7 @@ classdef FolderBrowser < handle
 		listbox
 		listbox_fig
 		fig
+		update_timer
 	end
 	methods
 		function obj = FolderBrowser(loc)
@@ -22,6 +23,13 @@ classdef FolderBrowser < handle
 				'Position', [0,0,1,1], ...
 				'Callback', @(h, varargin)obj.select(get(h, 'Value')));
 			obj.update();
+			obj.update_timer = timer();
+			obj.update_timer.Period = 3;
+			obj.update_timer.ExecutionMode = 'fixedSpacing';
+			obj.update_timer.TimerFcn = @(varargin)obj.update();
+			start(obj.update_timer);
+			% TODO set a a delete function on the figure to close the folder
+			% browser.
 		end
 
 		function update(obj)
@@ -58,6 +66,10 @@ classdef FolderBrowser < handle
 				table = qd.data.load_table(loc, table_name);
 				plot(table{1}.data, table{2}.data);
 			end
+		end
+
+		function delete(obj)
+			stop(obj.update_timer);
 		end
 	end
 end
