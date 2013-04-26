@@ -7,13 +7,19 @@ classdef DecaDACChannel < qd.classes.Channel
     end
     methods
         function obj = DecaDACChannel(num)
+            persistent warning_issued;
             obj.num = num;
-            warning('These drivers only support mode 2 so far (16 bit resolution).');
-            warning('No handling of DecaDAC range yet, setting -10V to 10V.');
             obj.range_low = -10.0;
             obj.range_high = 10.0;
             obj.ramp_rate = 1.0;
-            warning('No handling of limits either, chan.set(val) will remove limits if ramping is enabled.')
+            if isempty(warning_issued)
+                warning(['DecaDAC drivers: ' ...
+                    'No handling of DecaDAC range yet, setting -10V to 10V. ' ...
+                    'These drivers only support mode 2 so far (16 bit resolution). ' ...
+                    'No handling of limits either, chan.set(val) will remove limits ' ...
+                    'if ramping is enabled.'])
+                warning_issued = true;
+            end
         end
 
         function set(obj, val)

@@ -23,5 +23,10 @@ classdef Nameable < handle
         function set.name(obj, name)
             obj.defined_name = name;
         end
+
+        % For easy chaining.
+        function obj = set_name(obj, name)
+            obj.name = name;
+        end
     end
 end
