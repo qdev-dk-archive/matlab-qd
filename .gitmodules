@@ -1,0 +1,3 @@
+[submodule "matlab-json"]
+	path = matlab-json
+	url = git://github.com/kyamagu/matlab-json.git
