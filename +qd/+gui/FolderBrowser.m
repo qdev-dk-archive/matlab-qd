@@ -6,6 +6,7 @@ classdef FolderBrowser < handle
         listbox_fig
         fig
         update_timer
+        table_view
     end
     properties
         tbl
@@ -57,22 +58,18 @@ classdef FolderBrowser < handle
         function select(obj, val)
             loc = obj.content{val}.loc;
             obj.plot_loc(loc, obj.content{val}.name);
-            obj.expose_loc(loc);
+            obj.view_loc(loc);
         end
 
         function plot_loc(obj, loc, name)
             if isempty(obj.fig)
                 obj.fig = figure();
-            else
-                figure(obj.fig);
             end
-            clf();
-            hold('all');
-            title(name);
+            tables = {};
             for table_name = obj.list_table_names(loc)
-                table = qd.data.load_table(loc, table_name{1});
-                plot(table{1}.data, table{2}.data);
+                tables{end + 1} = qd.data.load_table(loc, table_name{1});
             end
+            obj.table_view = qd.gui.TableView(tables, obj.fig);
         end
 
         function view_loc(obj, loc)
@@ -80,7 +77,7 @@ classdef FolderBrowser < handle
             if length(names) == 1
                 obj.tbl = qd.data.view_table(loc, names{1});
             else
-                obj.tbl = qd.data.view_tables();
+                obj.tbl = qd.data.view_tables(loc);
             end
         end
 
