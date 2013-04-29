@@ -38,5 +38,16 @@ classdef SRLockIn < qd.classes.FileLikeInstrument
                 error('Not supported');
             end
         end
+
+        function r = describe(obj)
+            r = obj.describe@qd.classes.FileLikeInstrument();
+            r.config = struct();
+            for q = {'PHAS', 'FMOD', 'FREQ', 'RSLP', 'HARM', 'SLVL', 'ISRC', 'IGND', ...
+                    'ICPL', 'ILIN', 'SENS', 'RMOD', 'OFLT', 'OFSL', 'SYNC'}
+                question = [q{1} '?'];
+                simplified = q{1};
+                r.config.(simplified) = obj.query(question);
+            end
+        end
     end
 end

@@ -92,7 +92,7 @@ classdef Run < handle
             end
 
             % Store the metadata.
-            json.write(meta, fullfile(out_dir, 'meta.json'));
+            json.write(meta, fullfile(out_dir, 'meta.json'), 'indent', 2);
 
             obj.perform_run(out_dir);
         end
@@ -102,7 +102,7 @@ classdef Run < handle
         function perform_run(obj)
         end
 
-        function meta = add_to_meta(meta)
+        function meta = add_to_meta(obj, meta)
         end
     end
 end

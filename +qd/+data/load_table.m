@@ -5,8 +5,13 @@ function table = load_table(directory, name)
         error('Could not locate table');
     end
     meta = json.read(meta_path);
-    data = dlmread(data_path);
     table = {};
+    stat = dir(data_path);
+    if stat.bytes == 0
+        data = zeros(0, length(meta));
+    else
+        data = dlmread(data_path);
+    end
     i = 1;
     for c = meta
         c.data = data(:, i);

@@ -10,7 +10,7 @@ classdef Probe < qd.run.Run
             obj.sweep.from = from;
             obj.sweep.to = to;
             obj.sweep.points = points;
-            obj.sweep.settle = 0;
+            obj.sweep.settle = settle;
             obj.sweep.chan = obj.resolve_channel(name_or_channel);
         end
         
@@ -63,6 +63,7 @@ classdef Probe < qd.run.Run
                     values(end+1) = inp{1}.get();
                 end
                 table.add_point(values);
+                drawnow();
             end
         end
     end

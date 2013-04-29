@@ -79,7 +79,7 @@ classdef DecaDACChannel < qd.classes.Channel
         function val = get(obj)
             obj.select();
             raw = obj.instrument.querym('d;', 'd%d!');
-            val = raw / (2^16-1) * obj.range_span() + obj.range_low;
+            val = raw / 2^16 * obj.range_span() + obj.range_low;
         end
 
         function set_ramp_rate(obj, rate)

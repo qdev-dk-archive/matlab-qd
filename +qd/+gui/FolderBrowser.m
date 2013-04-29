@@ -69,7 +69,12 @@ classdef FolderBrowser < handle
             for table_name = obj.list_table_names(loc)
                 tables{end + 1} = qd.data.load_table(loc, table_name{1});
             end
+            old_view = obj.table_view;
             obj.table_view = qd.gui.TableView(tables, obj.fig);
+            if ~isempty(old_view)
+                obj.table_view.columns = old_view.columns;
+                obj.table_view.update;
+            end
         end
 
         function view_loc(obj, loc)

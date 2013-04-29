@@ -34,7 +34,7 @@ classdef StandardRun < qd.run.Run
 
     methods(Access=protected)
 
-        function add_to_meta(obj, meta)
+        function meta = add_to_meta(obj, meta)
             meta.inputs = {};
             for inp = obj.inputs
                 meta.inputs{end + 1} = obj.describe_channel(inp{1});
@@ -91,6 +91,7 @@ classdef StandardRun < qd.run.Run
                     values(end+1) = inp{1}.get();
                 end
                 table.add_point(values);
+                drawnow();
                 return
             end
 
