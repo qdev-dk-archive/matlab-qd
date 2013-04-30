@@ -33,7 +33,7 @@ classdef Run < handle
             obj.comment = comment;
         end
 
-        function obj = set_directory(obj, director)
+        function obj = set_directory(obj, directory)
             obj.directory = directory;
         end
 
@@ -61,7 +61,7 @@ classdef Run < handle
         end
 
         function meta = describe_channel(obj, chan)
-            if qd.util.cellmember(chan.instrument, obj.setup.instruments)
+            if ~isempty(obj.setup) && qd.util.cellmember(chan.instrument, obj.setup.instruments)
                 meta = chan.describe_without_instrument();
             else
                 meta = chan.describe();

@@ -32,8 +32,6 @@ classdef FolderBrowser < handle
             obj.update_timer.ExecutionMode = 'fixedSpacing';
             obj.update_timer.TimerFcn = @(varargin)obj.update();
             start(obj.update_timer);
-            % TODO set a a delete function on the figure to close the folder
-            % browser.
         end
 
         function update(obj)
@@ -51,6 +49,9 @@ classdef FolderBrowser < handle
                 c.loc = fullfile(obj.loc, d.name);
                 obj.content{end + 1} = c;
                 names{end + 1} = c.name;
+            end
+            if get(obj.listbox, 'Value') > length(names)
+                set(obj.listbox, 'Value', 1)
             end
             set(obj.listbox, 'String', names);
         end
@@ -73,8 +74,8 @@ classdef FolderBrowser < handle
             obj.table_view = qd.gui.TableView(tables, obj.fig);
             if ~isempty(old_view)
                 obj.table_view.columns = old_view.columns;
-                obj.table_view.update;
             end
+            obj.table_view.update();
         end
 
         function view_loc(obj, loc)
@@ -84,10 +85,6 @@ classdef FolderBrowser < handle
             else
                 obj.tbl = qd.data.view_tables(loc);
             end
-        end
-
-        function delete(obj)
-            stop(obj.update_timer);
         end
     end
     methods(Access=private)

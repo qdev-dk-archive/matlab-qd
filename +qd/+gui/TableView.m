@@ -14,7 +14,6 @@ classdef TableView < handle
                 obj.fig = varargin{1};
             end
             obj.tables = tables;
-            obj.update();
         end
 
         function update(obj)
@@ -22,16 +21,27 @@ classdef TableView < handle
             clf();
             hold('all');
             lists = [];
+            if isempty(obj.tables)
+                return
+            end
+            num_columns = length(obj.tables{1});
+            for i = 1:3
+                if i < 3
+                    obj.columns(i) = max(1, min(obj.columns(i), num_columns));
+                else
+                    obj.columns(i) = max(0, min(obj.columns(i), num_columns));
+                end
+            end
             for i = 1:3
                 names = {};
                 for column = obj.tables{1}
                     names{end + 1} = column{1}.name;
                 end
                 if i < 3
-                    selection = max(1, min(obj.columns(i), length(names)));
+                    selection = obj.columns(i);
                 else
-                    selection = max(0, min(obj.columns(i), length(names)));
                     names{end + 1} = '---';
+                    selection = obj.columns(i);
                     if selection == 0
                         selection = length(names);
                     end
@@ -42,13 +52,33 @@ classdef TableView < handle
                     'Value', selection, ...
                     'Callback', @(h, varargin) obj.select(i, get(h, 'Value')));
             end
+            obj.do_plot();
+            align(lists, 'Fixed', 0, 'Bottom');
+        end
+
+        function do_plot(obj)
             if obj.columns(3) == 0
                 for table = obj.tables
                     plot(table{1}{obj.columns(1)}.data, ...
                         table{1}{obj.columns(2)}.data);
                 end
+            else
+                table = obj.tables{1};
+                a = table{obj.columns(1)}.data;
+                b = table{obj.columns(2)}.data;
+                c = table{obj.columns(3)}.data;
+                xp = linspace(min(a), max(a), 500);
+                yp = linspace(min(b), max(b), 500);
+                [X, Y] = meshgrid(xp, yp);
+                Z = griddata(a, b, c, X, Y);
+                colormap(hot);
+                try
+                    plt = pcolor(X, Y, Z);
+                catch err
+                    disp(err)
+                end
+                set(plt, 'EdgeColor', 'none');
             end
-            align(lists, 'Fixed', 0, 'Bottom');
         end
 
         function select(obj, dim, column)
@@ -59,6 +89,5 @@ classdef TableView < handle
             end
             obj.update();
         end
-
     end
 end
