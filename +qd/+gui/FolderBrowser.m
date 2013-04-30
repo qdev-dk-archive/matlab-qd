@@ -1,6 +1,6 @@
 classdef FolderBrowser < handle
     properties(Access=private)
-        loc
+        location
         content
         listbox
         listbox_fig
@@ -10,10 +10,12 @@ classdef FolderBrowser < handle
     end
     properties
         tbl
+        loc
+        meta
     end
     methods
         function obj = FolderBrowser(loc)
-            obj.loc = loc;
+            obj.location = loc;
             obj.listbox_fig = figure( ...
                 'MenuBar', 'none', ...
                 'Name', loc, ...
@@ -35,18 +37,22 @@ classdef FolderBrowser < handle
         end
 
         function update(obj)
-            listing = dir(obj.loc);
+            listing = dir(obj.location);
             obj.content = {};
             names = {};
             for d = transpose(listing)
-                meta_path = fullfile(obj.loc, d.name, 'meta.json');
-                if ~exist(meta_path, 'file')
-                    continue
-                end
-                meta = json.read(meta_path);
                 c = struct();
+                c.loc = fullfile(obj.location, d.name);
+                meta_path = fullfile(c.loc, 'meta.json');
+                if ~exist(meta_path, 'file')
+                    continue;
+                end
+                try
+                    meta = json.read(meta_path);
+                catch
+                    continue;
+                end
                 c.name = meta.name;
-                c.loc = fullfile(obj.loc, d.name);
                 obj.content{end + 1} = c;
                 names{end + 1} = c.name;
             end
@@ -80,6 +86,8 @@ classdef FolderBrowser < handle
 
         function view_loc(obj, loc)
             names = obj.list_table_names(loc);
+            obj.loc = loc;
+            obj.meta = json.read(fullfile(loc, 'meta.json'));
             if length(names) == 1
                 obj.tbl = qd.data.view_table(loc, names{1});
             else

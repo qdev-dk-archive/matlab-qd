@@ -38,6 +38,8 @@ classdef DecaDACChannel < qd.classes.Channel
 
             % Set this as the active channel on the decadac.
             obj.select();
+            % For now, force mode 2 (4-chan)
+            ins.query('M2;');
             if isempty(obj.ramp_rate)
                 % Do not ramp, just set the output.
                 ins.queryf('D%d;', goal);

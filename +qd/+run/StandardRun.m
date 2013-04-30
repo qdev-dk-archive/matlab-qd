@@ -30,6 +30,18 @@ classdef StandardRun < qd.run.Run
             obj.inputs{end + 1} = obj.resolve_channel(name_or_channel);
         end
 
+        function move_to_start(obj)
+            for sweep = obj.sweeps
+                sweep{1}.chan.set(sweep{1}.from);
+            end
+        end
+
+        function zero_all_sweept_channels(obj)
+            for sweep = obj.sweeps
+                sweep{1}.chan.set(0);
+            end
+        end
+
     end
 
     methods(Access=protected)

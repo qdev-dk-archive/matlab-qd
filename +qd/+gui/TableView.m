@@ -70,7 +70,7 @@ classdef TableView < handle
                 xp = linspace(min(a), max(a), 500);
                 yp = linspace(min(b), max(b), 500);
                 [X, Y] = meshgrid(xp, yp);
-                Z = griddata(a, b, c, X, Y);
+                Z = griddata(a, b, c, X, Y, 'nearest');
                 colormap(hot);
                 try
                     plt = pcolor(X, Y, Z);
