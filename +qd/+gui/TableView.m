@@ -72,6 +72,7 @@ classdef TableView < handle
                 [X, Y] = meshgrid(xp, yp);
                 Z = griddata(a, b, c, X, Y, 'nearest');
                 colormap(hot);
+                colorbar();
                 try
                     plt = pcolor(X, Y, Z);
                 catch err
