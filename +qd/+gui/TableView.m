@@ -75,10 +75,10 @@ classdef TableView < handle
                 colorbar();
                 try
                     plt = pcolor(X, Y, Z);
+                    set(plt, 'EdgeColor', 'none');
                 catch err
-                    disp(err)
+                    warning(err.message)
                 end
-                set(plt, 'EdgeColor', 'none');
             end
         end
 
