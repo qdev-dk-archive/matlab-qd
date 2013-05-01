@@ -22,17 +22,17 @@ classdef Probe < qd.run.Run
 
     methods(Access=protected)
 
-        function meta = add_to_meta(obj, meta)
+        function meta = add_to_meta(obj, meta, register)
             meta.inputs = {};
             for inp = obj.inputs
-                meta.inputs{end + 1} = obj.describe_channel(inp{1});
+                meta.inputs{end + 1} = register.put('channels', inp{1});
             end
             meta.sweep = struct();
             meta.sweep.from = obj.sweep.from;
             meta.sweep.to = obj.sweep.to;
             meta.sweep.points = obj.sweep.points;
             meta.sweep.settle = obj.sweep.settle;
-            meta.sweep.chan = obj.describe_channel(obj.sweep.chan);
+            meta.sweep.chan = register.put('channels', obj.sweep.chan);
         end
 
         function perform_run(obj, out_dir)

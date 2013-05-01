@@ -64,23 +64,17 @@ classdef Setup < handle
             error('Channel not found.')
         end
 
-        function meta = describe(obj)
+        function meta = describe(obj, register)
             meta = struct();
             meta.meta = obj.meta;
             instrs = {};
             chans = {};
             for ins = obj.instruments
-                ins = ins{1};
-                instrs{end + 1} = ins.describe();
+                instrs{end + 1} = register.put('instruments', ins{1});
             end
             meta.instruments = instrs;
             for chan = obj.channels
-                chan = chan{1};
-                if qd.util.cellmember(chan.instrument, obj.instruments)
-                    chans{end + 1} = chan.describe_without_instrument();
-                else
-                    chans{end + 1} = chan.describe();
-                end
+                chans{end + 1} = register.put('channels', chan{1});
             end
             meta.channels = chans;
         end

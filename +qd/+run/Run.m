@@ -60,16 +60,9 @@ classdef Run < handle
             r = '0.0.1';
         end
 
-        function meta = describe_channel(obj, chan)
-            if ~isempty(obj.setup) && qd.util.cellmember(chan.instrument, obj.setup.instruments)
-                meta = chan.describe_without_instrument();
-            else
-                meta = chan.describe();
-            end
-        end
-
-        function out_dir = run(obj)
+        function meta = get_meta(obj)
             % Setup meta data
+            register = qd.classes.Register();
             meta = struct();
             meta.type = obj.get_type();
             meta.version = obj.version();
@@ -78,12 +71,18 @@ classdef Run < handle
             meta.comment = obj.comment;
             meta.name = obj.name;
             if ~isempty(obj.setup)
-                meta.setup = obj.setup.describe();
+                meta.setup = obj.setup.describe(register);
             end
 
             % Allow overriding meta data stored;
-            meta = obj.add_to_meta(meta);
+            meta = obj.add_to_meta(meta, register);
 
+            meta.register = register.describe();
+        end
+
+        function out_dir = run(obj)
+            meta = obj.get_meta();
+            
             % Get a directory to store the output.
             if ~isempty(obj.directory)
                 out_dir = obj.directory;
@@ -102,7 +101,7 @@ classdef Run < handle
         function perform_run(obj)
         end
 
-        function meta = add_to_meta(obj, meta)
+        function meta = add_to_meta(obj, meta, register)
         end
     end
 end

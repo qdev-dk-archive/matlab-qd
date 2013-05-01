@@ -46,10 +46,10 @@ classdef StandardRun < qd.run.Run
 
     methods(Access=protected)
 
-        function meta = add_to_meta(obj, meta)
+        function meta = add_to_meta(obj, meta, register)
             meta.inputs = {};
             for inp = obj.inputs
-                meta.inputs{end + 1} = obj.describe_channel(inp{1});
+                meta.inputs{end + 1} = register.put('channels', inp{1});
             end
             meta.sweeps = {};
             for sweep = obj.sweeps
@@ -59,7 +59,7 @@ classdef StandardRun < qd.run.Run
                 s.to = sweep.to;
                 s.points = sweep.points;
                 s.settle = sweep.settle;
-                s.chan = obj.describe_channel(sweep.chan);
+                s.chan = register.put('channels', sweep.chan);
                 meta.sweeps{end+1} = s;
             end
         end

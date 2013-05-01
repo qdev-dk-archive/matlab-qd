@@ -19,7 +19,7 @@ classdef Instrument < qd.classes.Nameable
             r = {};
         end
 
-        function r = describe(obj)
+        function r = describe(obj, register)
             r = struct;
             r.name = obj.name;
             r.model = obj.model;

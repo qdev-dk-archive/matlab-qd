@@ -35,19 +35,23 @@ classdef Register < handle
             previously_described = containers.Map();
             while true
                 all_described = true;
-                for field = fieldnames(obj.content)
+                for field = transpose(fieldnames(obj.content))
                     ns = obj.content.(field{1});
                     for name = ns.keys()
                         pkey = [field{1} '/' name{1}];
                         if previously_described.isKey(pkey)
-                            continue;
+                            continue
                         end
                         all_described = false;
                         previously_described(pkey) = true;
                         if ~isfield(meta, field{1})
                             meta.(field{1}) = {};
                         end
-                        meta.(field{1}){end + 1} = ns(name{1}).describe(obj);
+                        descr = ns(name{1}).describe(obj);
+                        if ~strcmp(descr.name, name{1})
+                            descr.registered_name = name{1};
+                        end
+                        meta.(field{1}){end + 1} = descr;
                     end
                 end
                 if all_described

@@ -27,8 +27,8 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
             chan.instrument = obj;
         end
 
-        function r = describe(obj)
-            r = obj.describe@qd.classes.FileLikeInstrument();
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.FileLikeInstrument(register);
             r.current_values = struct();
             for q = obj.channels()
                 r.current_values.(q{1}) = obj.getc(q{1});

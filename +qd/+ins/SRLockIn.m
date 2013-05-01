@@ -39,8 +39,8 @@ classdef SRLockIn < qd.classes.FileLikeInstrument
             end
         end
 
-        function r = describe(obj)
-            r = obj.describe@qd.classes.FileLikeInstrument();
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.FileLikeInstrument(register);
             r.config = struct();
             for q = {'PHAS', 'FMOD', 'FREQ', 'RSLP', 'HARM', 'SLVL', 'ISRC', 'IGND', ...
                     'ICPL', 'ILIN', 'SENS', 'RMOD', 'OFLT', 'OFSL', 'SYNC'}

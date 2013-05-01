@@ -8,18 +8,12 @@ classdef Channel < qd.classes.Nameable
             r = [obj.instrument.name '/' obj.channel_id];
         end
 
-        function r = describe_without_instrument(obj)
+        function r = describe(obj, register)
             r = struct();
             r.name = obj.name;
             r.default_name = obj.default_name;
             r.channel_id = obj.channel_id;
-            r.instrument_name = obj.instrument.name;
-        end
-
-        function r = describe(obj)
-            r = obj.describe_without_instrument();
-            r = rmfield(r, 'instrument_name');
-            r.instrument = obj.instrument.describe();
+            r.instrument = register.put('instruments', obj.instrument);
         end
 
         function val = get(obj)
