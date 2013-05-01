@@ -60,7 +60,7 @@ classdef Run < handle
             r = '0.0.1';
         end
 
-        function meta = get_meta(obj)
+        function meta = describe(obj)
             % Setup meta data
             register = qd.classes.Register();
             meta = struct();
@@ -74,14 +74,14 @@ classdef Run < handle
                 meta.setup = obj.setup.describe(register);
             end
 
-            % Allow overriding meta data stored;
+            % Allow overriding meta data stored
             meta = obj.add_to_meta(meta, register);
 
             meta.register = register.describe();
         end
 
         function out_dir = run(obj)
-            meta = obj.get_meta();
+            meta = obj.describe();
             
             % Get a directory to store the output.
             if ~isempty(obj.directory)

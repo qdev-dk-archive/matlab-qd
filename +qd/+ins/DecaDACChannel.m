@@ -92,6 +92,11 @@ classdef DecaDACChannel < qd.classes.Channel
             qd.util.assert((isnumeric(rate) && isscalar(rate)) || isempty(rate))
             obj.ramp_rate = abs(rate);
         end
+
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.Channel(register);
+            r.ramp_rate = obj.ramp_rate;
+        end
     end
     methods(Access=private)
         function select(obj)
