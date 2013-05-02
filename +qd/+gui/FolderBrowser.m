@@ -119,6 +119,7 @@ classdef FolderBrowser < handle
 
         function view_loc(obj, loc, meta, tables)
             obj.loc = loc;
+            obj.meta = meta;
             if length(tables) == 1
                 tbl = tables.values();
                 obj.tbl = qd.data.view_table(tbl{1});
