@@ -15,7 +15,7 @@ classdef TableView < handle
             end
             obj.tables = tables;
         end
-
+        
         function update(obj)
             figure(obj.fig);
             clf();

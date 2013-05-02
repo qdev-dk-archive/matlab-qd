@@ -7,6 +7,7 @@ classdef FolderBrowser < handle
         fig
         update_timer
         table_view
+        has_been_closed = false
     end
     properties
         tbl
@@ -21,7 +22,9 @@ classdef FolderBrowser < handle
                 'Name', loc, ...
                 'NumberTitle', 'off', ...
                 'WindowStyle', 'docked');
+            w = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
             set(get(obj.listbox_fig,'javaframe'), 'GroupName','FolderBrowser');
+            warning(w);
             obj.listbox = uicontrol( ...
                 'Style', 'listbox', ...
                 'Parent', obj.listbox_fig, ...
@@ -34,9 +37,22 @@ classdef FolderBrowser < handle
             obj.update_timer.ExecutionMode = 'fixedSpacing';
             obj.update_timer.TimerFcn = @(varargin)obj.update();
             start(obj.update_timer);
+            function on_close(varargin)
+                stop(obj.update_timer);
+                delete(obj.update_timer);
+                obj.has_been_closed = true;
+            end
+            set(obj.listbox_fig, 'DeleteFcn', @on_close);
+        end
+
+        function close(obj)
+            close(obj.listbox_fig);
         end
 
         function update(obj)
+            if obj.has_been_closed
+                return
+            end
             listing = dir(obj.location);
             obj.content = {};
             names = {};
