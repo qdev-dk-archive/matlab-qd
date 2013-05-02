@@ -3,6 +3,10 @@ classdef TableView < handle
         tables
         fig
         columns = [1 2 0]
+        resolution = 3
+    end
+    properties(Constant)
+        resolution_settings = [32 64 128 256 512 1024]
     end
     methods
 
@@ -52,8 +56,19 @@ classdef TableView < handle
                     'Value', selection, ...
                     'Callback', @(h, varargin) obj.select(i, get(h, 'Value')));
             end
+            resolutions = qd.util.map(@(n)[num2str(n) 'x' num2str(n)], obj.resolution_settings);
+            lists(end + 1) = uicontrol( ...
+                'Style', 'popupmenu', ...
+                'String', resolutions, ...
+                'Value', obj.resolution, ...
+                'Callback', @(h, varargin) obj.set_resolution(get(h, 'Value')));
             obj.do_plot();
             align(lists, 'Fixed', 0, 'Bottom');
+        end
+
+        function set_resolution(obj, res)
+            obj.resolution = res;
+            obj.update();
         end
 
         function do_plot(obj)
@@ -67,18 +82,23 @@ classdef TableView < handle
                 a = table{obj.columns(1)}.data;
                 b = table{obj.columns(2)}.data;
                 c = table{obj.columns(3)}.data;
-                xp = linspace(min(a), max(a), 500);
-                yp = linspace(min(b), max(b), 500);
+                res = obj.resolution_settings(obj.resolution);
+                mia = min(a);
+                maa = max(a);
+                mib = min(b);
+                mab = max(b);
+                xp = linspace(mia, maa, res);
+                yp = linspace(mib, mab, res);
                 [X, Y] = meshgrid(xp, yp);
                 Z = griddata(a, b, c, X, Y, 'nearest');
                 colormap(hot);
                 colorbar();
                 try
-                    plt = pcolor(X, Y, Z);
-                    set(plt, 'EdgeColor', 'none');
+                    plt = imagesc([mia maa], [mib mab], Z);
                 catch err
                     warning(err.message)
                 end
+                axis('tight');
             end
         end
 

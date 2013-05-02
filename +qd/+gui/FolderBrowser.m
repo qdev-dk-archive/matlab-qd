@@ -113,6 +113,7 @@ classdef FolderBrowser < handle
             obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
             if ~isempty(old_view)
                 obj.table_view.columns = old_view.columns;
+                obj.table_view.resolution = old_view.resolution;
             end
             obj.table_view.update();
         end
