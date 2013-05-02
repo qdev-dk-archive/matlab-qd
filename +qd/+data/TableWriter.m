@@ -16,13 +16,12 @@ classdef TableWriter < handle
             qd.util.assert(~exist(obj.data_path));
         end
 
-        function add_column(obj, name, unit)
-            obj.columns{end + 1} = struct('name', name, 'unit', unit); 
+        function add_column(obj, name)
+            obj.columns{end + 1} = struct('name', name); 
         end
 
         function add_channel_column(obj, chan)
-            obj.columns{end + 1} = struct('name', chan.name, 'unit', '');
-            % TODO proper handling of units.
+            obj.columns{end + 1} = struct('name', chan.name);
         end
 
         function init(obj)
