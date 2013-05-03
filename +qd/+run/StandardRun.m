@@ -6,18 +6,14 @@ classdef StandardRun < qd.run.Run
     methods
 
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
+            p = inputParser();
+            p.addOptional('settle', 0);
+            p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
             sweep.to = to;
             sweep.points = points;
-            switch length(varargin)
-                case 0
-                    sweep.settle = 0;
-                case 1
-                    sweep.settle = varargin{1};
-                otherwise
-                    error('Got too many arguments.');
-            end
+            sweep.settle = p.Result.settle;
             sweep.chan = obj.resolve_channel(name_or_channel);
             obj.sweeps{end + 1} = sweep;
         end

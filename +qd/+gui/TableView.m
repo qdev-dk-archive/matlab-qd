@@ -11,11 +11,12 @@ classdef TableView < handle
     methods
 
         function obj = TableView(tables, varargin)
-            switch length(varargin)
-            case 0
+            p = inputParser();
+            p.addOptional('fig', []);
+            p.parse(varargin{:});
+            obj.fig = p.Result.fig;
+            if isempty(obj.fig)
                 obj.fig = figure();
-            case 1
-                obj.fig = varargin{1};
             end
             obj.tables = tables;
         end

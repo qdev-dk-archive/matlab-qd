@@ -9,16 +9,14 @@ classdef LinOutputMix < qd.classes.Instrument
         function obj = LinOutputMix(base_channels, transform, varargin)
             transform_size = size(transform);
             qd.util.assert(length(base_channels) == transform_size(1));
+            p = inputParser();
+            p.addOptional('derived_channel_names', [], @(x) length(x) == transform_size(2));
+            p.parse(varargin{:});
+            obj.derived_channel_names = p.Result.derived_channel_names;
             obj.base_channels = base_channels;
             obj.transform = transform;
-            switch length(varargin)
-            case 0
+            if isempty(obj.derived_channel_names)
                 obj.derived_channel_names = qd.util.map(@(x) ['CH' num2str(x)], 1:transform_size(2));
-            case 1
-                obj.derived_channel_names = varargin{1};
-                qd.util.assert(length(varargin{1}) == transform_size(2));
-            otherwise
-                error('Too many argmunents');
             end
             obj.reinitialize_values_from_base_channels();
         end

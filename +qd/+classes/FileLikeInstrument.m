@@ -5,9 +5,11 @@ classdef FileLikeInstrument < qd.classes.Instrument
     methods
 
         function obj = FileLikeInstrument(varargin)
-            qd.util.assert(length(varargin) <= 1);
-            if ~isempty(varargin)
-                obj.com = varargin{1};
+            p = inputParser();
+            p.addOptional('com', []);
+            p.parse(varargin{:});
+            obj.com = p.Result.com;
+            if ~isempty(obj.com)
                 fopen(obj.com);
             end
         end
