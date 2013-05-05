@@ -36,7 +36,7 @@ classdef Instrument < qd.classes.Nameable
                 chan.instrument = obj;
                 chan.channel_id = id;
             else
-                error(sprintf('Channel not found (%s)', id));
+                error('Channel not found (%s)', id);
             end
         end
 

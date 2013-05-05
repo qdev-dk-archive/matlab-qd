@@ -28,7 +28,7 @@ classdef DecaDACChannel < qd.classes.Channel
             % Validate the input for common errors.
             qd.util.assert(isnumeric(val));
             if (val > obj.range_high) || (val < obj.range_low)
-                error(sprintf('%f is out of range.', val));
+                error('%f is out of range.', val);
             end
             
             % Here we calculate how far into the full range val is.
