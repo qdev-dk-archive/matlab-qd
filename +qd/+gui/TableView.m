@@ -14,7 +14,7 @@ classdef TableView < handle
             p = inputParser();
             p.addOptional('fig', []);
             p.parse(varargin{:});
-            obj.fig = p.Result.fig;
+            obj.fig = p.Results.fig;
             if isempty(obj.fig)
                 obj.fig = figure();
             end

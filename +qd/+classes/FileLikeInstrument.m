@@ -8,7 +8,7 @@ classdef ComInstrument < qd.classes.Instrument
             p = inputParser();
             p.addOptional('com', []);
             p.parse(varargin{:});
-            obj.com = p.Result.com;
+            obj.com = p.Results.com;
             if ~isempty(obj.com)
                 fopen(obj.com);
             end

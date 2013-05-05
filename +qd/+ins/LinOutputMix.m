@@ -12,7 +12,7 @@ classdef LinOutputMix < qd.classes.Instrument
             p = inputParser();
             p.addOptional('derived_channel_names', [], @(x) length(x) == transform_size(2));
             p.parse(varargin{:});
-            obj.derived_channel_names = p.Result.derived_channel_names;
+            obj.derived_channel_names = p.Results.derived_channel_names;
             obj.base_channels = base_channels;
             obj.transform = transform;
             if isempty(obj.derived_channel_names)

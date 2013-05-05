@@ -13,7 +13,7 @@ classdef StandardRun < qd.run.Run
             sweep.from = from;
             sweep.to = to;
             sweep.points = points;
-            sweep.settle = p.Result.settle;
+            sweep.settle = p.Results.settle;
             sweep.chan = obj.resolve_channel(name_or_channel);
             obj.sweeps{end + 1} = sweep;
         end
