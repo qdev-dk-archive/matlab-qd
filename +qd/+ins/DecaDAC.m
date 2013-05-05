@@ -1,4 +1,4 @@
-classdef DecaDAC < qd.classes.FileLikeInstrument
+classdef DecaDAC < qd.classes.ComInstrument
     methods
         function obj = DecaDAC(port)
             obj.com = serial(port, ...
@@ -6,7 +6,7 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
                 'Parity',   'none', ...
                 'DataBits', 8, ...
                 'StopBits', 1);
-            fopen(obj.com); % will be closed on delete by FileLikeInstrument.
+            fopen(obj.com); % will be closed on delete by ComInstrument.
         end
 
         function r = model(obj)
@@ -18,9 +18,10 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
         end
 
         function chan = channel(obj, id)
-            n = qd.util.match(id, 'CH%d');
-            if isempty(n)
-                error('No such channel.');
+            try
+                n = qd.util.match(id, 'CH%d');
+            catch
+                error('No such channel (%s).', id);
             end
             chan = qd.ins.DecaDACChannel(n);
             chan.channel_id = id;
@@ -28,7 +29,7 @@ classdef DecaDAC < qd.classes.FileLikeInstrument
         end
 
         function r = describe(obj, register)
-            r = obj.describe@qd.classes.FileLikeInstrument(register);
+            r = obj.describe@qd.classes.ComInstrument(register);
             r.current_values = struct();
             for q = obj.channels()
                 r.current_values.(q{1}) = obj.getc(q{1});

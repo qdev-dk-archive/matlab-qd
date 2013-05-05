@@ -1,8 +1,8 @@
-classdef AgilentDMM < qd.classes.FileLikeInstrument
+classdef AgilentDMM < qd.classes.ComInstrument
     methods
 
         function  obj = AgilentDMM(com)
-            obj@qd.classes.FileLikeInstrument(com);
+            obj@qd.classes.ComInstrument(com);
         end
         
         function r = model(obj)

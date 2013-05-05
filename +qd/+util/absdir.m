@@ -3,7 +3,7 @@ function r = absdir(rel)
 %
 % Returns the absolute path to an existing directory rel.
     save_dir = pwd();
+    cleanup = onCleanup(@()cd(save_dir));
     cd(rel);
     r = pwd();
-    cd(save_dir);
 end

@@ -1,8 +1,10 @@
 function r = class_name(obj, varargin)
+    p = inputParser();
+    p.addOptional('full', []);
+    p.parse(varargin{:});
     m = metaclass(obj);
-    qd.util.assert(length(varargin) < 2);
-    if length(varargin) == 1
-        qd.util.assert(strcmp(varargin{1}, 'full'));
+    if ~isempty(p.Result.full)
+        qd.util.assert(strcmp(p.Result.full, 'full'));
         r = m.Name;
     else
         p = qd.util.strsplit(m.Name, '.');

@@ -127,7 +127,7 @@ classdef FolderBrowser < handle
             else
                 obj.tbl = struct();
                 for key = tables.keys()
-                    if ~qd.util.validate_name(key{1})
+                    if ~isvarname(key{1})
                         continue
                     end
                     obj.tbl.(key{1}) = qd.data.view_table(tables(key{1}));

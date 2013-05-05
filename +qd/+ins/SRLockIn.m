@@ -1,8 +1,8 @@
-classdef SRLockIn < qd.classes.FileLikeInstrument
+classdef SRLockIn < qd.classes.ComInstrument
     methods
 
         function obj = SRLockIn(com)
-            obj@qd.classes.FileLikeInstrument(com);
+            obj@qd.classes.ComInstrument(com);
         end
 
         function r = model(obj)
@@ -40,7 +40,7 @@ classdef SRLockIn < qd.classes.FileLikeInstrument
         end
 
         function r = describe(obj, register)
-            r = obj.describe@qd.classes.FileLikeInstrument(register);
+            r = obj.describe@qd.classes.ComInstrument(register);
             r.config = struct();
             for q = {'PHAS', 'FMOD', 'FREQ', 'RSLP', 'HARM', 'SLVL', 'ISRC', 'IGND', ...
                     'ICPL', 'ILIN', 'SENS', 'RMOD', 'OFLT', 'OFSL', 'SYNC'}

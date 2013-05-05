@@ -14,7 +14,7 @@ classdef Setup < handle
             ins = struct();
             for instrument = obj.instruments
                 name = instrument{1}.name;
-                if qd.util.validate_name(name)
+                if isvarname(name)
                     ins.(name) = instrument{1};
                 end
             end
@@ -24,7 +24,7 @@ classdef Setup < handle
             chans = struct();
             for channel = obj.channels
                 name = channel{1}.name;
-                if qd.util.validate_name(name)
+                if isvarname(name)
                     chans.(name) = channel{1};
                 end
             end

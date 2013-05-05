@@ -1,10 +1,10 @@
-classdef FileLikeInstrument < qd.classes.Instrument
+classdef ComInstrument < qd.classes.Instrument
     properties(Access=protected)
         com
     end
     methods
 
-        function obj = FileLikeInstrument(varargin)
+        function obj = ComInstrument(varargin)
             p = inputParser();
             p.addOptional('com', []);
             p.parse(varargin{:});

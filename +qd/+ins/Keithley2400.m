@@ -1,10 +1,10 @@
-classdef Keithley2400 < qd.classes.FileLikeInstrument
+classdef Keithley2400 < qd.classes.ComInstrument
     % Currently this class only supports current mode.
     % TODO set range.
     methods
 
         function obj = Keithley2400(com)
-            obj = obj@qd.classes.FileLikeInstrument(com);
+            obj = obj@qd.classes.ComInstrument(com);
         end
 
         function r = model(obj)
@@ -64,7 +64,7 @@ classdef Keithley2400 < qd.classes.FileLikeInstrument
         end
 
         function r = describe(obj, register)
-            r = obj.describe@qd.classes.FileLikeInstrument(register);
+            r = obj.describe@qd.classes.ComInstrument(register);
             r.config = struct();
             for q = { ...
                 'FORM:ELEM', 'OUTP:STAT', 'OUTP:SMOD', 'ROUT:TERM', 'FUNC:CONC', ...
