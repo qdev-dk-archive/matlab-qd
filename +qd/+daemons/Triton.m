@@ -7,11 +7,13 @@ classdef Triton < handle
     properties
         address = ''
         password = ''
+        channels
         server
     end
     
     properties(Access=private)
         triton
+        scpi
     end
     
     methods
@@ -19,7 +21,9 @@ classdef Triton < handle
         function obj = Triton()
             obj.server = daemon.Daemon(obj.bind_address);
             obj.server.expose(obj, 'talk');
+            obj.server.expose(obj, 'list_channels');
             obj.server.daemon_name = 'triton-daemon';
+            obj.channels = containers.Map();
         end
             
         function connect(obj)
@@ -30,7 +34,25 @@ classdef Triton < handle
             obj.triton = tcpip(obj.address, 33576);
             set(obj.triton, 'InputBufferSize', 10000);
             fopen(obj.triton);
-            obj.get_access();
+            obj.scpi = qd.protocols.OxfordSCPI(@obj.talk);
+            obj.scpi.set('SYS:USER:NORM', obj.password);
+            for chan = {'COOL', 'STIL', 'MC', 'PT1', 'PT2', 'SORB'}
+                if obj.channels.isKey(chan{1})
+                    % This has been overwritten by the user.
+                    continue
+                end
+                uid = obj.scpi.read(['SYS:DR:CHAN:' chan{1}]);
+                if strcmp(uid, 'INVALID') || strcmp(uid, 'NONE')
+                    continue
+                end
+                obj.channels(chan{1}) = uid;
+            end
+        end
+
+        function r = list_channels(obj)
+            r = struct();
+            r.keys = obj.channels.keys();
+            r.values = obj.channels.values();
         end
 
         function run(obj)
@@ -52,13 +74,5 @@ classdef Triton < handle
             rep = query(obj.triton, req, '%s\n', '%s\n');
         end
         
-    end
-    
-    methods(Access=private)
-
-        function get_access(obj)
-            oxf = qd.protocols.OxfordSCPI(@obj.talk);
-            oxf.set('SYS:USER:NORM', obj.password);
-        end
     end
 end
