@@ -55,7 +55,7 @@ classdef Triton < handle
             r.values = obj.channels.values();
         end
 
-        function run(obj)
+        function run_daemon(obj)
             obj.connect();
             obj.server.serve_forever();
         end

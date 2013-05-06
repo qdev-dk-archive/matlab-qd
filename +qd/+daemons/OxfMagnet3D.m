@@ -44,7 +44,7 @@ classdef OxfMagnet3D < handle
         end
 
         function val = read(obj, axis, prop, varargin)
-            val = obj.magnet.read([axis_addr(axis) prop], varargin{:});
+            val = obj.magnet.read([obj.axis_addr(axis) prop], varargin{:});
         end
 
         function r = set(obj, axis, prop, value)
@@ -88,7 +88,7 @@ classdef OxfMagnet3D < handle
         end
 
         function report = get_report(obj)
-            report = sprintf('PT2: %s\nCooling water:%s\nStatus:%s\n', ...
+            report = sprintf('PT2: %f\nCooling water: %f\nStatus:%s\n', ...
                 obj.triton.getc('PT2'), ...
                 obj.triton.getc('cooling_water'), ...
                 obj.status);
