@@ -58,7 +58,7 @@ classdef OxfMagnet3D < handle
 
         function r = set(obj, axis, prop, value)
             obj.assert_conditions_ok();
-            obj.set(axis, prop, value);
+            obj.set_without_checking(axis, prop, value);
             r = [];
         end
 
