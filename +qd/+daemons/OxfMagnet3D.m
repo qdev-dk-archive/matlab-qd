@@ -93,7 +93,7 @@ classdef OxfMagnet3D < handle
                 if obj.read(axis, 'SIG:FSET', '%fT') ~= 0
                     r = false;
                     return;
-                elseif abs(obj.read(axis, 'SIG:FLD', '%T')) > 1E-3
+                elseif abs(obj.read(axis, 'SIG:FLD', '%fT')) > 1E-3
                     r = false;
                     return;
                 end
