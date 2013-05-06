@@ -38,9 +38,9 @@ classdef OxfMagnet3D < handle
 
         function run_daemon(obj)
             obj.pt2_chan = qd.comb.MemoizeChannel( ...
-                triton.channel('PT2'), obj.check_period/2);
+                obj.triton.channel('PT2'), obj.check_period/2);
             obj.cool_water_chan = qd.comb.MemoizeChannel( ...
-                triton.channel('cooling_water'), obj.check_period/2);
+                obj.triton.channel('cooling_water'), obj.check_period/2);
             while true % loop forever
                 try
                     obj.server.serve_period(obj.check_period);
