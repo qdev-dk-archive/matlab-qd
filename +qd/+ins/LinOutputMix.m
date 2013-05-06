@@ -18,7 +18,7 @@ classdef LinOutputMix < qd.classes.Instrument
             if isempty(obj.derived_channel_names)
                 obj.derived_channel_names = qd.util.map(@(x) ['CH' num2str(x)], 1:transform_size(2));
             end
-            obj.reinitialize_values_from_base_channels();
+            obj.reinitialize();
         end
 
         function chans = channels(obj)
@@ -33,26 +33,6 @@ classdef LinOutputMix < qd.classes.Instrument
             for chan = obj.base_channels
                 r.base_channels{end + 1} = register.put('channels', chan{1});
             end
-        end
-
-        function reinitialize_values_from_base_channels(obj)
-        % Normally, the LinOutputMix class caches the currently set values of
-        % derived channels. This function will cause the class to get the
-        % value of each base channel, and perform an pseudo inverse of the
-        % transform to find the current values of derived channels.
-        %
-        % This function is called by the constructor.
-            num = length(obj.base_channels);
-            base_values = NaN(num, 1);
-            for i = 1:num
-                base_values(i, 1) = obj.base_channels{i}.get();
-            end
-            obj.cached_values = pinv(obj.transform) * base_values;
-        end
-
-        function val = getc(obj, chan)
-            n = obj.get_chan_num(chan);
-            val = obj.cached_values(n, 1);
         end
 
         function setc(obj, chan, val)
@@ -73,5 +53,21 @@ classdef LinOutputMix < qd.classes.Instrument
                 error('Multiple channels have that name');
             end
         end
+
+        function reinitialize(obj)
+        % Normally, the LinOutputMix class caches the currently set values of
+        % derived channels. This function will cause the class to get the
+        % value of each base channel, and perform a pseudo inverse of the
+        % transform to find the current values of derived channels.
+        %
+        % This function is called by the constructor.
+            num = length(obj.base_channels);
+            base_values = NaN(num, 1);
+            for i = 1:num
+                base_values(i, 1) = obj.base_channels{i}.get();
+            end
+            obj.cached_values = pinv(obj.transform) * base_values;
+        end
+
     end
 end
