@@ -128,13 +128,12 @@ classdef OxfMagnet3D < handle
             vect = abs(vect);
             % Add a small value to each component to avoid degenerate cases.
             vect = vect + 0.01;
-            vect = vect/norm(vect);
+            vect = vect/norm(vect) * obj.ramp_to_zero_rate;
             for i = 1:3
                 % We assume here that the magnet is not in persistent mode.
-                obj.set_without_checking(axis, 'ACTN', 'HOLD');
-                obj.set_without_checking(axis(i), 'SIG:RFLD', ...
-                    vect(i) * obj.ramp_to_zero_rate);
-                obj.set_without_checking(axis, 'ACTN', 'RTOZ');
+                obj.set_without_checking(axis(i), 'ACTN', 'HOLD');
+                obj.set_without_checking(axis(i), 'SIG:RFLD', vect(i));
+                obj.set_without_checking(axis(i), 'ACTN', 'RTOZ');
             end
             obj.status = 'level1';
             obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
