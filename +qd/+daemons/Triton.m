@@ -33,6 +33,11 @@ classdef Triton < handle
             obj.get_access();
         end
 
+        function run(obj)
+            obj.connect();
+            obj.server.serve_forever();
+        end
+
         function delete(obj)
             if ~isempty(obj.triton)
                 fclose(obj.triton);
@@ -52,9 +57,8 @@ classdef Triton < handle
     methods(Access=private)
 
         function get_access(obj)
-            rep = obj.talk(['SET:SYS:USER:NORM:' obj.password]);
-            qd.util.assert(strcmp(rep, ...
-                ['STAT:SET:SYS:USER:NORM:' obj.password ':VALID'])));
+            oxf = qd.protocols.OxfordSCPI(@obj.talk);
+            oxf.set('SYS:USER:NORM', obj.password);
         end
     end
 end
