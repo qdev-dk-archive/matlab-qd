@@ -22,7 +22,7 @@ classdef MemoizeChannel < qd.classes.Channel
         end
 
         function val = get(obj)
-            if isempty(obj.last_time) || toc(obj.last_time) > memoize_time
+            if isempty(obj.last_time) || toc(obj.last_time) > obj.memoize_time
                 obj.last_value = obj.base_channel.get();
                 obj.last_time = tic();
             end
