@@ -9,7 +9,7 @@ classdef OxfMagnet3D < handle
         limit2_pt2 = 4.5
         limit1_cool_water = 20
         limit2_cool_water = 21
-        ramp_to_zero_rate = 0.2; % Tesla/min.
+        ramp_to_zero_rate = 0.03; % Tesla/min.
     end
     properties(SetAccess=private)
         magnet_serial
@@ -68,6 +68,9 @@ classdef OxfMagnet3D < handle
         end
 
         function perform_check(obj)
+            if obj.at_zero_field()
+                return
+            end
             if strcmp(obj.status, 'level2')
                 return
             end
@@ -81,6 +84,19 @@ classdef OxfMagnet3D < handle
             if obj.pt2_chan.get() > obj.limit1_pt2 ...
                 || obj.cool_water_chan.get() > obj.limit1_cool_water
                 obj.trip_level1();
+            end
+        end
+
+        function r = at_zero_field(obj)
+            r = true;
+            for axis = 'xyz'
+                if obj.read(axis, 'SIG:FSET', '%fT') ~= 0
+                    r = false;
+                    return;
+                elseif abs(obj.read(axis, 'SIG:FLD', '%T')) > 1E-3
+                    r = false;
+                    return;
+                end
             end
         end
 
