@@ -8,12 +8,20 @@ classdef FuseChannels < qd.classes.Channel
             obj.name = name;
         end
 
-        function val = get()
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.Channel(register);
+            r.base_channels = {};
+            for chan = obj.base_channels
+                r.base_channels{end + 1} = register.put('channels', chan{1});
+            end
+        end
+
+        function val = get(obj)
             vals = arrayfun(@(x) x.get(), obj.base_channels);
             val = mean(vals);
         end
 
-        function set(val)
+        function set(obj, val)
             for chan = obj.base_channels
                 chan.set(val);
             end
