@@ -5,13 +5,18 @@ classdef OxfMagnet3D < handle
     
     properties
         check_period = 3*60
-        max_pt2_temp = 4.5
-        max_cooling_water_temp = 21
+        limit1_pt2 = 4.0
+        limit2_pt2 = 4.5
+        limit1_cool_water = 20
+        limit2_cool_water = 21
+        ramp_to_zero_rate = 0.2; % Tesla/min.
     end
     properties(SetAccess=private)
         magnet_serial
         magnet
         triton
+        pt2_chan
+        cool_water_chan
         server
         status = 'ok'
     end
@@ -32,6 +37,10 @@ classdef OxfMagnet3D < handle
         end
 
         function run_daemon(obj)
+            obj.pt2_chan = qd.comb.MemoizeChannel( ...
+                triton.channel('PT2'), obj.check_period/2);
+            obj.cool_water_chan = qd.comb.MemoizeChannel( ...
+                triton.channel('cooling_water'), obj.check_period/2);
             while true % loop forever
                 try
                     obj.server.serve_period(obj.check_period);
@@ -54,27 +63,65 @@ classdef OxfMagnet3D < handle
         end
 
         function ok = conditions_ok(obj)
-            ok = strcmp(obj.status, 'ok') && ...
-                obj.triton.getc('PT2') <= obj.max_pt2_temp && ...
-                obj.triton.getc('cooling_water') <= obj.max_cooling_water_temp;
+            obj.perform_check();
+            ok = strcmp(obj.status, 'ok');
         end
 
         function perform_check(obj)
-            if ~obj.conditions_ok()
-                obj.trip_protection();
+            if strcmp(obj.status, 'level2')
+                return
+            end
+            if obj.pt2_chan.get() > obj.limit2_pt2 ...
+                || obj.cool_water_chan.get() > obj.limit2_cool_water
+                obj.trip_level2();
+            end
+            if strcmp(obj.status, 'level1')
+                return
+            end
+            if obj.pt2_chan.get() > obj.limit1_pt2 ...
+                || obj.cool_water_chan.get() > obj.limit1_cool_water
+                obj.trip_level1();
             end
         end
 
-        function trip_protection(obj)
-            if strcmp(obj.status, 'tripped')
+        function trip_level2(obj)
+            if strcmp(obj.status, 'level2')
                 return
             end
             for axis = 'xyz'
-                % For now, hold all when overheating as requested by oxford.
+                % Hold all when overheating as requested by oxford.
                 obj.set_without_checking(axis, 'ACTN', 'HOLD');
             end
-            obj.status = 'tripped';
-            obj.server.send_alert('Magnet too warm', obj.get_report());
+            obj.status = 'level2';
+            obj.server.send_alert('Magnet at level2 overheating', obj.get_report());
+        end
+
+        function trip_level1(obj)
+            if strcmp(obj.status, 'level1') || strcmp(obj.status, 'level2')
+                return
+            end
+            % Bring to zero along direction of field. Vect will hold the
+            % direction.
+            vect = [0 0 0]
+            axis = 'xyz'
+            for i = 1:3
+                % We assume here that the magnet is not in persistent mode.
+                vect(i) = obj.read(axis(i), 'SIG:FLD', '%fT');
+            end
+            % We set the ramp rate with positive numbers.
+            vect = abs(vect);
+            % Add a small value to each component to avoid degenerate cases.
+            vect = vect + 0.01;
+            vect = vect/norm(vect);
+            for i = 1:3
+                % We assume here that the magnet is not in persistent mode.
+                obj.set_without_checking(axis, 'ACTN', 'HOLD');
+                obj.set_without_checking(axis(i), 'SIG:RFLD', ...
+                    vect(i) * obj.ramp_to_zero_rate);
+                obj.set_without_checking(axis, 'ACTN', 'RTOZ');
+            end
+            obj.status = 'level1';
+            obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
         end
 
         function reset_status(obj)
@@ -89,12 +136,15 @@ classdef OxfMagnet3D < handle
 
         function report = get_report(obj)
             report = sprintf('PT2: %f\nCooling water: %f\nStatus:%s\n', ...
-                obj.triton.getc('PT2'), ...
-                obj.triton.getc('cooling_water'), ...
-                obj.status);
+                obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
         end
 
         function set_without_checking(axis, prop, value)
+            % Disapled for now
+            prop
+            value
+            return
+
             val = obj.magnet.set([axis_addr(axis) prop], value);
         end
 
