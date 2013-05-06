@@ -38,9 +38,6 @@ classdef Triton < handle
                 fclose(obj.triton);
             end
         end
-    end
-    
-    methods(Access=private)
         
         function rep = talk(obj, req)
         % triton.talk(req)
@@ -49,6 +46,10 @@ classdef Triton < handle
         %   Do not include trailing newline in request.
             rep = query(obj.triton, req, '%s\n', '%s\n');
         end
+        
+    end
+    
+    methods(Access=private)
 
         function get_access(obj)
             rep = obj.talk(['SET:SYS:USER:NORM:' obj.password]);
