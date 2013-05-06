@@ -55,13 +55,13 @@ classdef OxfMagnet3D < handle
 
         function ok = conditions_ok(obj)
             ok = strcmp(obj.status, 'ok') && ...
-                obj.triton.getc('PT2') > obj.max_pt2_temp && ...
-                obj.triton.getc('cooling_water') > obj.max_cooling_water_temp;
+                obj.triton.getc('PT2') <= obj.max_pt2_temp && ...
+                obj.triton.getc('cooling_water') <= obj.max_cooling_water_temp;
         end
 
         function perform_check(obj)
             if ~obj.conditions_ok()
-                trip_protection();
+                obj.trip_protection();
             end
         end
 
@@ -71,7 +71,7 @@ classdef OxfMagnet3D < handle
             end
             for axis = 'xyz'
                 % For now, hold all when overheating as requested by oxford.
-                obj.set(axis, 'ACTN', 'HOLD');
+                obj.set_without_checking(axis, 'ACTN', 'HOLD');
             end
             obj.status = 'tripped';
             obj.server.send_alert('Magnet too warm', obj.get_report());
