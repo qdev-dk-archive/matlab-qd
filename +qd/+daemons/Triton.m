@@ -1,4 +1,4 @@
-classdef TritonServer < handle
+classdef Triton < handle
     properties(Constant)
         % The address the triton proxy server will listen on.
         bind_address = 'tcp://127.0.0.1:9736/'
@@ -7,6 +7,7 @@ classdef TritonServer < handle
     properties
         address = ''
         password = ''
+        server
     end
     
     properties(Access=private)
@@ -14,6 +15,13 @@ classdef TritonServer < handle
     end
     
     methods
+
+        function obj = Triton()
+            obj.server = daemon.Daemon(obj.bind_address);
+            obj.server.expose(obj, 'talk');
+            obj.server.daemon_name = 'triton-daemon';
+        end
+            
         function connect(obj)
             if ~isempty(obj.triton)
                 % already connected.
@@ -25,11 +33,6 @@ classdef TritonServer < handle
             obj.get_access();
         end
 
-        function server = make_server(obj)
-            server = daemon.Daemon(obj.bind_address);
-            server.expose(obj, 'talk');
-        end
-        
         function delete(obj)
             if ~isempty(obj.triton)
                 fclose(obj.triton);
