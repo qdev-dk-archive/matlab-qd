@@ -16,6 +16,14 @@ classdef Triton < qd.classes.Instrument
             obj.temp_chans = containers.Map(keysVals.keys, keysVals.values);
         end
 
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.Instrument(register);
+            r.temperatures = struct();
+            for chan = obj.channels();
+                r.temperatures.(chan{1}) = obj.getc(chan{1});
+            end
+        end
+
         function chans = channels(obj)
             chans = obj.temp_chans.keys();
             chans{end + 1} = 'cooling_water';
