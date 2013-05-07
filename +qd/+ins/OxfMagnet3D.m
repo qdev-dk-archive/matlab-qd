@@ -36,8 +36,27 @@ classdef OxfMagnet3D < qd.classes.Instrument
         end
 
         function setc(obj, chan, value)
-            obj.magnet.remote.set(chan, 'SIG:FLD', value, '%.10f');
-            obj.magnet.remote.set(chan, 'ACTN', 'RTOS');
+            obj.magnet.remote.set(chan, 'SIG:FSET', value, '%.10f');
+            if value == 0.0
+                obj.magnet.remote.set(chan, 'ACTN', 'RTOZ');
+            else
+                obj.magnet.remote.set(chan, 'ACTN', 'RTOS');
+            end
+            % We start by waiting 100 ms. Each time we read the state and we are still
+            % ramping, we wait 25% longer. delay = 2s is max.
+            delay = 0.1;
+            while true
+                pause(delay);
+                actn = obj.magnet.remote.read(chan, 'ACTN');
+                if strcmp(actn, 'HOLD')
+                    break
+                end
+                fld = obj.getc(chan);
+                if abs(fld - value) <= 1E-4
+                    break
+                end
+                delay = min(delay * 1.25, 2.0);
+            end
         end
     end
 end

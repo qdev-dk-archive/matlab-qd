@@ -1,6 +1,7 @@
 classdef OxfordSCPI < handle
     properties
         link_func
+        debug = false;
     end
     methods
         function obj = OxfordSCPI(link_func)
@@ -34,7 +35,13 @@ classdef OxfordSCPI < handle
             p.parse(varargin{:});
             set_format = p.Results.set_format;
             req = ['SET:' prop ':' sprintf(set_format, value)];
+            if obj.debug
+                disp(['req ' req]);
+            end
             rep = obj.link_func(req);
+            if obj.debug
+                disp(['rep ' rep]);
+            end
             qd.util.assert(strcmp(rep, ['STAT:' req ':VALID']));
         end
     end

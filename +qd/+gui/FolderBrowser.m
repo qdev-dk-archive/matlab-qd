@@ -9,6 +9,7 @@ classdef FolderBrowser < handle
         table_view
         has_been_closed = false
         pseudo_columns = {}
+        cache
     end
     properties
         tbl
@@ -17,6 +18,7 @@ classdef FolderBrowser < handle
     end
     methods
         function obj = FolderBrowser(loc)
+            obj.clear_cache();
             obj.location = loc;
             obj.listbox_fig = figure( ...
                 'MenuBar', 'none', ...
@@ -58,18 +60,23 @@ classdef FolderBrowser < handle
             obj.content = {};
             names = {};
             for d = transpose(listing)
-                c = struct();
-                c.loc = fullfile(obj.location, d.name);
-                meta_path = fullfile(c.loc, 'meta.json');
-                if ~exist(meta_path, 'file')
-                    continue;
+                if obj.cache.isKey(d.name)
+                    c = obj.cache(d.name);
+                else
+                    c = struct();
+                    c.loc = fullfile(obj.location, d.name);
+                    meta_path = fullfile(c.loc, 'meta.json');
+                    if ~exist(meta_path, 'file')
+                        continue;
+                    end
+                    try
+                        meta = json.read(meta_path);
+                    catch
+                        continue;
+                    end
+                    c.name = meta.name;
+                    obj.cache(d.name) = c;
                 end
-                try
-                    meta = json.read(meta_path);
-                catch
-                    continue;
-                end
-                c.name = meta.name;
                 obj.content{end + 1} = c;
                 names{end + 1} = c.name;
             end
@@ -77,6 +84,10 @@ classdef FolderBrowser < handle
                 set(obj.listbox, 'Value', 1)
             end
             set(obj.listbox, 'String', names);
+        end
+
+        function clear_cache(obj)
+            obj.cache = containers.Map();
         end
 
         function select(obj, val)

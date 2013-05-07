@@ -26,12 +26,17 @@ classdef OxfMagnet3D < handle
         function obj = OxfMagnet3D(com_port)
             obj.magnet_serial = serial(com_port);
             fopen(obj.magnet_serial);
-            obj.magnet = qd.protocols.OxfordSCPI(@(req)query(obj.magnet_serial, req));
+            obj.magnet = qd.protocols.OxfordSCPI(...
+                @(req)query(obj.magnet_serial, req, '%s\n', '%s\n'));
+            obj.magnet.debug = true;
             obj.triton = qd.ins.Triton();
             obj.server = daemon.Daemon(obj.bind_address);
             obj.server.daemon_name = 'oxfmagnet3d-daemon';
             obj.server.expose(obj, 'set');
+            obj.server.expose(obj, 'force_set');
+            obj.server.expose(obj, 'force_set_base');
             obj.server.expose(obj, 'read');
+            obj.server.expose(obj, 'read_base');
             obj.server.expose(obj, 'get_report');
             obj.server.expose(obj, 'reset_status');
         end
@@ -58,7 +63,16 @@ classdef OxfMagnet3D < handle
 
         function r = set(obj, axis, prop, value, varargin)
             obj.assert_conditions_ok();
-            obj.set_without_checking(axis, prop, value, varargin{:});
+            obj.force_set(axis, prop, value, varargin{:});
+            r = [];
+        end
+
+        function val = read_base(obj, prop, varargin)
+            val = obj.magnet.read(prop, varargin{:});
+        end
+
+        function r = force_set_base(obj, prop, value, varargin)
+            obj.magnet.set(prop, value, varargin{:});
             r = [];
         end
 
@@ -106,7 +120,7 @@ classdef OxfMagnet3D < handle
             end
             for axis = 'xyz'
                 % Hold all when overheating as requested by oxford.
-                obj.set_without_checking(axis, 'ACTN', 'HOLD');
+                obj.force_set(axis, 'ACTN', 'HOLD');
             end
             obj.status = 'level2';
             obj.server.send_alert('Magnet at level2 overheating', obj.get_report());
@@ -131,9 +145,9 @@ classdef OxfMagnet3D < handle
             vect = vect/norm(vect) * obj.ramp_to_zero_rate;
             for i = 1:3
                 % We assume here that the magnet is not in persistent mode.
-                obj.set_without_checking(axis(i), 'ACTN', 'HOLD');
-                obj.set_without_checking(axis(i), 'SIG:RFLD', vect(i), '%.16f');
-                obj.set_without_checking(axis(i), 'ACTN', 'RTOZ');
+                obj.force_set(axis(i), 'ACTN', 'HOLD');
+                obj.force_set(axis(i), 'SIG:RFST', vect(i), '%.16f');
+                obj.force_set(axis(i), 'ACTN', 'RTOZ');
             end
             obj.status = 'level1';
             obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
@@ -154,14 +168,8 @@ classdef OxfMagnet3D < handle
                 obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
         end
 
-        function set_without_checking(obj, axis, prop, value, varargin)
-            % Disapled for now
-            prop
-            value
-            axis
-            return
-
-            val = obj.magnet.set([axis_addr(axis) prop], value, varargin{:});
+        function force_set(obj, axis, prop, value, varargin)
+            obj.magnet.set([obj.axis_addr(axis) prop], value, varargin{:});
         end
 
         function addr = axis_addr(obj, axis)
