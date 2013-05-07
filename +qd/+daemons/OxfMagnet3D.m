@@ -56,9 +56,9 @@ classdef OxfMagnet3D < handle
             val = obj.magnet.read([obj.axis_addr(axis) prop], varargin{:});
         end
 
-        function r = set(obj, axis, prop, value)
+        function r = set(obj, axis, prop, value, varargin)
             obj.assert_conditions_ok();
-            obj.set_without_checking(axis, prop, value);
+            obj.set_without_checking(axis, prop, value, varargin{:});
             r = [];
         end
 
@@ -132,7 +132,7 @@ classdef OxfMagnet3D < handle
             for i = 1:3
                 % We assume here that the magnet is not in persistent mode.
                 obj.set_without_checking(axis(i), 'ACTN', 'HOLD');
-                obj.set_without_checking(axis(i), 'SIG:RFLD', vect(i));
+                obj.set_without_checking(axis(i), 'SIG:RFLD', vect(i), '%.16f');
                 obj.set_without_checking(axis(i), 'ACTN', 'RTOZ');
             end
             obj.status = 'level1';
@@ -154,13 +154,14 @@ classdef OxfMagnet3D < handle
                 obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
         end
 
-        function set_without_checking(axis, prop, value)
+        function set_without_checking(obj, axis, prop, value, varargin)
             % Disapled for now
             prop
             value
+            axis
             return
 
-            val = obj.magnet.set([axis_addr(axis) prop], value);
+            val = obj.magnet.set([axis_addr(axis) prop], value, varargin{:});
         end
 
         function addr = axis_addr(obj, axis)

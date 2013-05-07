@@ -12,17 +12,17 @@ classdef OxfMagnet3D < qd.classes.Instrument
             chans = {'x', 'y', 'z'};
         end
 
-        function set_ramp_rate(ramp_rate, varargin)
+        function set_ramp_rate(obj, ramp_rate, varargin)
             qd.util.assert(ramp_rate < 0.25); % Handle this better.
             p = inputParser();
-            p.addParam('axis', [], @(x)ismember(x, 'xyz'));
+            p.addParamValue('axis', [], @(x)ismember(x, 'xyz'));
             p.parse(varargin{:});
             axis = p.Results.axis;
             for ax = 'xyz'
                 if ~isempty(axis) && ax ~= axis
                     continue;
                 end
-                obj.magnet.remote.set(ax, 'SIG:RFST', ramp_rate);
+                obj.magnet.remote.set(ax, 'SIG:RFST', ramp_rate, '%.10f');
             end
         end
 
@@ -32,11 +32,11 @@ classdef OxfMagnet3D < qd.classes.Instrument
         end
 
         function val = getc(obj, chan)
-            obj.magnet.remote.read(chan, 'SIG:FLD', '%fT');
+            val = obj.magnet.remote.read(chan, 'SIG:FLD', '%fT');
         end
 
         function setc(obj, chan, value)
-            obj.magnet.remote.set(chan, 'SIG:FLD', value);
+            obj.magnet.remote.set(chan, 'SIG:FLD', value, '%.10f');
             obj.magnet.remote.set(chan, 'ACTN', 'RTOS');
         end
     end

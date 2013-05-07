@@ -28,9 +28,12 @@ classdef OxfordSCPI < handle
             value = qd.util.match(parts{end}, read_format);
         end
         
-        function set(obj, prop, value)
-            qd.util.assert(ischar(value));
-            req = ['SET:' prop ':' value];
+        function set(obj, prop, value, varargin)
+            p = inputParser();
+            p.addOptional('set_format', '%s', @ischar);
+            p.parse(varargin{:});
+            set_format = p.Results.set_format;
+            req = ['SET:' prop ':' sprintf(set_format, value)];
             rep = obj.link_func(req);
             qd.util.assert(strcmp(rep, ['STAT:' req ':VALID']));
         end
