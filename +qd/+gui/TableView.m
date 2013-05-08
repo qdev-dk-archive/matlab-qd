@@ -4,9 +4,13 @@ classdef TableView < handle
         fig
         columns = [1 2 0]
         resolution = 3
+        aspect = 'x:y'
+        zoom = 1
+        limits = '*:*'
     end
     properties(Constant)
         resolution_settings = [32 64 128 256 512 1024]
+        zoom_settings = [0 5 10 15]
     end
     methods
 
@@ -57,12 +61,26 @@ classdef TableView < handle
                     'Value', selection, ...
                     'Callback', @(h, varargin) obj.select(i, get(h, 'Value')));
             end
+            lists(end + 1) = uicontrol( ...
+                'Style', 'edit', ...
+                'String', obj.limits, ...
+                'Callback', @(h, varargin) obj.set_limits(get(h, 'String')));
+            lists(end + 1) = uicontrol( ...
+                'Style', 'edit', ...
+                'String', obj.aspect, ...
+                'Callback', @(h, varargin) obj.set_aspect_ratio(get(h, 'String')));
             resolutions = qd.util.map(@(n)[num2str(n) 'x' num2str(n)], obj.resolution_settings);
             lists(end + 1) = uicontrol( ...
                 'Style', 'popupmenu', ...
                 'String', resolutions, ...
                 'Value', obj.resolution, ...
                 'Callback', @(h, varargin) obj.set_resolution(get(h, 'Value')));
+            zoom = qd.util.map(@(n)['Enlarge ' num2str(n) '%'], obj.zoom_settings);
+            lists(end + 1) = uicontrol( ...
+                'Style', 'popupmenu', ...
+                'String', zoom, ...
+                'Value', obj.zoom, ...
+                'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
             obj.do_plot();
             align(lists, 'Fixed', 0, 'Bottom');
         end
@@ -70,6 +88,53 @@ classdef TableView < handle
         function set_resolution(obj, res)
             obj.resolution = res;
             obj.update();
+        end
+
+        function set_aspect_ratio(obj, asp)
+            obj.aspect = asp;
+            obj.update();
+        end
+
+        function set_limits(obj, limits)
+            obj.limits = limits;
+            obj.update();
+        end
+
+        function set_zoom(obj, zoom)
+            obj.zoom = zoom;
+            obj.update();
+        end
+
+        function aspect = get_aspect_ratio(obj)
+            parts = qd.util.strsplit(obj.aspect, ':');
+            if length(parts) ~= 2
+                aspect = 'auto';
+                return
+            end
+            aspect = [1 1 1];
+            for i = 1:2
+                n = str2double(parts{i});
+                if isnan(n)
+                    aspect = 'auto';
+                    return
+                end
+                aspect(i) = n;
+            end
+        end
+
+        function limits = get_limits(obj, data)
+            limits = [min(data), max(data)];
+            parts = qd.util.strsplit(obj.limits, ':');
+            if length(parts) ~= 2
+                return
+            end
+            for i = 1:2
+                l = str2double(parts{i});
+                if isnan(l)
+                    continue
+                end
+                limits(i) = l;
+            end
         end
 
         function do_plot(obj)
@@ -100,7 +165,14 @@ classdef TableView < handle
                     warning(err.message)
                 end
                 axis('tight');
+                daspect(obj.get_aspect_ratio());
+                ax = gca();
+                set(ax, 'CLim', obj.get_limits(c));
             end
+            ax = gca();
+            zoom = obj.zoom_settings(obj.zoom)/100.0;
+            pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
+            set(ax, 'OuterPosition', pos);
         end
 
         function select(obj, dim, column)

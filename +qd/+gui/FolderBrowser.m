@@ -125,6 +125,9 @@ classdef FolderBrowser < handle
             if ~isempty(old_view)
                 obj.table_view.columns = old_view.columns;
                 obj.table_view.resolution = old_view.resolution;
+                obj.table_view.aspect = old_view.aspect;
+                obj.table_view.zoom = old_view.zoom;
+                obj.table_view.limits = old_view.limits;
             end
             obj.table_view.update();
         end
