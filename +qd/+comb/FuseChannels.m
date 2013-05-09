@@ -12,7 +12,7 @@ classdef FuseChannels < qd.classes.Channel
             r = obj.describe@qd.classes.Channel(register);
             r.base_channels = {};
             for chan = obj.base_channels
-                r.base_channels{end + 1} = register.put('channels', chan{1});
+                r.base_channels{end + 1} = register.put('channels', chan(1));
             end
         end
 
