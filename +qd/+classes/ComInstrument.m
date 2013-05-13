@@ -1,5 +1,5 @@
 classdef ComInstrument < qd.classes.Instrument
-    properties(Access=protected)
+    properties
         com
     end
     methods
