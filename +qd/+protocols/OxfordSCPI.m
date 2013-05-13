@@ -18,7 +18,14 @@ classdef OxfordSCPI < handle
             p.parse(varargin{:});
             read_format = p.Results.read_format;
 
+            req = ['READ:' prop];
+            if obj.debug
+                disp(['req ' req]);
+            end
             rep = obj.link_func(['READ:' prop]);
+            if obj.debug
+                disp(['rep ' rep]);
+            end
             parts = qd.util.strsplit(rep, ':');
             
             % check the reply
