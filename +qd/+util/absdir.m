@@ -1,9 +1,6 @@
 function r = absdir(rel)
 % absdir(rel)
 %
-% Returns the absolute path to an existing directory rel.
-    save_dir = pwd();
-    cleanup = onCleanup(@()cd(save_dir));
-    cd(rel);
-    r = pwd();
+% Returns the absolute canonical path to a file or directory.
+    r = char(java.io.File(rel).getCanonicalPath());
 end
