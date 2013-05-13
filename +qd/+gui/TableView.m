@@ -6,7 +6,7 @@ classdef TableView < handle
         resolution = 3
         aspect = 'x:y'
         zoom = 1
-        limits = '*:*'
+        limits
     end
     properties(Constant)
         resolution_settings = [32 64 128 256 512 1024]
@@ -23,6 +23,10 @@ classdef TableView < handle
                 obj.fig = figure();
             end
             obj.tables = tables;
+            obj.limits = struct();
+            obj.limits.x = '*:*';
+            obj.limits.y = '*:*';
+            obj.limits.z = '*:*';
         end
         
         function update(obj)
@@ -61,11 +65,13 @@ classdef TableView < handle
                     'Value', selection, ...
                     'Callback', @(h, varargin) obj.select(i, get(h, 'Value')));
             end
-            lists(end + 1) = uicontrol( ...
-                'Style', 'edit', ...
-                'String', obj.limits, ...
-                'TooltipString', 'Limits for color axis', ...
-                'Callback', @(h, varargin) obj.set_limits(get(h, 'String')));
+            for axis = 'xyz'
+                lists(end + 1) = uicontrol( ...
+                    'Style', 'edit', ...
+                    'String', obj.limits.(axis), ...
+                    'TooltipString', sprintf('Limits for %s-axis', axis), ...
+                    'Callback', @(h, varargin) obj.set_limits(axis, get(h, 'String')));
+            end
             lists(end + 1) = uicontrol( ...
                 'Style', 'edit', ...
                 'String', obj.aspect, ...
@@ -88,6 +94,26 @@ classdef TableView < handle
             align(lists, 'Fixed', 0, 'Bottom');
         end
 
+        function mirror_settings(obj, other)
+            % Select the same columns as before (by name)
+            for i = 1:3
+                try
+                    name = other.tables{1}{other.columns(i)}.name;
+                catch
+                    continue
+                end
+                for j = 1:length(obj.tables{1})
+                    if strcmp(obj.tables{1}{j}.name, name)
+                        obj.columns(i) = j;
+                    end
+                end
+            end
+            obj.resolution = other.resolution;
+            obj.aspect = other.aspect;
+            obj.zoom = other.zoom;
+            obj.limits = other.limits;
+        end
+
         function set_resolution(obj, res)
             obj.resolution = res;
             obj.update();
@@ -98,8 +124,8 @@ classdef TableView < handle
             obj.update();
         end
 
-        function set_limits(obj, limits)
-            obj.limits = limits;
+        function set_limits(obj, axis, limits)
+            obj.limits.(axis) = limits;
             obj.update();
         end
 
@@ -125,9 +151,9 @@ classdef TableView < handle
             end
         end
 
-        function limits = get_limits(obj, data)
-            limits = [min(data), max(data)];
-            parts = qd.util.strsplit(obj.limits, ':');
+        function limits = get_limits(obj, axis, min_data, max_data)
+            limits = [min_data, max_data];
+            parts = qd.util.strsplit(obj.limits.(axis), ':');
             if length(parts) ~= 2
                 return
             end
@@ -143,8 +169,12 @@ classdef TableView < handle
         function do_plot(obj)
             if obj.columns(3) == 0
                 for table = obj.tables
-                    plot(table{1}{obj.columns(1)}.data, ...
-                        table{1}{obj.columns(2)}.data);
+                    xdata = table{1}{obj.columns(1)}.data;
+                    ydata = table{1}{obj.columns(2)}.data;
+                    plot(xdata, ydata);
+                    ax = gca();
+                    set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
+                    set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
                 end
             else
                 table = obj.tables{1};
@@ -170,9 +200,10 @@ classdef TableView < handle
                 axis('tight');
                 daspect(obj.get_aspect_ratio());
                 ax = gca();
-                set(ax, 'CLim', obj.get_limits(c));
+                set(ax, 'XLim', obj.get_limits('x', mia, maa));
+                set(ax, 'YLim', obj.get_limits('y', mib, mab));
+                set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
             end
-            ax = gca();
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
             set(ax, 'OuterPosition', pos);

@@ -124,23 +124,7 @@ classdef FolderBrowser < handle
             old_view = obj.table_view;
             obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
             if ~isempty(old_view)
-                % Select the same columns as before (by name)
-                for i = 1:3
-                    try
-                        name = old_view.tables{1}{old_view.columns(i)}.name;
-                    catch
-                        continue
-                    end
-                    for j = 1:length(obj.table_view.tables{1})
-                        if strcmp(obj.table_view.tables{1}{j}.name, name)
-                            obj.table_view.columns(i) = j;
-                        end
-                    end
-                end
-                obj.table_view.resolution = old_view.resolution;
-                obj.table_view.aspect = old_view.aspect;
-                obj.table_view.zoom = old_view.zoom;
-                obj.table_view.limits = old_view.limits;
+                obj.table_view.mirror_settings(old_view);
             end
             obj.table_view.update();
         end
