@@ -152,6 +152,10 @@ classdef TableView < handle
         end
 
         function limits = get_limits(obj, axis, min_data, max_data)
+            if min_data == max_data
+                min_data = min_data * 0.999 - 1e-12;
+                max_data = max_data * 1.001 + 1e-12;
+            end
             limits = [min_data, max_data];
             parts = qd.util.strsplit(obj.limits.(axis), ':');
             if length(parts) ~= 2

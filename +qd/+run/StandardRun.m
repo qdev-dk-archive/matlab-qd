@@ -2,6 +2,7 @@ classdef StandardRun < qd.run.Run
     properties
         sweeps = {}
         inputs = {}
+        initial_settle = 0;
     end
     methods
 
@@ -72,7 +73,7 @@ classdef StandardRun < qd.run.Run
             table.init();
 
             % Now perform all the measurements.
-            obj.handle_sweeps(obj.sweeps, [], 0, table);
+            obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, table);
         end
 
         function handle_sweeps(obj, sweeps, earlier_values, settle, table)
