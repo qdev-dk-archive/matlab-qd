@@ -168,6 +168,11 @@ classdef TableView < handle
                 end
                 limits(i) = l;
             end
+            if limits(1) > limits(2)
+                x = limits(2);
+                limits(2) = limits(1);
+                limits(1) = x;
+            end
         end
 
         function do_plot(obj)
