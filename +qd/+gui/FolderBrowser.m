@@ -98,12 +98,16 @@ classdef FolderBrowser < handle
                 tbl = qd.data.load_table(loc, table_name{1});
                 for pseudo_column = obj.pseudo_columns
                     try
-                        name = pseudo_column{1}.name;
-                        col = pseudo_column{1}.func(qd.data.view_table(tbl), meta);
-                        tbl{end + 1} = struct('data', col, 'name', name);
+                        func = pseudo_column{1};
+                        new_columns = func(qd.data.view_table(tbl), meta);
+                        for column = new_columns
+                            assert(isfield(column{1}, 'data'));
+                            assert(isfield(column{1}, 'name'));
+                            tbl{end + 1} = column{1};
+                        end
                     catch err
-                        warning('Error while computing column (%s). Error was: %s', ...
-                            name, err.message);
+                        warning('Error while computing column pseudo columns. Error was:\n%s', ...
+                            getReport(err));
                     end
                 end
                 tables(table_name{1}) = tbl;
@@ -113,7 +117,17 @@ classdef FolderBrowser < handle
         end
 
         function add_pseudo_column(obj, func, name)
-            obj.pseudo_columns{end + 1} = struct('func', func, 'name', name);
+            function r = pseudo(tbls, meta)
+                c = struct();
+                c.name = name;
+                c.data = func(tbls, meta);
+                r = {c};
+            end
+            obj.pseudo_columns{end + 1} = @pseudo;
+        end
+
+        function add_pseudo_columns(obj, func)
+            obj.pseudo_columns{end + 1} = func;
         end
 
         function plot_loc(obj, tables)
