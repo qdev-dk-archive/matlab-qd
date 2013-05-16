@@ -28,7 +28,6 @@ classdef OxfMagnet3D < handle
             fopen(obj.magnet_serial);
             obj.magnet = qd.protocols.OxfordSCPI(...
                 @(req)query(obj.magnet_serial, req, '%s\n', '%s\n'));
-            obj.magnet.debug = true;
             obj.triton = qd.ins.Triton();
             obj.server = daemon.Daemon(obj.bind_address);
             obj.server.daemon_name = 'oxfmagnet3d-daemon';
