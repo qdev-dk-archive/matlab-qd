@@ -1,10 +1,27 @@
 classdef Register < handle
+% A register is used as part of meta data generation. It solves a simple
+% problem. Say you have a qd.Setup containing two channels, both belonging to
+% the same instrument. To describe one of these channels completely you need
+% to describe both the channel and the instrument it belongs to. What you do
+% not want, is to include the description of the instrument twice. To solve
+% this, each channel calls 'name = register.put('instruments', ins)' to get a
+% unique name for the instrument. When, at some point, register.describe() is
+% called, it will include a description of the instrument.
+%
+% The Register class handles cyclical references between elements (for
+% instance, between an instrument and a channel), and other such oddities.
     properties
         content = struct()
     end
     methods
 
         function name = put(obj, namespace, value)
+        % Place 'value' in the namespace named 'namespace'. Returns a name
+        % associated with value guaranteed to be unique in that namespace.
+        % 'value' should have a name property which is used as a basis for
+        % name generation, and a 'describe' method, taking this register as an
+        % argument, and generating metadata. 'put' does nothing is 'value' is
+        % already in the register.
             ns = obj.get_ns(namespace);
             name = value.name;
             if ~ns.isKey(name)
@@ -31,6 +48,11 @@ classdef Register < handle
         end
 
         function meta = describe(obj)
+        % Form metadata describing all items in every namespace of this
+        % register. If, during the 'describe' call of each element in the
+        % register, more element are put in the register, these will also be
+        % included in the returned metadata (moral is: you do not have to
+        % worry about this happening).
             meta = struct;
             previously_described = containers.Map();
             while true
@@ -48,9 +70,7 @@ classdef Register < handle
                             meta.(field{1}) = {};
                         end
                         descr = ns(name{1}).describe(obj);
-                        if ~strcmp(descr.name, name{1})
-                            descr.registered_name = name{1};
-                        end
+                        descr.registered_name = name{1};
                         meta.(field{1}){end + 1} = descr;
                     end
                 end

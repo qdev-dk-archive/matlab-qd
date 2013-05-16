@@ -28,6 +28,8 @@ classdef Instrument < qd.classes.Nameable
         end
 
         function chan = channel(obj, id)
+        % Get a channel instance for the channel with name 'id'. 'id' should
+        % be a string.
             if obj.has_channel(id)
                 if obj.disable_default
                     error('Not supported by this channel.');
@@ -40,17 +42,22 @@ classdef Instrument < qd.classes.Nameable
             end
         end
 
-        function r = has_channel(obj, channel)
-            r = ~isempty(find(strcmp(obj.channels(), channel)));
+        function r = has_channel(obj, id)
+        % 'id' should be a string.
+            r = ~isempty(find(strcmp(obj.channels(), id)));
         end
 
-        function val = getc(obj, channel)
-            chan = obj.channel_if_reimplemented(channel);
+        function val = getc(obj, id)
+        % Get the value of the channel with name 'id'.
+        % Equivalent to ins.channel(id).get().
+            chan = obj.channel_if_reimplemented(id);
             val = chan.get();
         end
 
-        function setc(obj, channel, val)
-            chan = obj.channel_if_reimplemented(channel);
+        function setc(obj, id, val)
+        % Set the value of the channel with name 'id'.
+        % Equivalent to ins.channel(id).set(val).
+            chan = obj.channel_if_reimplemented(id);
             chan.set(val);
         end
     end

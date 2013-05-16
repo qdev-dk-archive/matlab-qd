@@ -1,4 +1,8 @@
 classdef Nameable < handle
+% Base class for everything having a 'name'. Note, this class just adds some
+% sugar (like remembering what the original default name of an item was), in
+% general, other functions expecting an object with a name will work fine as
+% long as that object has a 'name' property.
     properties(Dependent)
         name
     end
