@@ -1,4 +1,4 @@
-classdef Time < qd.classes.ComInstrument
+classdef Time < qd.classes.Instrument
     properties(Access=private)
         start_time;
     end
