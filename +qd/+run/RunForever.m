@@ -8,6 +8,7 @@ classdef RunForever < qd.run.StandardRun
     methods(Access=protected)
         function perform_run(obj, out_dir)
             table = qd.data.TableWriter(out_dir, 'data');
+            table.add_column('iteration');
             for sweep = obj.sweeps
                 table.add_channel_column(sweep{1}.chan);
             end
@@ -15,11 +16,13 @@ classdef RunForever < qd.run.StandardRun
                 table.add_channel_column(inp{1});
             end
             table.init();
-
+            
+            i = 0;
             while true
-	            obj.handle_sweeps(obj.sweeps, [], obj.delay * 1000, table);
-	            table.add_divider();
-	        end
+                obj.handle_sweeps(obj.sweeps, [i], obj.delay * 1000, table);
+                table.add_divider();
+                i = i + 1;
+            end
         end
     end
 end
