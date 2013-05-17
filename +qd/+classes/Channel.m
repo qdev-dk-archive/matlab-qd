@@ -25,7 +25,9 @@ classdef Channel < qd.classes.Nameable
         end
 
         function val = get(obj)
-            if ~isempty(obj.instrument)
+            if qd.util.is_reimplemented(obj, 'get_async', ?qd.classes.Channel)
+                val = obj.get_async().exec();
+            elseif ~isempty(obj.instrument)
                 val = obj.instrument.getc(obj.channel_id);
             else
                 error('Not supported');
@@ -33,11 +35,21 @@ classdef Channel < qd.classes.Nameable
         end
 
         function set(obj, val)
-            if ~isempty(obj.instrument)
+            if qd.util.is_reimplemented(obj, 'set_async', ?qd.classes.Channel)
+                val = obj.set_async(val).exec();
+            elseif ~isempty(obj.instrument)
                 obj.instrument.setc(obj.channel_id, val);
             else
                 error('Not supported');
             end
+        end
+
+        function future = get_async(obj)
+            future = qd.classes.GetFuture(@()obj.get());
+        end
+
+        function future = set_async(obj, val)
+            future = qd.classes.SetFuture(@()obj.set(val));
         end
 
         function obj = set_meta(obj, meta)
