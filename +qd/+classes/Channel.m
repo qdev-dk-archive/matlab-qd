@@ -45,10 +45,20 @@ classdef Channel < qd.classes.Nameable
         end
 
         function future = get_async(obj)
+            if ~isempty(obj.instrument) && ...
+                    qd.util.is_reimplemented(obj.instrument, 'getc_async', ?qd.classes.Instrument)
+                future = obj.instrument.getc_async(obj.channel_id);
+                return
+            end
             future = qd.classes.GetFuture(@()obj.get());
         end
 
         function future = set_async(obj, val)
+            if ~isempty(obj.instrument) && ...
+                    qd.util.is_reimplemented(obj.instrument, 'setc_async', ?qd.classes.Instrument)
+                future = obj.instrument.setc_async(obj.channel_id, val);
+                return
+            end
             future = qd.classes.SetFuture(@()obj.set(val));
         end
 

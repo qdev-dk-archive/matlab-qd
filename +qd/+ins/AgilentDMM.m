@@ -1,4 +1,7 @@
 classdef AgilentDMM < qd.classes.ComInstrument
+    properties
+        read_queued = false;
+    end
     methods
 
         function  obj = AgilentDMM(com)
@@ -19,13 +22,20 @@ classdef AgilentDMM < qd.classes.ComInstrument
             r = {'in'};
         end
 
-        function val = getc(obj, channel)
-            switch channel
-                case 'in'
-                    val = obj.querym('READ?', '%f');
-                otherwise
-                    error('Not supported.')
+        function future = getc_async(obj, channel)
+            if ~strcmp(channel, 'in')
+                error('No such channel.')
             end
+            if obj.read_queued
+                error('read_queued is true. An async get has been requested but not executed.');
+            end
+            obj.send('INIT')
+            obj.read_queued = true;
+            function val = exec()
+                val = obj.querym('FETCH?', '%f');
+                obj.read_queued = false;
+            end
+            future = qd.classes.GetFuture(@exec);
         end
     end
 end
