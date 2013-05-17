@@ -1,7 +1,4 @@
 classdef Instrument < qd.classes.Nameable
-    properties(Access=private)
-        disable_default = false
-    end
     methods
         function r = model(obj)
         % The name of the type of instrument as given by the manufacturer. For
@@ -31,9 +28,6 @@ classdef Instrument < qd.classes.Nameable
         % Get a channel instance for the channel with name 'id'. 'id' should
         % be a string.
             if obj.has_channel(id)
-                if obj.disable_default
-                    error('Not supported by this channel.');
-                end
                 chan = qd.classes.Channel();
                 chan.instrument = obj;
                 chan.channel_id = id;
@@ -62,19 +56,18 @@ classdef Instrument < qd.classes.Nameable
         end
     end
     methods(Access=private)
-        function chan = channel_if_reimplemented(obj, channel)
+        function chan = channel_if_reimplemented(obj, id)
+            if ~obj.has_channel(id)
+                error('Channel not found (%s)', id);
+            end
             % The default implementation of Instrument::channel is to return a
             % channel which will call back getc and setc, this will cause an
-            % infinite loop. Here we set disable_default = true to disable the
-            % default implementation of channel for the duration of this call.
-            obj.disable_default = true;
-            try
-                chan = obj.channel(channel);
-            catch err
-                obj.disable_default = false;
-                rethrow(err)
+            % infinite loop. Here we check if channel has been reimplemented
+            % before we call it.
+            if ~qd.util.is_reimplemented(obj, 'channel', ?qd.classes.Instrument)
+                error('Not supported.')
             end
-            obj.disable_default = false;
+            chan = obj.channel(id);
         end
     end
 end
