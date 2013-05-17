@@ -96,8 +96,12 @@ classdef StandardRun < qd.run.Run
                     pause(settle/1000);
                 end
                 values = [earlier_values];
+                futures = {};
                 for inp = obj.inputs
-                    values(end+1) = inp{1}.get();
+                    futures{end + 1} = inp.get_async();
+                end
+                for future = futures
+                    values(end + 1) = future{1}.exec();
                 end
                 table.add_point(values);
                 drawnow();
