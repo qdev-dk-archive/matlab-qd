@@ -96,6 +96,7 @@ classdef DecaDACChannel < qd.classes.Channel
         function r = describe(obj, register)
             r = obj.describe@qd.classes.Channel(register);
             r.ramp_rate = obj.ramp_rate;
+            r.current_value = obj.get();
         end
     end
     methods(Access=private)
