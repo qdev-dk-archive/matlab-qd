@@ -48,11 +48,21 @@ classdef Instrument < qd.classes.Nameable
             val = chan.get();
         end
 
+        function future = getc_async(obj, id)
+            chan = obj.channel_if_reimplemented(id);
+            val = chan.get_async();
+        end
+
         function setc(obj, id, val)
         % Set the value of the channel with name 'id'.
         % Equivalent to ins.channel(id).set(val).
             chan = obj.channel_if_reimplemented(id);
             chan.set(val);
+        end
+
+        function future = setc_async(obj, id, val)
+            chan = obj.channel_if_reimplemented(id);
+            future = chan.set_async(val);
         end
     end
     methods(Access=private)

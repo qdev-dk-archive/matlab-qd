@@ -98,7 +98,7 @@ classdef StandardRun < qd.run.Run
                 values = [earlier_values];
                 futures = {};
                 for inp = obj.inputs
-                    futures{end + 1} = inp.get_async();
+                    futures{end + 1} = inp{1}.get_async();
                 end
                 for future = futures
                     values(end + 1) = future{1}.exec();
