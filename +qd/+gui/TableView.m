@@ -5,12 +5,12 @@ classdef TableView < handle
         columns = [1 2 0]
         resolution = 3
         aspect = 'x:y'
-        zoom = 1
+        zoom = 4
         limits
     end
     properties(Constant)
         resolution_settings = [32 64 128 256 512 1024]
-        zoom_settings = [0 5 10 15]
+        zoom_settings = [-15 -10 -5 0 5 10 15]
     end
     methods
 
