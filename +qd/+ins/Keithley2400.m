@@ -1,8 +1,22 @@
 classdef Keithley2400 < qd.classes.ComInstrument
     % Currently this class only supports current mode.
     % TODO set range.
+    
+    properties
+        read_queued = false;
+        ramp_step_size = 0.05;
+        ramp_wait = 0.01;
+    end
+    
     methods
-
+        function set_ramp_step(obj, val)
+            obj.ramp_step_size = val;
+        end
+        
+        function set_ramp_wait(obj, val)
+            obj.ramp_wait = val;
+        end
+        
         function obj = Keithley2400(com)
             obj = obj@qd.classes.ComInstrument(com);
         end
@@ -44,6 +58,31 @@ classdef Keithley2400 < qd.classes.ComInstrument
                     error('not supported.')
             end
         end
+        
+        function ramp_volt(obj, value)
+            obj.ramp_channel('volt',value)
+        end
+        
+
+        function ramp_channel(obj, channel, value)
+            switch channel
+                case 'volt'
+                    startpoint = obj.getc(channel);
+                    dir = sign(value - startpoint);
+                    while startpoint ~= value
+                        startpoint = startpoint+(dir*obj.ramp_step_size);
+                        obj.setc(channel,startpoint);
+                        % startpoint = obj.getc(channel);
+                        if abs(startpoint-value) <= abs(obj.ramp_step_size)
+                            obj.setc(channel,value);
+                            startpoint = value;
+                        end
+                        pause(obj.ramp_wait);
+                    end
+                otherwise
+                    error('not supported.')
+            end
+        end
 
         function val = getc(obj, channel)
             switch channel
@@ -78,6 +117,5 @@ classdef Keithley2400 < qd.classes.ComInstrument
                 r.config.(simplified) = obj.query(question);
             end
         end
-        
-    end
+     end
 end
