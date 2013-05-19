@@ -91,6 +91,10 @@ classdef TableView < handle
                 'String', zoom, ...
                 'Value', obj.zoom, ...
                 'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
+            lists(end + 1) = uicontrol( ...
+                'Style', 'pushbutton', ...
+                'String', 'Copy figure', ...
+                'Callback', @(h, varargin) obj.copy_to_clipboard());
             obj.do_plot();
             align(lists, 'Fixed', 0, 'Bottom');
         end
@@ -118,6 +122,12 @@ classdef TableView < handle
         function set_resolution(obj, res)
             obj.resolution = res;
             obj.update();
+        end
+
+
+        function copy_to_clipboard(obj)
+            % unfortunately the copy includes a large white background
+            print -dmeta -noui
         end
 
         function set_aspect_ratio(obj, asp)

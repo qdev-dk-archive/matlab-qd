@@ -59,7 +59,7 @@ classdef FolderBrowser < handle
             listing = dir(obj.location);
             obj.content = {};
             names = {};
-            for d = transpose(listing)
+            for d = transpose(listing(end:-1:1))
                 if obj.cache.isKey(d.name)
                     c = obj.cache(d.name);
                 else
