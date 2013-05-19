@@ -131,6 +131,9 @@ classdef FolderBrowser < handle
         end
 
         function plot_loc(obj, tables)
+%             I would like to pass the meta data to TableView, but I cant
+%             pass it to plot_loc, it tells me "Too many input arguments",
+%             also when I do the exact same as with view_loc.
             if isempty(obj.fig)
                 obj.fig = figure();
                 set(obj.fig, 'Color', 'white');

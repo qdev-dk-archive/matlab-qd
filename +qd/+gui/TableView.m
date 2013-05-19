@@ -2,6 +2,7 @@ classdef TableView < handle
     properties
         tables
         fig
+        meta
         columns = [1 2 0]
         resolution = 3
         aspect = 'x:y'
@@ -184,6 +185,8 @@ classdef TableView < handle
                     ax = gca();
                     set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
                     set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
+                    xlabel(table{1}{obj.columns(1)}.name)
+                    ylabel(table{1}{obj.columns(2)}.name)
                 end
             else
                 table = obj.tables{1};
@@ -200,7 +203,7 @@ classdef TableView < handle
                 [X, Y] = meshgrid(xp, yp);
                 Z = griddata(a, b, c, X, Y, 'nearest');
                 colormap(hot);
-                colorbar();
+                cb = colorbar();
                 try
                     plt = imagesc([mia maa], [mib mab], Z);
                 catch err
@@ -212,6 +215,12 @@ classdef TableView < handle
                 set(ax, 'XLim', obj.get_limits('x', mia, maa));
                 set(ax, 'YLim', obj.get_limits('y', mib, mab));
                 set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
+                xlabel(table{obj.columns(1)}.name)
+                ylabel(table{obj.columns(2)}.name)
+                ylabel(cb, table{obj.columns(3)}.name)
+%                 title(obj.meta.name)
+%                 I would like to get the meta data from FolderBrowser, but
+%                 I cannot pass it via the TableView function.
             end
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
