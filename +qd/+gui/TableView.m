@@ -235,12 +235,31 @@ classdef TableView < handle
                 set(ax, 'XLim', obj.get_limits('x', mia, maa));
                 set(ax, 'YLim', obj.get_limits('y', mib, mab));
                 set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
-                xlabel(obj.get_label(1));
-                ylabel(obj.get_label(2));
-                ylabel(cb, obj.get_label(3));
+                
+                xstr = obj.get_label(1);
+                ystr = obj.get_label(2);
+                zstr = obj.get_label(3);
+                
+                xl = xlabel(xstr);
+                yl = ylabel(ystr);
+                zl = ylabel(cb, zstr);
+                
+                if xstr(1)=='$' && xstr(end)=='$'
+                    set(xl,'Interpreter','Latex');
+                end
+                if ystr(1)=='$' && ystr(end)=='$'
+                    set(yl,'Interpreter','Latex');
+                end
+                if zstr(1)=='$' && zstr(end)=='$'
+                    set(zl,'Interpreter','Latex');
+                end
             end
             if ~isempty(obj.header)
-                title(obj.header);
+                t = title(obj.header);
+                
+                if obj.header(1)=='$' && obj.header(end)=='$'
+                    set(t,'Interpreter','Latex');
+                end
             end
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];

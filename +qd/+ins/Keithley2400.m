@@ -17,6 +17,14 @@ classdef Keithley2400 < qd.classes.ComInstrument
             obj.ramp_wait = val;
         end
         
+        function val = get_ramp_step(obj)
+            val = obj.ramp_step_size;
+        end
+        
+        function val = get_ramp_wait(obj)
+            val = obj.ramp_wait;
+        end
+        
         function obj = Keithley2400(com)
             obj = obj@qd.classes.ComInstrument(com);
         end
