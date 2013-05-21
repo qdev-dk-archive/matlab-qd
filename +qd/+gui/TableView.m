@@ -175,13 +175,15 @@ classdef TableView < handle
                     limits(i) = l;
                 end
             end
+            % Make sure limits are not decreasing
             if limits(1) > limits(2)
                 x = limits(2);
                 limits(2) = limits(1);
                 limits(1) = x;
-            elseif limits(1) == limits(2)
-                limits(1) = limits(1) * 0.999 - 1e-12;
-                limits(2) = limits(2) * 1.001 + 1e-12;
+            end
+            if abs(limits(1) - limits(2)) < eps(limits(1)) * 100;
+                limits(1) = limits(1) - eps(limits(1)) * 50;
+                limits(2) = limits(2) + eps(limits(1)) * 50;
             end
         end
 
