@@ -15,9 +15,14 @@ classdef FolderBrowser < handle
         tbl
         loc
         meta
+        % This is a containers.Map mapping strings to strings.
+        % The key is the name of a column, the value is the desired label
+        % on the axis of that column.
+        column_label_override
     end
     methods
         function obj = FolderBrowser(loc)
+            obj.column_label_override = containers.Map();
             obj.clear_cache();
             obj.location = loc;
             obj.listbox_fig = figure( ...
@@ -108,6 +113,11 @@ classdef FolderBrowser < handle
                     catch err
                         warning('Error while computing column pseudo columns. Error was:\n%s', ...
                             getReport(err));
+                    end
+                end
+                for i = 1:length(tbl)
+                    if obj.column_label_override.isKey(tbl{i}.name)
+                        tbl{i}.label = obj.column_label_override(tbl{i}.name);
                     end
                 end
                 tables(table_name{1}) = tbl;

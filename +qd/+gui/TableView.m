@@ -184,6 +184,17 @@ classdef TableView < handle
             end
         end
 
+        function label = get_label(obj, axis)
+        % Get the desired label for axis where axis is 1, 2, or 3 specifying
+        % the x-axis, y-axis or z-axis respectively.
+            table = obj.tables{1};
+            if isfield(table{obj.columns(axis)}, 'label')
+                label = table{obj.columns(axis)}.label;
+            else
+                label = table{obj.columns(axis)}.name;
+            end
+        end
+
         function do_plot(obj)
             if obj.columns(3) == 0
                 for table = obj.tables
@@ -193,8 +204,8 @@ classdef TableView < handle
                     ax = gca();
                     set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
                     set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
-                    xlabel(table{1}{obj.columns(1)}.name)
-                    ylabel(table{1}{obj.columns(2)}.name)
+                    xlabel(obj.get_label(1));
+                    ylabel(obj.get_label(2));
                 end
             else
                 table = obj.tables{1};
@@ -223,9 +234,9 @@ classdef TableView < handle
                 set(ax, 'XLim', obj.get_limits('x', mia, maa));
                 set(ax, 'YLim', obj.get_limits('y', mib, mab));
                 set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
-                xlabel(table{obj.columns(1)}.name)
-                ylabel(table{obj.columns(2)}.name)
-                ylabel(cb, table{obj.columns(3)}.name)
+                xlabel(obj.get_label(1));
+                ylabel(obj.get_label(2));
+                ylabel(cb, obj.get_label(3));
 %                 title(obj.meta.name)
 %                 I would like to get the meta data from FolderBrowser, but
 %                 I cannot pass it via the TableView function.
