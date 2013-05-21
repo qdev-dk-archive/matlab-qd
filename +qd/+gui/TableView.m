@@ -8,6 +8,7 @@ classdef TableView < handle
         aspect = 'x:y'
         zoom = 4
         limits
+        header = '';
     end
     properties(Constant)
         resolution_settings = [32 64 128 256 512 1024]
@@ -163,26 +164,35 @@ classdef TableView < handle
         end
 
         function limits = get_limits(obj, axis, min_data, max_data)
-            if min_data == max_data
-                min_data = min_data * 0.999 - 1e-12;
-                max_data = max_data * 1.001 + 1e-12;
-            end
             limits = [min_data, max_data];
             parts = qd.util.strsplit(obj.limits.(axis), ':');
-            if length(parts) ~= 2
-                return
-            end
-            for i = 1:2
-                l = str2double(parts{i});
-                if isnan(l)
-                    continue
+            if length(parts) == 2
+                for i = 1:2
+                    l = str2double(parts{i});
+                    if isnan(l)
+                        continue
+                    end
+                    limits(i) = l;
                 end
-                limits(i) = l;
             end
             if limits(1) > limits(2)
                 x = limits(2);
                 limits(2) = limits(1);
                 limits(1) = x;
+            elseif limits(1) == limits(2)
+                limits(1) = limits(1) * 0.999 - 1e-12;
+                limits(2) = limits(2) * 1.001 + 1e-12;
+            end
+        end
+
+        function label = get_label(obj, axis)
+        % Get the desired label for axis where axis is 1, 2, or 3 specifying
+        % the x-axis, y-axis or z-axis respectively.
+            table = obj.tables{1};
+            if isfield(table{obj.columns(axis)}, 'label')
+                label = table{obj.columns(axis)}.label;
+            else
+                label = table{obj.columns(axis)}.name;
             end
         end
 
@@ -195,8 +205,8 @@ classdef TableView < handle
                     ax = gca();
                     set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
                     set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
-                    xlabel(table{1}{obj.columns(1)}.name)
-                    ylabel(table{1}{obj.columns(2)}.name)
+                    xlabel(obj.get_label(1));
+                    ylabel(obj.get_label(2));
                 end
             else
                 table = obj.tables{1};
@@ -225,12 +235,12 @@ classdef TableView < handle
                 set(ax, 'XLim', obj.get_limits('x', mia, maa));
                 set(ax, 'YLim', obj.get_limits('y', mib, mab));
                 set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
-                xlabel(table{obj.columns(1)}.name)
-                ylabel(table{obj.columns(2)}.name)
-                ylabel(cb, table{obj.columns(3)}.name)
-%                 title(obj.meta.name)
-%                 I would like to get the meta data from FolderBrowser, but
-%                 I cannot pass it via the TableView function.
+                xlabel(obj.get_label(1));
+                ylabel(obj.get_label(2));
+                ylabel(cb, obj.get_label(3));
+            end
+            if ~isempty(obj.header)
+                title(obj.header);
             end
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
