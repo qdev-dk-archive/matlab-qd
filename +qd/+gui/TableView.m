@@ -8,6 +8,7 @@ classdef TableView < handle
         aspect = 'x:y'
         zoom = 4
         limits
+        header = '';
     end
     properties(Constant)
         resolution_settings = [32 64 128 256 512 1024]
@@ -237,9 +238,9 @@ classdef TableView < handle
                 xlabel(obj.get_label(1));
                 ylabel(obj.get_label(2));
                 ylabel(cb, obj.get_label(3));
-%                 title(obj.meta.name)
-%                 I would like to get the meta data from FolderBrowser, but
-%                 I cannot pass it via the TableView function.
+            end
+            if ~isempty(obj.header)
+                title(obj.header);
             end
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];

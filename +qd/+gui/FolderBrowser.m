@@ -19,6 +19,8 @@ classdef FolderBrowser < handle
         % The key is the name of a column, the value is the desired label
         % on the axis of that column.
         column_label_override
+        % Set this to false if you do not want headers on plots.
+        show_headers = true
     end
     methods
         function obj = FolderBrowser(loc)
@@ -122,7 +124,7 @@ classdef FolderBrowser < handle
                 end
                 tables(table_name{1}) = tbl;
             end
-            obj.plot_loc(tables);
+            obj.plot_loc(tables, meta);
             obj.view_loc(loc, meta, tables);
         end
 
@@ -140,16 +142,16 @@ classdef FolderBrowser < handle
             obj.pseudo_columns{end + 1} = func;
         end
 
-        function plot_loc(obj, tables)
-%             I would like to pass the meta data to TableView, but I cant
-%             pass it to plot_loc, it tells me "Too many input arguments",
-%             also when I do the exact same as with view_loc.
+        function plot_loc(obj, tables, meta)
             if isempty(obj.fig)
                 obj.fig = figure();
                 set(obj.fig, 'Color', 'white');
             end
             old_view = obj.table_view;
             obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
+            if obj.show_headers && isfield(meta, 'name')
+                obj.table_view.header = meta.name;
+            end
             if ~isempty(old_view)
                 obj.table_view.mirror_settings(old_view);
             end
