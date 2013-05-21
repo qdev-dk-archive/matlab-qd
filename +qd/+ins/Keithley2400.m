@@ -26,7 +26,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'curr', 'volt', 'resist'};
+            r = {'curr', 'volt', 'resist', 'rampvolt'};
         end
 
         function reset(obj)
@@ -54,6 +54,8 @@ classdef Keithley2400 < qd.classes.ComInstrument
             switch channel
                 case 'volt'
                     obj.sendf('SOUR:VOLT %.16E', value)
+                case 'rampvolt'
+                    obj.ramp_channel('volt',value)
                 otherwise
                     error('not supported.')
             end
