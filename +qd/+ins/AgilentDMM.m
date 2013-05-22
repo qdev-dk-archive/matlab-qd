@@ -1,6 +1,6 @@
 classdef AgilentDMM < qd.classes.ComInstrument
     properties
-        read_queued = false;
+        current_future;
     end
     methods
 
@@ -22,20 +22,24 @@ classdef AgilentDMM < qd.classes.ComInstrument
             r = {'in'};
         end
 
+        function force_current_future(obj)
+            if ~isempty(obj.current_future)
+                obj.current_future.force();
+                obj.current_future = [];
+            end
+        end
+
         function future = getc_async(obj, channel)
             if ~strcmp(channel, 'in')
                 error('No such channel.')
             end
-            if obj.read_queued
-                error('read_queued is true. An async get has been requested but not executed.');
-            end
-            obj.send('INIT')
-            obj.read_queued = true;
+            obj.force_current_future();
+            obj.send('INIT');
             function val = exec()
                 val = obj.querym('FETCH?', '%f');
-                obj.read_queued = false;
             end
             future = qd.classes.GetFuture(@exec);
+            obj.current_future = futute;
         end
     end
 end
