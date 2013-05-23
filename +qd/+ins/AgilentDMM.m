@@ -39,7 +39,7 @@ classdef AgilentDMM < qd.classes.ComInstrument
                 val = obj.querym('FETCH?', '%f');
             end
             future = qd.classes.GetFuture(@exec);
-            obj.current_future = futute;
+            obj.current_future = future;
         end
     end
 end

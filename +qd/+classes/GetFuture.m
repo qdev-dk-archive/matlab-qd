@@ -12,8 +12,9 @@ classdef GetFuture < handle
             if isempty(obj.func)
                 return;
             end
-            obj.value = obj.func;
+            obj.value = obj.func();
             obj.func = [];
+        end
 
         function val = exec(obj)
             obj.force();

@@ -44,6 +44,10 @@ classdef Instrument < qd.classes.Nameable
         function val = getc(obj, id)
         % Get the value of the channel with name 'id'.
         % Equivalent to ins.channel(id).get().
+            if qd.util.is_reimplemented(obj, 'getc_async', ?qd.classes.Instrument)
+                val = obj.getc_async(id).exec();
+                return
+            end
             chan = obj.channel_if_reimplemented(id);
             val = chan.get();
         end
@@ -56,6 +60,10 @@ classdef Instrument < qd.classes.Nameable
         function setc(obj, id, val)
         % Set the value of the channel with name 'id'.
         % Equivalent to ins.channel(id).set(val).
+            if qd.util.is_reimplemented(obj, 'setc_async', ?qd.classes.Instrument)
+                val = obj.setc_async(id, val).exec();
+                return
+            end
             chan = obj.channel_if_reimplemented(id);
             chan.set(val);
         end
