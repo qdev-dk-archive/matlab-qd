@@ -149,6 +149,9 @@ classdef FolderBrowser < handle
             end
             old_view = obj.table_view;
             obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
+            try
+                obj.table_view.sweeps = meta.sweeps;
+            end
             if obj.show_headers && isfield(meta, 'name')
                 obj.table_view.header = meta.name;
             end

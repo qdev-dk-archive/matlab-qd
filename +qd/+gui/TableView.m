@@ -1,17 +1,18 @@
 classdef TableView < handle
     properties
         tables
+        sweeps
         fig
         meta
         columns = [1 2 0]
-        resolution = 3
+        resolution = 1
         aspect = 'x:y'
         zoom = 4
         limits
         header = '';
     end
     properties(Constant)
-        resolution_settings = [32 64 128 256 512 1024]
+        resolution_settings = [NaN 32 64 128 256 512 1024]
         zoom_settings = [-15 -10 -5 0 5 10 15]
     end
     methods
@@ -80,6 +81,7 @@ classdef TableView < handle
                 'TooltipString', 'Aspect ratio', ...
                 'Callback', @(h, varargin) obj.set_aspect_ratio(get(h, 'String')));
             resolutions = qd.util.map(@(n)[num2str(n) 'x' num2str(n)], obj.resolution_settings);
+            resolutions{1} = 'Native';
             lists(end + 1) = uicontrol( ...
                 'Style', 'popupmenu', ...
                 'String', resolutions, ...
@@ -96,8 +98,20 @@ classdef TableView < handle
                 'Style', 'pushbutton', ...
                 'String', 'Copy figure', ...
                 'Callback', @(h, varargin) obj.copy_to_clipboard());
-            obj.do_plot();
+            try
+                obj.do_plot();
+            catch err
+                obj.show_message_instead_of_plot( ...
+                    getReport(err, 'extended', 'hyperlinks', 'off'));
+                disp(getReport(err));
+            end
             align(lists, 'Fixed', 0, 'Bottom');
+        end
+
+        function show_message_instead_of_plot(obj, msg)
+            uistack(uicontrol('Style', 'text', 'String', msg, ...
+                'Units', 'normalized', 'Position', [0,0,1,1], ...
+                'HorizontalAlignment', 'left'), 'bottom');
         end
 
         function mirror_settings(obj, other)
@@ -211,32 +225,28 @@ classdef TableView < handle
                     ylabel(obj.get_label(2));
                 end
             else
-                table = obj.tables{1};
-                a = table{obj.columns(1)}.data;
-                b = table{obj.columns(2)}.data;
-                c = table{obj.columns(3)}.data;
-                res = obj.resolution_settings(obj.resolution);
-                mia = min(a);
-                maa = max(a);
-                mib = min(b);
-                mab = max(b);
-                xp = linspace(mia, maa, res);
-                yp = linspace(mib, mab, res);
-                [X, Y] = meshgrid(xp, yp);
-                Z = griddata(a, b, c, X, Y, 'nearest');
+                if (obj.resolution == 1)
+                    if ~(obj.columns(1) == 1 && obj.columns(2) == 2 ...
+                        || obj.columns(1) == 2 && obj.columns(2) == 1)
+                        obj.show_message_instead_of_plot( ...
+                            ['Plotting in native resolution is not supported for ' ...
+                             'your choice of axes. The x-axis must be column ' ...
+                             'one and the y-axis must be column two, or vice-versa.']);
+                        return;
+                    end
+                    [data, extents] = obj.get_data_in_native_resolution();
+                else
+                    [data, extents] = obj.resample_data();
+                end
                 colormap(hot);
                 cb = colorbar();
-                try
-                    plt = imagesc([mia maa], [mib mab], Z);
-                catch err
-                    warning(err.message)
-                end
+                plt = imagesc(extents(1,:), extents(2,:), data);
                 axis('tight');
                 daspect(obj.get_aspect_ratio());
                 ax = gca();
-                set(ax, 'XLim', obj.get_limits('x', mia, maa));
-                set(ax, 'YLim', obj.get_limits('y', mib, mab));
-                set(ax, 'CLim', obj.get_limits('z', min(c), max(c)));
+                set(ax, 'XLim', obj.get_limits('x', extents(1,1), extents(1,2)));
+                set(ax, 'YLim', obj.get_limits('y', extents(2,1), extents(2,2)));
+                set(ax, 'CLim', obj.get_limits('z', min(min(data)), max(max(data))));
                 
                 xstr = obj.get_label(1);
                 ystr = obj.get_label(2);
@@ -266,6 +276,36 @@ classdef TableView < handle
             zoom = obj.zoom_settings(obj.zoom)/100.0;
             pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
             set(ax, 'OuterPosition', pos);
+        end
+
+        function [data, extents] = get_data_in_native_resolution(obj)
+            assert(~isempty(obj.sweeps));
+            table = obj.tables{1};
+            [data, extents] = qd.data.reshape_data( ...
+                table{obj.columns(3)}.data, obj.sweeps);
+            if obj.columns(1) == 2 && obj.columns(2) == 1
+                data = transpose(data);
+                extents = extents(end:-1:1,:);
+            else
+                assert(obj.columns(1) == 1 && obj.columns(2) == 2);
+            end
+        end
+
+        function [data, extents] = resample_data(obj)
+            table = obj.tables{1};
+            a = table{obj.columns(1)}.data;
+            b = table{obj.columns(2)}.data;
+            c = table{obj.columns(3)}.data;
+            res = obj.resolution_settings(obj.resolution);
+            extents = [];
+            extents(1,1) = min(a);
+            extents(1,2) = max(a);
+            extents(2,1) = min(b);
+            extents(2,2) = max(b);
+            xp = linspace(extents(1,1), extents(1,2), res);
+            yp = linspace(extents(2,1), extents(2,2), res);
+            [X, Y] = meshgrid(xp, yp);
+            data = griddata(a, b, c, X, Y, 'nearest');
         end
 
         function select(obj, dim, column)
