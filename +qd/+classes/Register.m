@@ -82,6 +82,20 @@ classdef Register < handle
 
     end
 
+    methods(Static)
+        function reg = parse(meta)
+            reg = struct;
+            for field = fieldnames(meta).'
+                namespace = field{1};
+                reg.(namespace) = containers.Map();
+                for obj = meta.(namespace)
+                    ns = reg.(namespace);
+                    ns(obj{1}.registered_name) = obj{1};
+                end
+            end
+        end
+    end
+
     methods(Access=private)
         function ns = get_ns(obj, namespace)
             if ~isfield(obj.content, namespace)
