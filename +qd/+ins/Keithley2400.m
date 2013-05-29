@@ -49,7 +49,11 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function setc(obj, channel, value)
             switch channel
                 case 'volt'
-                    obj.sendf('SOUR:VOLT %.16E', value)
+                    if ~isempty(obj.ramp_rate)
+                        obj.set_volt_with_ramp(value)
+                    else
+                        obj.sendf('SOUR:VOLT %.16E', value)
+                    end
                 otherwise
                     error('not supported.')
             end
@@ -98,35 +102,43 @@ classdef Keithley2400 < qd.classes.ComInstrument
             current_value = obj.getc('volt');
             step = obj.ramp_step_size * sign(val - current_value);
             obj.send('SENS:FUNC:OFF:ALL');
+            obj.send('SOUR:VOLT:MODE SWE');
             obj.sendf('TRIG:DEL %.16E', obj.ramp_step_size/obj.ramp_rate);
-            while abs(current_value - val) > obj.ramp_step_size
+            while true
                 first_value = current_value + step;
-                obj.send('SOUR:VOLT:MODE SWE');
-                obj.sendf('SOUR:VOLT:START %.16E', first_value);
                 number_of_points =  ceil(abs(val - first_value) / obj.ramp_step_size);
                 number_of_points = min(2500, number_of_points); % this limit is set by the instrument
+                if number_of_points <= 1
+                    break
+                end
                 end_value = current_value + step*number_of_points;
                 if val > current_value
                     end_value = min(end_value, val);
                 else
                     end_value = max(end_value, val);
                 end
+                % The keithley calculates all point in the sweep in advance
+                % whenever parameters are changed, therefore setting the sweep
+                % to two points while setting start and stop greatly speeds up
+                % the process.
+                obj.send('SOUR:SWE:POIN 2');
+                obj.sendf('SOUR:VOLT:START %.16E', first_value);
                 obj.sendf('SOUR:VOLT:STOP %.16E', end_value);
-                obj.sendf('SOUR:SWE:POIN', number_of_points);
-                obj.sendf('TRIG:POIN %d', number_of_points);
+                obj.sendf('SOUR:SWE:POIN %d', number_of_points);
+                obj.sendf('TRIG:COUN %d', number_of_points);
                 obj.send('INIT');
-                obj.send('*OPC?');
-                while true
-                    status = fscanf(obj.com, '%d');
-                    if ~isempty(status) && status == 1
-                        break;
-                    end
-                end
                 current_value = end_value;
+            end
+            obj.send('*OPC?');
+            while true
+                status = fscanf(obj.com, '%d');
+                if ~isempty(status) && status == 1
+                    break;
+                end
             end
             obj.send('SOUR:VOLT:MODE FIX')
             obj.send('TRIG:COUN 1')
-            obj.sendf('TRIG:DEL %.16E', abs(current_value - val)/obj.ramp_rate)
+            obj.sendf('TRIG:DEL %.16E', round(abs(current_value - val)/obj.ramp_rate*10000)/10000);
             obj.sendf('SOUR:VOLT %.16E', val);
             obj.send('TRIG:DEL 0');
             obj.send('SENS:FUNC:ON "CURR"');
