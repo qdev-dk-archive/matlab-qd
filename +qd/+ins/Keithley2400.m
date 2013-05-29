@@ -100,13 +100,13 @@ classdef Keithley2400 < qd.classes.ComInstrument
     methods(Access=private)
         function set_volt_with_ramp(obj, val)
             current_value = obj.getc('volt');
-            step = obj.ramp_step_size * sign(val - current_value);
             obj.send('SENS:FUNC:OFF:ALL');
             obj.send('SOUR:VOLT:MODE SWE');
             obj.sendf('TRIG:DEL %.16E', obj.ramp_step_size/obj.ramp_rate);
             while true
+                step = obj.ramp_step_size * sign(val - current_value);
                 first_value = current_value + step;
-                number_of_points =  ceil(abs(val - first_value) / obj.ramp_step_size);
+                number_of_points =  floor(abs(val - first_value) / obj.ramp_step_size);
                 number_of_points = min(2500, number_of_points); % this limit is set by the instrument
                 if number_of_points <= 1
                     break
