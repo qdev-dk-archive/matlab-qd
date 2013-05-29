@@ -1,30 +1,17 @@
 classdef Keithley2400 < qd.classes.ComInstrument
-    % Currently this class only supports current mode.
+    % Currently this class only supports sourcing a voltage and reading currents.
     % TODO set range.
     
     properties
-        read_queued = false;
-        ramp_step_size = 0.05;
-        ramp_wait = 0.01;
+        ramp_rate = []; % Ramp rate in V/s. Default is [] which disables ramping.
+        ramp_step_size = 10E-3; % Step size to make when ramping. Default is 10 mV
+    end
+
+    properties(Access=private)
+        output_format_set = false;
     end
     
-    methods
-        function set_ramp_step(obj, val)
-            obj.ramp_step_size = val;
-        end
-        
-        function set_ramp_wait(obj, val)
-            obj.ramp_wait = val;
-        end
-        
-        function val = get_ramp_step(obj)
-            val = obj.ramp_step_size;
-        end
-        
-        function val = get_ramp_wait(obj)
-            val = obj.ramp_wait;
-        end
-        
+    methods        
         function obj = Keithley2400(com)
             obj = obj@qd.classes.ComInstrument(com);
         end
@@ -34,16 +21,17 @@ classdef Keithley2400 < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'curr', 'volt', 'resist', 'rampvolt'};
+            r = {'curr', 'volt', 'resist'};
         end
 
         function reset(obj)
             obj.send('*rst');
-            obj.init();
+            obj.set_output_format();
         end
 
-        function init(obj)
+        function set_output_format(obj)
             obj.send(':FORM:ELEM VOLT,CURR');
+            obj.output_format_set = true;
         end
 
         function set_curr_compliance(obj, level)
@@ -62,42 +50,18 @@ classdef Keithley2400 < qd.classes.ComInstrument
             switch channel
                 case 'volt'
                     obj.sendf('SOUR:VOLT %.16E', value)
-                case 'rampvolt'
-                    obj.ramp_channel('volt',value)
-                otherwise
-                    error('not supported.')
-            end
-        end
-        
-        function ramp_volt(obj, value)
-            obj.ramp_channel('volt',value)
-        end
-        
-
-        function ramp_channel(obj, channel, value)
-            switch channel
-                case 'volt'
-                    startpoint = obj.getc(channel);
-                    dir = sign(value - startpoint);
-                    while startpoint ~= value
-                        startpoint = startpoint+(dir*obj.ramp_step_size);
-                        obj.setc(channel,startpoint);
-                        % startpoint = obj.getc(channel);
-                        if abs(startpoint-value) <= abs(obj.ramp_step_size)
-                            obj.setc(channel,value);
-                            startpoint = value;
-                        end
-                        pause(obj.ramp_wait);
-                    end
                 otherwise
                     error('not supported.')
             end
         end
 
         function val = getc(obj, channel)
+            % This is not fool-proof, since it does not
+            % detect if changes are made.
+            if ~obj.output_format_set
+                obj.set_output_format();
+            end
             switch channel
-            % How to interpret what is read depends on the configured output
-            % format. Here we assume init has been called.
                 case 'curr'
                     res = obj.querym(':READ?', '%g, %g');
                     val = res(2);
@@ -127,5 +91,45 @@ classdef Keithley2400 < qd.classes.ComInstrument
                 r.config.(simplified) = obj.query(question);
             end
         end
-     end
+    end
+
+    methods(Access=private)
+        function set_volt_with_ramp(obj, val)
+            current_value = obj.getc('volt');
+            step = obj.ramp_step_size * sign(val - current_value);
+            obj.send('SENS:FUNC:OFF:ALL');
+            obj.sendf('TRIG:DEL %.16E', obj.ramp_step_size/obj.ramp_rate);
+            while abs(current_value - val) > obj.ramp_step_size
+                first_value = current_value + step;
+                obj.send('SOUR:VOLT:MODE SWE');
+                obj.sendf('SOUR:VOLT:START %.16E', first_value);
+                number_of_points =  ceil(abs(val - first_value) / obj.ramp_step_size);
+                number_of_points = min(2500, number_of_points); % this limit is set by the instrument
+                end_value = current_value + step*number_of_points;
+                if val > current_value
+                    end_value = min(end_value, val);
+                else
+                    end_value = max(end_value, val);
+                end
+                obj.sendf('SOUR:VOLT:STOP %.16E', end_value);
+                obj.sendf('SOUR:SWE:POIN', number_of_points);
+                obj.sendf('TRIG:POIN %d', number_of_points);
+                obj.send('INIT');
+                obj.send('*OPC?');
+                while true
+                    status = fscanf(obj.com, '%d');
+                    if ~isempty(status) && status == 1
+                        break;
+                    end
+                end
+                current_value = end_value;
+            end
+            obj.send('SOUR:VOLT:MODE FIX')
+            obj.send('TRIG:COUN 1')
+            obj.sendf('TRIG:DEL %.16E', abs(current_value - val)/obj.ramp_rate)
+            obj.sendf('SOUR:VOLT %.16E', val);
+            obj.send('TRIG:DEL 0');
+            obj.send('SENS:FUNC:ON "CURR"');
+        end
+    end
 end
