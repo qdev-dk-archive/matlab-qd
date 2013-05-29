@@ -84,6 +84,9 @@ classdef Register < handle
 
     methods(Static)
         function reg = parse(meta)
+        % Helper to browse the output of describe(). Returns a struct
+        % containing one field for each namespace, each field contains a
+        % containers.Map of registered names to  the metadata for that object.
             reg = struct;
             for field = fieldnames(meta).'
                 namespace = field{1};
