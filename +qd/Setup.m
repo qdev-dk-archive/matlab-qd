@@ -3,6 +3,7 @@ classdef Setup < handle
         instruments = {}
         channels = {}
         meta = struct()
+        meta_funcs = {}
     end
     properties(Dependent)
         ins
@@ -77,6 +78,17 @@ classdef Setup < handle
                 chans{end + 1} = register.put('channels', chan{1});
             end
             meta.channels = chans;
+            for v = obj.meta_funcs
+                [name, func] = v{1}{:};
+                meta.meta.(name) = func();
+            end
+        end
+
+        function add_meta_function(obj, func, name)
+        % When describe is called, each function added using 
+        % add_meta_function will be called. The output of the functions
+        % are stored under meta.(name).
+            obj.meta_funcs{end + 1} = {name, func};
         end
     end
     methods(Access=private)
