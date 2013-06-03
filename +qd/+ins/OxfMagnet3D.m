@@ -35,6 +35,12 @@ classdef OxfMagnet3D < qd.classes.Instrument
             val = obj.magnet.remote.read(chan, 'SIG:FLD', '%fT');
         end
 
+        function unclamp_all(obj)
+            for ax = 'xyz'
+                obj.magnet.remote.set(ax, 'ACTN', 'HOLD');
+            end
+        end
+
         function setc(obj, chan, value)
             obj.magnet.remote.set(chan, 'SIG:FSET', value, '%.10f');
             if value == 0.0
