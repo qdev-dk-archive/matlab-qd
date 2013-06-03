@@ -10,6 +10,7 @@ classdef FolderBrowser < handle
         has_been_closed = false
         pseudo_columns = {}
         cache
+        editor
     end
     properties
         tbl
@@ -53,6 +54,11 @@ classdef FolderBrowser < handle
                 obj.has_been_closed = true;
             end
             set(obj.listbox_fig, 'DeleteFcn', @on_close);
+        end
+
+        function set_editor(obj, editor)
+        % See qd.gui.TableView.set_editor.
+            obj.editor = editor;
         end
 
         function close(obj)
@@ -124,7 +130,7 @@ classdef FolderBrowser < handle
                 end
                 tables(table_name{1}) = tbl;
             end
-            obj.plot_loc(tables, meta);
+            obj.plot_loc(tables, loc, meta);
             obj.view_loc(loc, meta, tables);
         end
 
@@ -142,7 +148,7 @@ classdef FolderBrowser < handle
             obj.pseudo_columns{end + 1} = func;
         end
 
-        function plot_loc(obj, tables, meta)
+        function plot_loc(obj, tables, loc, meta)
             if isempty(obj.fig)
                 obj.fig = figure();
                 set(obj.fig, 'Color', 'white');
@@ -158,6 +164,8 @@ classdef FolderBrowser < handle
             if ~isempty(old_view)
                 obj.table_view.mirror_settings(old_view);
             end
+            obj.table_view.loc = loc;
+            obj.table_view.set_editor(obj.editor)
             obj.table_view.update();
         end
 

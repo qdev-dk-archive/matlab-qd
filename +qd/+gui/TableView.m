@@ -9,7 +9,9 @@ classdef TableView < handle
         aspect = 'x:y'
         zoom = 4
         limits
-        header = '';
+        header = ''
+        loc
+        editor
     end
     properties(Constant)
         resolution_settings = [NaN 32 64 128 256 512 1024]
@@ -30,6 +32,13 @@ classdef TableView < handle
             obj.limits.x = '*:*';
             obj.limits.y = '*:*';
             obj.limits.z = '*:*';
+        end
+
+        function set_editor(obj, editor)
+        % Set this to the complete path to an executable. When the "edit meta"
+        % button is clicked, the executable will be called with the path to
+        % the meta-file as its only argument.
+            obj.editor = editor;
         end
         
         function update(obj)
@@ -98,6 +107,12 @@ classdef TableView < handle
                 'Style', 'pushbutton', ...
                 'String', 'Copy figure', ...
                 'Callback', @(h, varargin) obj.copy_to_clipboard());
+            if ~isempty(obj.editor)
+                lists(end + 1) = uicontrol( ...
+                    'Style', 'pushbutton', ...
+                    'String', 'Edit meta', ...
+                    'Callback', @(h, varargin) obj.edit_metafile());
+            end
             try
                 obj.do_plot();
             catch err
@@ -112,6 +127,13 @@ classdef TableView < handle
             uistack(uicontrol('Style', 'text', 'String', msg, ...
                 'Units', 'normalized', 'Position', [0,0,1,1], ...
                 'HorizontalAlignment', 'left'), 'bottom');
+        end
+
+        function edit_metafile(obj)
+            assert(~isempty(obj.editor));
+            runtime = java.lang.Runtime.getRuntime();
+            fullfile(obj.loc, 'meta.json')
+            runtime.exec({obj.editor, fullfile(obj.loc, 'meta.json')});
         end
 
         function mirror_settings(obj, other)
