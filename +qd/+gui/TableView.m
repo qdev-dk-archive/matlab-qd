@@ -98,6 +98,7 @@ classdef TableView < handle
                 'TooltipString', 'Resampling resolution', ...
                 'Callback', @(h, varargin) obj.set_resolution(get(h, 'Value')));
             zoom = qd.util.map(@(n)['Enlarge ' num2str(n) '%'], obj.zoom_settings);
+            zoom{end+1} = 'Tight inset';
             lists(end + 1) = uicontrol( ...
                 'Style', 'popupmenu', ...
                 'String', zoom, ...
@@ -296,9 +297,14 @@ classdef TableView < handle
                     set(t,'Interpreter','Latex');
                 end
             end
-            zoom = obj.zoom_settings(obj.zoom)/100.0;
-            pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
-            set(ax, 'OuterPosition', pos);
+            if obj.zoom > length(obj.zoom_settings)
+                set(ax, 'OuterPosition', [0 0 1 1]);
+                set(ax, 'LooseInset', [0,0,0,0]);
+            else
+                zoom = obj.zoom_settings(obj.zoom)/100.0;
+                pos = [0-zoom, 0-zoom, 1+2*zoom, 1+2*zoom];
+                set(ax, 'OuterPosition', pos);
+            end
         end
 
         function [data, extents] = get_data_in_native_resolution(obj)

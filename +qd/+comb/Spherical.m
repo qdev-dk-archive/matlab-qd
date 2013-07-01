@@ -21,7 +21,10 @@ classdef Spherical < qd.classes.Instrument
 
         function r = describe(obj, register)
             r = obj.describe@qd.classes.Instrument(register);
-            r.cached_values = obj.cached_values;
+            r.cached_values = struct();
+            r.cached_values.r = obj.r;
+            r.cached_values.theta = obj.theta;
+            r.cached_values.phi = obj.phi;
             r.base_channels = struct();
             for axis = 'xyz'
                 r.base_channels.(axis) = register.put('channels', ...
@@ -44,8 +47,6 @@ classdef Spherical < qd.classes.Instrument
             obj.base_channels.y.set(obj.r * sin(obj.theta) * sin(obj.phi));
             obj.base_channels.z.set(obj.r * cos(obj.theta));
         end
-    end
-    methods(Access = private)
 
         function reinitialize(obj)
             x = obj.base_channels.x.get();
@@ -57,7 +58,7 @@ classdef Spherical < qd.classes.Instrument
                 obj.phi = 0;
                 return
             end
-            obj.theta = acos(z / r);
+            obj.theta = acos(z / obj.r);
             obj.phi = atan2(y, x);
         end
 

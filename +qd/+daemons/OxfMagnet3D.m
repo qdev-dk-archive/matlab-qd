@@ -131,8 +131,8 @@ classdef OxfMagnet3D < handle
             end
             % Bring to zero along direction of field. Vect will hold the
             % direction.
-            vect = [0 0 0]
-            axis = 'xyz'
+            vect = [0 0 0];
+            axis = 'xyz';
             for i = 1:3
                 % We assume here that the magnet is not in persistent mode.
                 vect(i) = obj.read(axis(i), 'SIG:FLD', '%fT');
@@ -163,7 +163,7 @@ classdef OxfMagnet3D < handle
         end
 
         function report = get_report(obj)
-            report = sprintf('PT2: %f\nCooling water: %f\nStatus:%s\n', ...
+            report = sprintf('PT2: %f\nCooling water: %f\nStatus: %s\n', ...
                 obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
         end
 

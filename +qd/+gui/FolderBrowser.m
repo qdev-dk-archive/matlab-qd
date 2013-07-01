@@ -6,7 +6,6 @@ classdef FolderBrowser < handle
         listbox_fig
         fig
         update_timer
-        table_view
         has_been_closed = false
         pseudo_columns = {}
         cache
@@ -16,6 +15,7 @@ classdef FolderBrowser < handle
         tbl
         loc
         meta
+        table_view
         % This is a containers.Map mapping strings to strings.
         % The key is the name of a column, the value is the desired label
         % on the axis of that column.
@@ -101,6 +101,15 @@ classdef FolderBrowser < handle
 
         function clear_cache(obj)
             obj.cache = containers.Map();
+        end
+
+        function clear_figure(obj)
+            try
+                close(obj.fig);
+            catch
+            end
+            obj.fig = [];
+            obj.table_view = [];
         end
 
         function select(obj, val)
