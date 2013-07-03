@@ -10,7 +10,7 @@ classdef SRLockIn < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2'};
+            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl'};
         end
 
         function val = getc(obj, channel)
@@ -25,6 +25,8 @@ classdef SRLockIn < qd.classes.ComInstrument
                     val = obj.querym('OUTP?4', '%f');
                 case 'freq'
                     val = obj.querym('FREQ?', '%f');
+                case 'slvl'
+                    val = obj.querym('SLVL?', '%f');
                 case 'display1'
                     val = obj.querym('OUTR?1', '%f');
                 case 'display2'
@@ -37,7 +39,9 @@ classdef SRLockIn < qd.classes.ComInstrument
         function setc(obj, channel, value)
             switch channel
             case 'freq'
-                obj.sendf('FREQ %.6f', value);
+                obj.sendf('FREQ %.10f', value);
+            case 'slvl'
+                obj.sendf('SLVL %.10f', value);
             otherwise
                 error('Not supported');
             end
