@@ -45,6 +45,10 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function turn_off_output(obj)
             obj.send(':OUTP:STAT 0');
         end
+        
+        function set_NPLC(obj, nplc)
+            obj.send([':SENS:VOLT:NPLC ', num2str(nplc)])
+        end
 
         function setc(obj, channel, value)
             switch channel

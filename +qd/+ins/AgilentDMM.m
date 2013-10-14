@@ -41,5 +41,9 @@ classdef AgilentDMM < qd.classes.ComInstrument
             future = qd.classes.GetFuture(@exec);
             obj.current_future = future;
         end
+        
+        function set_NPLC(obj, nplc)
+            obj.send(['VOLT:NPLCycles ', num2str(nplc)]);
+        end
     end
 end

@@ -17,7 +17,7 @@ classdef Store < handle
         end
 
         function directory = new_dir(obj)
-            i = 0;
+            i = 1;
             while true
                 directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', i)]);
                 % TODO, do not fill in holes.
