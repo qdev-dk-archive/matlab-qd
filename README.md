@@ -11,6 +11,11 @@ be recorded in the file `BREAKING_CHANGES.txt`. Please watch this when
 updating the package.
 
 ## Installation
+To install json submodule run the following in Git Shell:
+
+`git submodule init`
+
+`git submodule update --recursive`
 
 ## Examples
 
