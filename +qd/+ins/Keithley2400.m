@@ -37,6 +37,19 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function set_curr_compliance(obj, level)
             obj.sendf(':CURR:PROT %.16E', level);
         end
+        
+        function set_ramp_rate(obj, rate)
+            qd.util.assert((isnumeric(rate) && isscalar(rate)) || isempty(rate))
+            if rate==0
+                obj.ramp_rate = [];
+            else
+                obj.ramp_rate = abs(rate);
+            end
+        end
+        
+        function set_ramp_step_size(obj, ramp_step_size)
+            obj.ramp_step_size = ramp_step_size;
+        end
 
         function turn_on_output(obj)
             obj.send(':OUTP:STAT 1')
