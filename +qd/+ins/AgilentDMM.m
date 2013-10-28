@@ -10,7 +10,7 @@ classdef AgilentDMM < qd.classes.ComInstrument
         
         function r = model(obj)
             r = 'Agilent';
-            idn = obj.query('*IDN?')
+            idn = obj.query('*IDN?');
             for m = {'34401A', '34410A', '34411A'}
                 if strfind(idn, m{1}) ~= -1
                     r = ['Agilent' m{1}];
