@@ -43,7 +43,15 @@ classdef AgilentDMM < qd.classes.ComInstrument
         end
         
         function set_NPLC(obj, nplc)
-            obj.send(['VOLT:NPLCycles ', num2str(nplc)]);
+            if nplc==(0.02|0.2|1|10|100)
+                obj.send(['VOLT:NPLCycles ', num2str(nplc)]);
+            else
+                error('not supported. NPLC = {0.02,0.2,1,10,100}');
+            end
+        end
+        
+        function r = get_NPLC(obj)
+            r = obj.query('VOLT:NPLCycles?');
         end
     end
 end
