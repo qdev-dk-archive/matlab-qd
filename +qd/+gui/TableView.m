@@ -44,6 +44,46 @@ classdef TableView < handle
         function update(obj)
             figure(obj.fig);
             clf();
+            
+            panelColor = get(0,'DefaultUicontrolBackgroundColor');
+
+            set(obj.fig,'Units','characters',...
+                'Color',panelColor,...
+                'ResizeFcn',@figResize);
+                
+            botPanel = uipanel('BorderType','etchedin',...
+                'BackgroundColor',panelColor,...
+                'Units','characters',...
+                'Position',[0 0 1 1],...
+                'Parent',obj.fig, ...
+                'ResizeFcn',@botPanelResize);
+
+            centerPanel = uipanel('bordertype','etchedin',...
+                'BackgroundColor',panelColor,...
+                'Units','characters',...
+                'Position', [0 0 1 1],...
+                'Parent',obj.fig,...
+                'ResizeFcn',@centerPanelResize);
+                 
+            function botPanelResize(src,evt)
+                bpos = get(botPanel,'Position');
+            end
+            
+            function centerPanelResize(src,evt)
+                cpos = get(centerPanel,'Position');
+            end
+            
+            function figResize(src,evt)
+                fpos = get(obj.fig,'Position');
+                botHeight = 4;
+                set(botPanel,'Position',...
+                    [0 0 fpos(3) botHeight])
+                set(centerPanel,'Position',...
+                    [0 botHeight fpos(3) fpos(4)-botHeight]);
+            end
+                    
+            axes('parent',centerPanel,'box','on');
+            
             hold('all');
             lists = [];
             if isempty(obj.tables)
@@ -122,6 +162,10 @@ classdef TableView < handle
                 disp(getReport(err));
             end
             align(lists, 'Fixed', 0, 'Bottom');
+            
+            figResize();
+            botPanelResize();
+            centerPanelResize();
         end
 
         function show_message_instead_of_plot(obj, msg)
@@ -161,7 +205,6 @@ classdef TableView < handle
             obj.resolution = res;
             obj.update();
         end
-
 
         function copy_to_clipboard(obj)
             % unfortunately the copy includes a large white background
@@ -235,7 +278,7 @@ classdef TableView < handle
             end
         end
 
-        function do_plot(obj)
+        function do_plot(obj) 
             if obj.columns(3) == 0
                 for table = obj.tables
                     xdata = table{1}{obj.columns(1)}.data;
