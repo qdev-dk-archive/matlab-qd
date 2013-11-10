@@ -53,5 +53,29 @@ classdef AgilentDMM < qd.classes.ComInstrument
         function r = get_NPLC(obj)
             r = obj.query('VOLT:NPLCycles?');
         end
+        
+        function set_display_text(obj,line1,line2)
+            model = obj.model();
+            if strcmp(model,'Agilent34410A') || strcmp(model,'Agilent34411A');
+                obj.send(sprintf('DISP:WIND1:TEXT "%s"',line1));
+                obj.send(sprintf('DISP:WIND2:TEXT "%s"',line2));
+            else strcmp(model,'Agilent34401A');
+                obj.send(sprintf('DISP:TEXT "%s"',line1));
+            end
+        end
+        
+        function clear_display_text(obj)
+            model = obj.model();
+            if strcmp(model,'Agilent34410A') || strcmp(model,'Agilent34411A');
+                obj.send('DISP:WIND1:TEXT:CLE')
+                obj.send('DISP:WIND1:STAT 1')
+                obj.send('DISP:WIND2:TEXT:CLE')
+                obj.send('DISP:WIND2:STAT 1')
+            else strcmp(model,'Agilent34401A');
+                obj.send('DISP:WIND:TEXT:CLE')
+                obj.send('DISP:WIND:STAT 1')
+            end
+        end
+        
     end
 end
