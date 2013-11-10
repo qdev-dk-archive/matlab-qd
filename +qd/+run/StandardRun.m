@@ -32,11 +32,21 @@ classdef StandardRun < qd.run.Run
                 sweep{1}.chan.set(sweep{1}.from);
             end
         end
-
-        function zero_all_sweept_channels(obj)
+        
+        function move_to_end(obj)
+            for sweep = obj.sweeps
+                sweep{1}.chan.set(sweep{1}.to);
+            end
+        end
+        
+        function move_to_zero(obj)
             for sweep = obj.sweeps
                 sweep{1}.chan.set(0);
             end
+        end
+        
+        function zero_all_sweept_channels(obj)
+            obj.move_to_zero()
         end
 
     end

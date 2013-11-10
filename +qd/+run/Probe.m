@@ -17,6 +17,18 @@ classdef Probe < qd.run.Run
         function obj = input(obj, name_or_channel)
             obj.inputs{end + 1} = obj.resolve_channel(name_or_channel);
         end
+        
+        function move_to_start(obj)
+            obj.sweep.chan.set(obj.sweep.from);
+        end
+        
+        function move_to_end(obj)
+            obj.sweep.chan.set(obj.sweep.to);
+        end
+        
+        function move_to_zero(obj)
+            obj.sweep.chan.set(0);
+        end
 
     end
 
