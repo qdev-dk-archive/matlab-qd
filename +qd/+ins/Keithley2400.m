@@ -1,6 +1,5 @@
 classdef Keithley2400 < qd.classes.ComInstrument
     % Currently this class only supports sourcing a voltage and reading currents.
-    % TODO set range.
     
     properties
         ramp_rate = []; % Ramp rate in V/s. Default is [] which disables ramping.
@@ -9,9 +8,11 @@ classdef Keithley2400 < qd.classes.ComInstrument
 
     properties(Access=private)
         output_format_set = false;
+        limit_low = -20;
+        limit_high = 20;
     end
     
-    methods        
+    methods
         function obj = Keithley2400(com)
             obj = obj@qd.classes.ComInstrument(com);
         end
@@ -27,6 +28,18 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function reset(obj)
             obj.send('*rst');
             obj.set_output_format();
+        end
+        
+        function set_limits(obj,low,high)
+            % use .set_limits([],[]) to disable
+            qd.util.assert((isnumeric(low) && isscalar(low)) || isempty(low))
+            qd.util.assert((isnumeric(high) && isscalar(high)) || isempty(high))
+            obj.limit_low = low;
+            obj.limit_high = high;
+        end
+        
+        function limits = get_limits(obj)
+            limits = [obj.limit_low, obj.limit_high];
         end
 
         function set_output_format(obj)
@@ -66,6 +79,13 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function setc(obj, channel, value)
             switch channel
                 case 'volt'
+                    if value<obj.limit_low
+                        warning('Out of limit!\nSetting value to min: %sV',num2str(obj.limit_low));
+                        value = obj.limit_low;
+                    elseif value>obj.limit_high
+                        warning('Out of limit!\nSetting value to max: %sV',num2str(obj.limit_high));
+                        value = obj.limit_high;
+                    end
                     if ~isempty(obj.ramp_rate)
                         obj.set_volt_with_ramp(value)
                     else

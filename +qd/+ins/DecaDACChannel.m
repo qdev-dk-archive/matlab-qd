@@ -25,10 +25,16 @@ classdef DecaDACChannel < qd.classes.Channel
         end
 
         function set_limits(obj, low, high)
+            qd.util.assert((isnumeric(low) && isscalar(low)) || isempty(low))
+            qd.util.assert((isnumeric(high) && isscalar(high)) || isempty(high))
             obj.limit_low = low;
             obj.limit_high = high;
         end
 
+        function range = get_limits(obj)
+            range = [obj.limit_low, obj.limit_high];
+        end
+        
         function set(obj, val)
             % Shorthand for obj.instrument
             ins = obj.instrument;
