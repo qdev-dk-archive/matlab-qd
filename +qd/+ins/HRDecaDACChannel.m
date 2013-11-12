@@ -14,7 +14,6 @@ classdef HRDecaDACChannel < qd.classes.Channel
         wait_for_ramp = true
         slope
         offset
-        
     end
     methods
         function obj = HRDecaDACChannel(num,mode)
@@ -40,16 +39,6 @@ classdef HRDecaDACChannel < qd.classes.Channel
             qd.util.assert((isnumeric(high) && isscalar(high)) || isempty(high))
             obj.limit_low = low;
             obj.limit_high = high;
-        end
-        
-        function set_slope(obj, slope)
-            qd.util.assert((isnumeric(slope) && isscalar(slope)) || isempty(slope))
-            obj.slope = slope;
-        end
-        
-        function set_offset(obj, offset)
-            qd.util.assert((isnumeric(offset) && isscalar(offset)) || isempty(offset))
-            obj.offset = offset;
         end
 
         function range = get_limits(obj)
@@ -84,27 +73,29 @@ classdef HRDecaDACChannel < qd.classes.Channel
             end
             
             [bin,c_bin,f_bin] = obj.get_bins(val);
+%             disp([bin,c_bin,f_bin]);
 
             if isempty(obj.ramp_rate)
                 if obj.mode == 1
                     % write in one step
                     ins.queryf('B%d;C%d;D%d;B%d;C%d;D%d;',obj.board, obj.chan, c_bin, obj.board, obj.chan+2, f_bin);
                 else
-                    % send coarse bin only, and use the the 16bit value.
+                    % send coarse bin only, use the the 16bit value.
                     ins.queryf('B%d;C%d;D%d;',obj.board, obj.chan, bin);
                 end
             else % The else part is a ramping set.
                 % Merlin: I dont know how to do this for both channels, so
                 % I just ramp roughly with the coarse channel, in the end I
-                % send the exact value to both.
-                %
+                % set the exact value to coarse and fine.
+                
                 % Get the current coarse value.
                 obj.select();
                 current = ins.querym('d;', 'd%d!');
                 if obj.wait_for_ramp == false && obj.mode == 1
                     % if ramping blind, set fine channel first.
-                    bin = c_bin;
                     ins.queryf('B%d;C%d;D%d;', obj.board, obj.chan+2, f_bin);
+                    % make sure to ramp to c_bin
+                    bin = c_bin;
                 end
                 obj.select();
                 % set the limit for the ramp
@@ -176,13 +167,6 @@ classdef HRDecaDACChannel < qd.classes.Channel
             end
         end
         
-        
-        function cc(obj, val)
-            ins = obj.instrument;
-%             obj.select();
-            ins.query(val)
-        end
-        
         function set_setpoint(obj, val)
             % Same as obj.set but without wait time (added by Guen on 12/10/2013)
             % Use the same code but skip waiting.
@@ -195,6 +179,7 @@ classdef HRDecaDACChannel < qd.classes.Channel
             obj.select();
             raw = obj.instrument.querym('d;', 'd%d!');
             val = raw / 2^16 * obj.range_span() + obj.range_low;
+            val = val*obj.slope+obj.offset;
         end
 
         function set_ramp_rate(obj, rate)
@@ -212,6 +197,24 @@ classdef HRDecaDACChannel < qd.classes.Channel
             rate = obj.ramp_rate;
         end
 
+        function set_slope(obj, slope)
+            qd.util.assert((isnumeric(slope) && isscalar(slope)) || isempty(slope))
+            obj.slope = slope;
+        end
+        
+        function set_offset(obj, offset)
+            qd.util.assert((isnumeric(offset) && isscalar(offset)) || isempty(offset))
+            obj.offset = offset;
+        end
+        
+        function r = get_slope(obj)
+            r = obj.slope;
+        end
+        
+        function r = get_offset(obj)
+            r = obj.offset;
+        end
+        
         function r = describe(obj, register)
             r = obj.describe@qd.classes.Channel(register);
             r.ramp_rate = obj.ramp_rate;

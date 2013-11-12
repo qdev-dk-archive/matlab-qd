@@ -1,13 +1,13 @@
 classdef HRDecaDAC < qd.classes.ComInstrument
-    % Use the HRDecaDAC driver as you use the DecaDac drivers.
-    % The HR version supports corarse and fine channels, set by
-    % *.set_board_mode({1,2,2,2,2}); % Modes 0:off, 1:fine  2:coarse
-    % Do so before you access channels, i.e. before naming them. I did not
-    % implement many fool-safe parts.
-    % you can add offsets and slopes to the channels.
-    % blind ramping (set_setpoint) sets fine channel first, which might be
-    % a voltage jump of 100mV, use it with care!
-    properties
+    % - Use the HRDecaDAC driver as you use the DecaDac drivers.
+    % - The HR version supports corarse and fine channels, set by
+    %   *.set_board_mode({1,2,2,2,2}); % Modes 0:off, 1:fine  2:coarse
+    %   Do so before you access channels, i.e. before naming them. I did not
+    %   implement many fool-safe parts.
+    % - you can add offsets and slopes to the channels.
+    % - blind ramping (set_setpoint) sets fine channel first, which might be
+    %   a voltage jump of 100mV, use it with care!
+    properties(Access=private)
         board_mode = {2,2,2,2,2} % Modes 0:off, 1:fine  2:coarse.
     end
     
@@ -20,20 +20,6 @@ classdef HRDecaDAC < qd.classes.ComInstrument
                 'StopBits', 1);
             fopen(obj.com); % will be closed on delete by ComInstrument.
             obj.set_board_mode(obj.board_mode) % to Coarse by default
-        end
-
-        function set_board_mode(obj, boards)
-            obj.board_mode = boards;
-            % Put the boards in OFF, Coarse or Fine modes
-            % Modes 0:off, 1:fine  2:coarse.
-            for i = 1:5;
-                mode = boards{i};
-                if ~any(mode == [0,1,2])
-                    mode = 0;
-                    warning('Mode must be 0,1, or 2. Now set to 0')
-                end
-                obj.queryf('B%d;M%d;', i-1, mode);
-            end
         end
         
         function r = model(obj)
@@ -56,6 +42,25 @@ classdef HRDecaDAC < qd.classes.ComInstrument
             chan.instrument = obj;
         end
 
+        function set_board_mode(obj, boards)
+            obj.board_mode = boards;
+            % Put the boards in OFF, Coarse or Fine modes
+            % Modes: 0:off, 1:fine  2:coarse.
+            for i = 1:5;
+                mode = boards{i};
+                if ~any(mode == [0,1,2])
+                    mode = 0;
+                    warning('Mode must be 0,1, or 2. Now set to 0')
+                end
+                obj.queryf('B%d;M%d;', i-1, mode);
+            end
+        end
+        
+        
+        function r = get_board_mode(obj)
+            r = obj.board_mode;
+        end
+        
         function r = describe(obj, register)
             r = obj.describe@qd.classes.ComInstrument(register);
             r.current_values = struct();
