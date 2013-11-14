@@ -80,7 +80,7 @@ classdef Run < handle
             meta.register = register.describe();
         end
 
-        function out_dir = run(obj)
+        function out_dir = run(obj, varargin)
             meta = obj.describe();
             
             % Get a directory to store the output.
@@ -93,7 +93,7 @@ classdef Run < handle
             % Store the metadata.
             json.write(meta, fullfile(out_dir, 'meta.json'), 'indent', 2);
 
-            obj.perform_run(out_dir);
+            obj.perform_run(out_dir, varargin{:});
         end
     end
 

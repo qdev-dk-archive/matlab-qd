@@ -50,5 +50,9 @@ classdef TableWriter < handle
             end
         end
 
+        function file = get_file(obj)
+            file = obj.data_path;
+        end
+
     end
 end

@@ -1,11 +1,15 @@
 classdef Store < handle
     properties(GetAccess=public)
         loc
+        name
     end
     methods
-        function obj = Store(loc)
+        function obj = Store(loc, name)
             qd.util.assert(exist(loc, 'file'));
             obj.loc = qd.util.absdir(loc);
+            if nargin == 2
+                obj.name = name;
+            end
         end
 
         function cd(obj, d)
@@ -17,16 +21,29 @@ classdef Store < handle
         end
 
         function directory = new_dir(obj)
-            i = 1;
-            while true
-                directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', i)]);
-                % TODO, do not fill in holes.
-                if ~exist(directory, 'file')
-                    break
+            if isempty(obj.name)
+                % Time and counter-style data directories
+                i = 1;
+                while true
+                    directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', i)]);
+                    % TODO, do not fill in holes.
+                    if ~exist(directory, 'file')
+                        break
+                    end
+                    i = i + 1;
                 end
-                i = i + 1;
+                mkdir(directory);
+            else
+                % Date and time-style data directories
+                datestamp = strcat(strrep(datestr(now, 6), '/',''),datestr(now,10));
+                timestamp = strrep(datestr(now, 13), ':','');
+                directory = strcat(obj.loc, '\', datestamp, '\', timestamp, '_', obj.name);
+
+                if ~exist(strcat(obj.loc, '\', datestamp), 'dir')
+                  mkdir(strcat(obj.loc, '\', datestamp));
+                end
+                mkdir(directory);
             end
-            mkdir(directory);
         end
     end
 end

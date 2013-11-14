@@ -72,7 +72,7 @@ classdef OxfMagnet1D < handle
             server.expose(obj, 'set_current_sweep_rate');
             server.expose(obj, 'set_field');
             server.expose(obj, 'set_field_sweep_rate');
-            server.expose(obj, 'hold');
+            server.expose(obj, 'stop_sweep');
             server.expose(obj, 'get_status_report');
             server.expose(obj, 'switch_heater');
             server.expose(obj, 'get_switch_heater_current');
@@ -242,7 +242,7 @@ classdef OxfMagnet1D < handle
             r = [];
         end
         
-        function r = hold(obj)
+        function r = stop_sweep(obj)
             obj.assert_temperature_ok();
             obj.send('A0');
             r = [];

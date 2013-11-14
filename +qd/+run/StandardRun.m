@@ -16,6 +16,9 @@ classdef StandardRun < qd.run.Run
             sweep.points = points;
             sweep.settle = p.Results.settle;
             sweep.chan = obj.resolve_channel(name_or_channel);
+            if(strcmp(name_or_channel,'time/time') && (sweep.from == 0))
+                sweep.chan.instrument.reset;
+            end
             obj.sweeps{end + 1} = sweep;
         end
 

@@ -37,7 +37,7 @@ classdef OxfMagnet1D < qd.classes.Instrument
             obj.magnet.remote.switch_heater(value);
         end
 
-        function hold(obj)
+        function hold_magnet(obj)
             obj.magnet.remote.stop_sweep();
         end
 
