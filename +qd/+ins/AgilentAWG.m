@@ -46,6 +46,34 @@ classdef AgilentAWG < qd.classes.ComInstrument
                     error('not supported.')
             end
         end
+        
+        function playsound(obj, varargin)
+            % THIS CHANGES CURRENT SETTINGS!!!
+            num = 0; % Default value
+            if ~isempty(varargin)
+                num = varargin{1};
+            end
+            switch num
+                case 0
+                    obj.send('OUTP ON');
+                    obj.send(sprintf('APPL:SIN %f, 2.0, 0',1));
+
+                    for i = 1:2
+                        for j = 10:5:50
+                            obj.send(sprintf('FREQ %f',j*10));
+                            pause(0.02)
+                        end
+                    end
+
+                    obj.send(sprintf('FREQ %f',1));
+                    obj.send('VOLT 1')
+                otherwise
+                    warning('Sound not available.')
+            end
+        end
+                    
+            
+        
                 
         function apply(obj, mode, freq, amp, offset)
             str = sprintf('APPL:%s %f, %f, %f', mode, freq, amp, offset);
