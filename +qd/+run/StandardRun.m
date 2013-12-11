@@ -27,7 +27,11 @@ classdef StandardRun < qd.run.Run
         end
         
         function obj = input(obj, name_or_channel)
-            obj.inputs{end + 1} = obj.resolve_channel(name_or_channel);
+            chan = obj.resolve_channel(name_or_channel);
+            obj.inputs{end + 1} = chan;
+            if(strcmp(name_or_channel,'time/time'))
+                chan.instrument.reset;
+            end
         end
 
         function move_to_start(obj)
