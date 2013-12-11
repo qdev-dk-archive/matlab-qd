@@ -27,6 +27,7 @@ classdef Triton < qd.classes.Instrument
         function chans = channels(obj)
             chans = obj.temp_chans.keys();
             chans{end + 1} = 'cooling_water';
+            chans{end + 1} = 'TSET';
         end
 
         function val = getc(obj, chan)
@@ -35,10 +36,27 @@ classdef Triton < qd.classes.Instrument
             elseif obj.temp_chans.isKey(chan)
                 uid = obj.temp_chans(chan);
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:SIG:TEMP', uid), '%fK');
+            elseif strcmp(chan, 'TSET')
+                uid = obj.temp_chans('MC');
+                val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), '%fK');
             else
                 error('No such channel (%s).', chan);
             end
         end
-
+        
+        function setc(obj, chan, value)
+            switch chan
+                case 'TSET'
+                    uid = obj.temp_chans('MC');
+                    obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), value, '%f');
+                otherwise
+                    error('No such channel (%s).', chan);
+            end
+        end
+        
+        function pid_mode(obj, value)
+            uid = obj.temp_chans('MC');
+            obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:MODE', uid), value, '%s');
+        end
     end
 end
