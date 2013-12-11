@@ -64,5 +64,37 @@ classdef OxfMagnet1D < qd.classes.Instrument
                     error('No such channel.')
             end
         end
+
+        function set_and_wait(obj, chan, value)
+            %
+            % Sets the value of the field and displays a progress bar.
+            % If progress bar is closed, sweep is terminated and field stops sweeping.
+            switch chan
+                case 'fld'
+                    obj.setc(chan, value);
+                    sweep_rate = obj.get_field_sweep_rate();
+                    curval = obj.getc(chan);
+                    deltaB = abs(value-curval);
+                    h = waitbar(0,'Initializing waitbar...');
+                    set(h,'Name','Setting B-field');
+                    while abs(value-curval)>0.0001
+                        pause(0.1);
+                        curval = obj.getc(chan);
+                        if ishandle(h)
+                            waitbar(abs(abs(value-curval)-deltaB)/deltaB,h,sprintf('B = %f T...',curval))
+                        else
+                            % Progress window has been closed
+                            disp(sprintf('Sweep cancelled at B = %f T', curval));
+                            obj.setc(chan, curval);
+                            break
+                        end
+                    end
+                    if ishandle(h)
+                        close(h);
+                    end
+                otherwise
+                    error('No such channel.')
+            end
+        end
     end
 end
