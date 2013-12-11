@@ -4,6 +4,7 @@ classdef Run < handle
         setup
         meta = struct
         comment = ''
+        type = ''
         directory
         store
     end
@@ -53,7 +54,11 @@ classdef Run < handle
         end
 
         function r = get_type(obj)
-            r = qd.util.class_name(obj);
+            if strcmp(obj.type, '')
+                r = qd.util.class_name(obj);
+            else
+                r = obj.type;
+            end
         end
 
         function r = version(obj)
