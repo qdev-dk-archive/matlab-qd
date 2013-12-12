@@ -1,6 +1,6 @@
 classdef Keithley2400 < qd.classes.ComInstrument
     % Currently this class only supports sourcing a voltage and reading currents.
-    
+
     properties
         ramp_rate = []; % Ramp rate in V/s. Default is [] which disables ramping.
         ramp_step_size = 10E-3; % Step size to make when ramping. Default is 10 mV
@@ -11,7 +11,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
         limit_low = -20;
         limit_high = 20;
     end
-    
+
     methods
         function obj = Keithley2400(com)
             obj = obj@qd.classes.ComInstrument(com);
@@ -29,7 +29,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
             obj.send('*rst');
             obj.set_output_format();
         end
-        
+
         function set_limits(obj,low,high)
             % use .set_limits([],[]) to disable
             qd.util.assert((isnumeric(low) && isscalar(low)) || isempty(low))
@@ -37,7 +37,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
             obj.limit_low = low;
             obj.limit_high = high;
         end
-        
+
         function limits = get_limits(obj)
             limits = [obj.limit_low, obj.limit_high];
         end
@@ -50,7 +50,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function set_curr_compliance(obj, level)
             obj.sendf(':CURR:PROT %.16E', level);
         end
-        
+
         function set_ramp_rate(obj, rate)
             qd.util.assert((isnumeric(rate) && isscalar(rate)) || isempty(rate))
             if rate==0
@@ -59,7 +59,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
                 obj.ramp_rate = abs(rate);
             end
         end
-        
+
         function set_ramp_step_size(obj, ramp_step_size)
             obj.ramp_step_size = ramp_step_size;
         end
@@ -71,7 +71,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function turn_off_output(obj)
             obj.send(':OUTP:STAT 0');
         end
-        
+
         function set_NPLC(obj, nplc)
             obj.send([':SENS:VOLT:NPLC ', num2str(nplc)])
         end
@@ -115,6 +115,20 @@ classdef Keithley2400 < qd.classes.ComInstrument
                 otherwise
                     error('not supported.')
             end
+        end
+
+        function fix_errors(obj)
+            % still to be confirmed working
+            obj.send('SOUR:VOLT:MODE FIX')
+            obj.send('TRIG:COUN 1')
+            obj.send('TRIG:DEL 0');
+            obj.send('SENS:FUNC:ON "CURR"');
+        end
+
+
+        function stop_autorange(obj)
+            obj.send('SOUR:VOLT:RANG 210')
+            obj.send('SOUR:VOLT:AUTO 0')
         end
 
         function r = describe(obj, register)
