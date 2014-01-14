@@ -23,6 +23,9 @@ classdef Time < qd.classes.Instrument
         function setc(obj, channel, val)
             switch channel
                 case 'time'
+                    if(val == 0)
+                        obj.reset();
+                    end
                     if isempty(obj.start_time)
                         obj.begin();
                     end

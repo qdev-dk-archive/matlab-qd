@@ -8,8 +8,8 @@ classdef Keithley2400 < qd.classes.ComInstrument
 
     properties(Access=private)
         output_format_set = false;
-        limit_low = -20;
-        limit_high = 20;
+        limit_low = -200;
+        limit_high = 200;
     end
 
     methods
@@ -91,6 +91,8 @@ classdef Keithley2400 < qd.classes.ComInstrument
                     else
                         obj.sendf('SOUR:VOLT %.16E', value)
                     end
+                case 'curr'
+                    obj.sendf('SOUR:CURR %.16E', value)
                 otherwise
                     error('not supported.')
             end

@@ -1,6 +1,7 @@
 classdef Triton < qd.classes.Instrument
     properties
         triton % an qd.protocol.OxfordSCPI instance connected to the the triton.
+        ramp_rate
     end
 
     properties(Access=private)
@@ -14,6 +15,7 @@ classdef Triton < qd.classes.Instrument
             obj.triton = qd.protocols.OxfordSCPI(triton_daemon.remote.talk);
             keysVals = triton_daemon.remote.list_channels();
             obj.temp_chans = containers.Map(keysVals.keys, keysVals.values);
+            obj.ramp_rate = 0.001;
         end
 
         function r = describe(obj, register)
@@ -28,6 +30,8 @@ classdef Triton < qd.classes.Instrument
             chans = obj.temp_chans.keys();
             chans{end + 1} = 'cooling_water';
             chans{end + 1} = 'TSET';
+            chans{end + 1} = 'RAMP';
+            chans{end + 1} = 'RATE';
         end
 
         function val = getc(obj, chan)
@@ -39,6 +43,12 @@ classdef Triton < qd.classes.Instrument
             elseif strcmp(chan, 'TSET')
                 uid = obj.temp_chans('MC');
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), '%fK');
+            elseif strcmp(chan, 'RAMP')
+                uid = obj.temp_chans('MC');
+                val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:ENAB', uid), '%s');
+            elseif strcmp(chan, 'RATE')
+                uid = obj.temp_chans('MC');
+                val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:RATE', uid), '%f');
             else
                 error('No such channel (%s).', chan);
             end
@@ -49,6 +59,13 @@ classdef Triton < qd.classes.Instrument
                 case 'TSET'
                     uid = obj.temp_chans('MC');
                     obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), value, '%f');
+                case 'RAMP'
+                    uid = obj.temp_chans('MC');
+                    obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:RAMP:ENAB', uid), value, '%s');
+                case 'RATE'
+                    obj.ramp_rate = value;
+                    uid = obj.temp_chans('MC');
+                    obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:RAMP:RATE', uid), value, '%f');
                 otherwise
                     error('No such channel (%s).', chan);
             end
