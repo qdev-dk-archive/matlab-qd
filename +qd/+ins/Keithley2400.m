@@ -4,6 +4,11 @@ classdef Keithley2400 < qd.classes.ComInstrument
     properties
         ramp_rate = []; % Ramp rate in V/s. Default is [] which disables ramping.
         ramp_step_size = 10E-3; % Step size to make when ramping. Default is 10 mV
+
+        % The Keithley 2600 series can emulate a 2400. Set this to true if you
+        % are using it in this way (this enables workarounds for minor bugs
+        % this introduces).
+        is_2600_in_disguise = false;
     end
 
     properties(Access=private)
@@ -136,13 +141,19 @@ classdef Keithley2400 < qd.classes.ComInstrument
         function r = describe(obj, register)
             r = obj.describe@qd.classes.ComInstrument(register);
             r.config = struct();
-            for q = { ...
+            r.is_2600_in_disguise = obj.is_2600_in_disguise;
+            queries = { ...
                 'FORM:ELEM', 'OUTP:STAT', 'OUTP:SMOD', 'ROUT:TERM', 'FUNC:CONC', ...
                 'FUNC:ON', 'CURR:RANG:UPP', 'CURR:RANG:AUTO', 'CURR:NPLC', 'CURR:PROT', ...
                 'VOLT:RANG:UPP', 'VOLT:RANG:AUTO', 'VOLT:NPLC', 'VOLT:PROT', 'RES:RANG:UPP', ...
                 'RES:RANG:AUTO', 'RES:NPLC', 'AVER:STAT', 'AVER:COUN', 'AVER:TCON', ...
                 'SOUR:DEL', 'SOUR:FUNC', 'SOUR:CURR:LEV', 'SOUR:CURR:RANG', ...
-                'SOUR:VOLT:LEV', 'SOUR:VOLT:RANG', 'SOUR:VOLT:PROT'}
+                'SOUR:VOLT:LEV', 'SOUR:VOLT:RANG'};
+            if not(obj.is_2600_in_disguise)
+                % This query hangs for a 2600 running with the 2400 persona.
+                queries{end + 1} = 'SOUR:VOLT:PROT'
+            end
+            for q = queries
                 question = [':' q{1} '?'];
                 simplified = lower(strrep(q{1}, ':', '_'));
                 r.config.(simplified) = obj.query(question);
