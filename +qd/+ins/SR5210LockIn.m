@@ -16,15 +16,40 @@ classdef SR5210LockIn < qd.classes.ComInstrument
         function val = getc(obj, channel)
             switch channel
                 case 'X'
-                    val = obj.querym('X', '%f');
+                    try
+                        val = obj.querym('X', '%f');
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
                 case 'Y'
-                    val = obj.querym('Y', '%f');
+                    try
+                        val = obj.querym('Y', '%f');
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
                 case 'R'
-                    val = obj.querym('MAG', '%f');
+                    try
+                        val = obj.querym('MAG', '%f');
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
                 case 'theta'
-                    val = obj.querym('PHA', '%f');
+                    try
+                        val = obj.querym('PHA', '%f');
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
                 case 'freq'
-                    val = obj.querym('FRQ', '%f');
+                    try
+                        val = obj.querym('FRQ', '%f');
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
                 otherwise
                     error('Not supported.')
             end

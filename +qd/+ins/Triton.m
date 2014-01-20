@@ -41,6 +41,7 @@ classdef Triton < qd.classes.Instrument
                 uid = obj.temp_chans(chan);
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:SIG:TEMP', uid), '%fK');
 <<<<<<< HEAD
+<<<<<<< HEAD
             elseif strcmp(chan, 'TSET')
                 uid = obj.temp_chans('MC');
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), '%fK');
@@ -51,6 +52,8 @@ classdef Triton < qd.classes.Instrument
                 uid = obj.temp_chans('MC');
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:RATE', uid), '%f');
 =======
+=======
+>>>>>>> 4c86360c86e334a71cfc40a7efe4c89fed478651
              elseif strcmp(chan, 'TSET')
                 for i = obj.temp_chans.values
                     tempval = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', i{1}));
@@ -58,6 +61,9 @@ classdef Triton < qd.classes.Instrument
                         val = qd.util.match(tempval,'%fK');
                     end
                 end
+<<<<<<< HEAD
+>>>>>>> 4c86360c86e334a71cfc40a7efe4c89fed478651
+=======
 >>>>>>> 4c86360c86e334a71cfc40a7efe4c89fed478651
             else
                 error('No such channel (%s).', chan);
