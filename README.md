@@ -8,7 +8,8 @@ and to quickly browse the resulting data. This is a direct competitor to
 
 The API is under development. Changes likely to cause problems for users will
 be recorded in the file `BREAKING_CHANGES.txt`. Please watch this when
-updating the package.
+updating the package. In addition, you should restart daemons and clear your
+matlab workspaces after updating (unless you know better).
 
 ## Installation
 To install json submodule run the following in Git Shell:
