@@ -9,7 +9,7 @@ classdef Triton < qd.classes.Instrument
     end
 
     methods
-        
+
         function obj = Triton()
             triton_daemon = daemon.Client(qd.daemons.Triton.bind_address);
             obj.triton = qd.protocols.OxfordSCPI(triton_daemon.remote.talk);
@@ -40,6 +40,7 @@ classdef Triton < qd.classes.Instrument
             elseif obj.temp_chans.isKey(chan)
                 uid = obj.temp_chans(chan);
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:SIG:TEMP', uid), '%fK');
+<<<<<<< HEAD
             elseif strcmp(chan, 'TSET')
                 uid = obj.temp_chans('MC');
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', uid), '%fK');
@@ -49,11 +50,20 @@ classdef Triton < qd.classes.Instrument
             elseif strcmp(chan, 'RATE')
                 uid = obj.temp_chans('MC');
                 val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:RATE', uid), '%f');
+=======
+             elseif strcmp(chan, 'TSET')
+                for i = obj.temp_chans.values
+                    tempval = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:TSET', i{1}));
+                    if ~strcmp(tempval,'NOT_FOUND')
+                        val = qd.util.match(tempval,'%fK');
+                    end
+                end
+>>>>>>> 4c86360c86e334a71cfc40a7efe4c89fed478651
             else
                 error('No such channel (%s).', chan);
             end
         end
-        
+
         function setc(obj, chan, value)
             switch chan
                 case 'TSET'
@@ -70,7 +80,7 @@ classdef Triton < qd.classes.Instrument
                     error('No such channel (%s).', chan);
             end
         end
-        
+
         function pid_mode(obj, value)
             uid = obj.temp_chans('MC');
             obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:MODE', uid), value, '%s');
