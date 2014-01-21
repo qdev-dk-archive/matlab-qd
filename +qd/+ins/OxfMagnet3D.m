@@ -41,8 +41,8 @@ classdef OxfMagnet3D < qd.classes.Instrument
         function r = describe(obj, register)
             r = obj.describe@qd.classes.Instrument(register);
             r.field = struct;
-            for axis = obj.axes()
-                r.field.(ax) = obj.getc(ax)
+            for ax = obj.axes()
+                r.field.(ax) = obj.getc(ax);
             end
         end
 
