@@ -10,6 +10,9 @@ classdef OxfMagnet3D < handle
         limit1_cool_water = 20
         limit2_cool_water = 21
         ramp_to_zero_rate = 0.03; % Tesla/min.
+        % All the available axes of the magnet. When using Triton 6, set this
+        % to 'xz' since it only has a 2d magnet.
+        axes = 'xyz'
     end
     properties(SetAccess=private)
         magnet_serial
@@ -38,6 +41,7 @@ classdef OxfMagnet3D < handle
             obj.server.expose(obj, 'read_base');
             obj.server.expose(obj, 'get_report');
             obj.server.expose(obj, 'reset_status');
+            obj.server.expose(obj, 'get_axes');
         end
 
         function run_daemon(obj)
@@ -102,7 +106,7 @@ classdef OxfMagnet3D < handle
 
         function r = at_zero_field(obj)
             r = true;
-            for axis = 'xyz'
+            for axis = obj.axes
                 if obj.read(axis, 'SIG:FSET', '%fT') ~= 0
                     r = false;
                     return;
@@ -117,7 +121,7 @@ classdef OxfMagnet3D < handle
             if strcmp(obj.status, 'level2')
                 return
             end
-            for axis = 'xyz'
+            for axis = obj.axes
                 % Hold all when overheating as requested by oxford.
                 obj.force_set(axis, 'ACTN', 'HOLD');
             end
@@ -131,22 +135,21 @@ classdef OxfMagnet3D < handle
             end
             % Bring to zero along direction of field. Vect will hold the
             % direction.
-            vect = [0 0 0];
-            axis = 'xyz';
-            for i = 1:3
+            vect = zeros(0, length(obj.axes));
+            for i = 1:length(obj.axes)
                 % We assume here that the magnet is not in persistent mode.
-                vect(i) = obj.read(axis(i), 'SIG:FLD', '%fT');
+                vect(i) = obj.read(obj.axes(i), 'SIG:FLD', '%fT');
             end
             % We set the ramp rate with positive numbers.
             vect = abs(vect);
             % Add a small value to each component to avoid degenerate cases.
             vect = vect + 0.01;
             vect = vect/norm(vect) * obj.ramp_to_zero_rate;
-            for i = 1:3
+            for i = 1:length(obj.axes)
                 % We assume here that the magnet is not in persistent mode.
-                obj.force_set(axis(i), 'ACTN', 'HOLD');
-                obj.force_set(axis(i), 'SIG:RFST', vect(i), '%.16f');
-                obj.force_set(axis(i), 'ACTN', 'RTOZ');
+                obj.force_set(obj.axes(i), 'ACTN', 'HOLD');
+                obj.force_set(obj.axes(i), 'SIG:RFST', vect(i), '%.16f');
+                obj.force_set(obj.axes(i), 'ACTN', 'RTOZ');
             end
             obj.status = 'level1';
             obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
@@ -181,6 +184,10 @@ classdef OxfMagnet3D < handle
             if ~isempty(obj.magnet_serial)
                 fclose(obj.magnet_serial);
             end
+        end
+
+        function axes = get_axes(obj)
+            axes = obj.axes;
         end
         
     end
