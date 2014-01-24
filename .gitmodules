@@ -1,3 +1,9 @@
-[submodule "matlab-json"]
-	path = matlab-json
+[submodule "dependencies/matlab-json"]
+	path = dependencies/matlab-json
 	url = git://github.com/kyamagu/matlab-json.git
+[submodule "dependencies/matlab-daemon"]
+	path = dependencies/matlab-daemon
+	url = git@qdev-data.fys.ku.dk:anders/matlab-daemon
+[submodule "dependencies/zmqmat"]
+	path = dependencies/zmqmat
+	url = git@qdev-data.fys.ku.dk:anders/zmqmat
