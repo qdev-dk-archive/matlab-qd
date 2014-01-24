@@ -25,7 +25,7 @@ classdef StandardRun < qd.run.Run
         function obj = clear_sweeps(obj)
             obj.sweeps = {};
         end
-        
+
         function obj = input(obj, name_or_channel)
             chan = obj.resolve_channel(name_or_channel);
             obj.inputs{end + 1} = chan;
@@ -39,19 +39,19 @@ classdef StandardRun < qd.run.Run
                 sweep{1}.chan.set(sweep{1}.from);
             end
         end
-        
+
         function move_to_end(obj)
             for sweep = obj.sweeps
                 sweep{1}.chan.set(sweep{1}.to);
             end
         end
-        
+
         function move_to_zero(obj)
             for sweep = obj.sweeps
                 sweep{1}.chan.set(0);
             end
         end
-        
+
         function zero_all_sweept_channels(obj)
             obj.move_to_zero()
         end
@@ -95,7 +95,7 @@ classdef StandardRun < qd.run.Run
 
         function handle_sweeps(obj, sweeps, earlier_values, settle, table)
         % obj.handle_sweeps(sweeps, earlier_values, settle, table)
-        % 
+        %
         % Sweeps the channels in sweeps, takes measurements and puts them in
         % table.
         %
@@ -110,7 +110,7 @@ classdef StandardRun < qd.run.Run
             % measure one point.
             if isempty(sweeps)
                 if(settle > 0)
-                    pause(settle/1000);
+                    pause(settle);
                 end
                 values = [earlier_values];
                 futures = {};

@@ -16,10 +16,10 @@ classdef RunForever < qd.run.StandardRun
                 table.add_channel_column(inp{1});
             end
             table.init();
-            
+
             i = 0;
             while true
-                obj.handle_sweeps(obj.sweeps, [i], obj.delay * 1000, table);
+                obj.handle_sweeps(obj.sweeps, [i], obj.delay, table);
                 table.add_divider();
                 i = i + 1;
             end

@@ -13,19 +13,19 @@ classdef Probe < qd.run.Run
             obj.sweep.settle = settle;
             obj.sweep.chan = obj.resolve_channel(name_or_channel);
         end
-        
+
         function obj = input(obj, name_or_channel)
             obj.inputs{end + 1} = obj.resolve_channel(name_or_channel);
         end
-        
+
         function move_to_start(obj)
             obj.sweep.chan.set(obj.sweep.from);
         end
-        
+
         function move_to_end(obj)
             obj.sweep.chan.set(obj.sweep.to);
         end
-        
+
         function move_to_zero(obj)
             obj.sweep.chan.set(0);
         end
@@ -68,7 +68,7 @@ classdef Probe < qd.run.Run
             for value = linspace(from, to, obj.sweep.points)
                 obj.sweep.chan.set(value);
                 if(obj.sweep.settle > 0)
-                    pause(obj.sweep.settle/1000);
+                    pause(obj.sweep.settle);
                 end
                 values = [value];
                 for inp = obj.inputs

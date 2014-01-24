@@ -42,7 +42,7 @@ classdef SafeRun < qd.run.StandardRun
 
         function handle_sweeps(obj, sweeps, earlier_values, settle, table)
         % obj.handle_sweeps(sweeps, earlier_values, settle, table)
-        % 
+        %
         % Sweeps the channels in sweeps, takes measurements and puts them in
         % table.
         %
@@ -57,7 +57,7 @@ classdef SafeRun < qd.run.StandardRun
             % measure one point.
             if isempty(sweeps)
                 if(settle > 0)
-                    pause(settle/1000);
+                    pause(settle);
                 end
                 values = [earlier_values];
                 futures = {};
