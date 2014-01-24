@@ -27,6 +27,8 @@ run the following commands in a git shell:
 
 `git submodule update --recursive`
 
+Then add all the files in the `dependencies` folder to the MATLAB path.
+
 Some equipment needs continuously running daemons, see [Configuring
 Daemons](+qd/+daemons/config-example/README.md).
 
