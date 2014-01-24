@@ -4,19 +4,19 @@ A framework to write high-level instrument drivers, to do basic measurement,
 and to quickly browse the resulting data. This is a direct competitor to
 [special-measure](https://code.google.com/p/special-measure/).
 
-This file is written in the [markdown
-format](http://daringfireball.net/projects/markdown/syntax). If you use, for
-instance, the chrome extension [Markdown Preview
-Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl),
-and enable local file-system access,
-you will have a pleasant reading experience, with all links working.
+This file is written in the 
+[markdown format](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet). 
+If you use, for instance, the chrome extension 
+[Markdown Preview Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl), 
+and enable local file-system access, you will have a pleasant reading
+experience, with all links working.
 
 ## Important notice
 
 The API is under development. Changes likely to cause problems for users will
-be recorded in the file `BREAKING_CHANGES.txt`. Please watch this when
-updating the package. In addition, you should restart daemons and clear your
-matlab workspaces after updating (unless you know better).
+be recorded in the file [BREAKING_CHANGES.md](BREAKING_CHANGES.md). Please
+watch this when updating the package. In addition, you should restart daemons
+and clear your matlab workspaces after updating (unless you know better).
 
 ## Installation
 
@@ -27,7 +27,8 @@ run the following commands in a git shell:
 
 `git submodule update --recursive`
 
-Then add all the files in the `dependencies` folder to the MATLAB path.
+Then add all the files in the `dependencies` folder to the MATLAB path and run
+the command `zmq.install_jar` in MATLAB.
 
 Some equipment needs continuously running daemons, see [Configuring
 Daemons](+qd/+daemons/config-example/README.md).
