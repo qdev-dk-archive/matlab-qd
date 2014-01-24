@@ -4,6 +4,13 @@ A framework to write high-level instrument drivers, to do basic measurement,
 and to quickly browse the resulting data. This is a direct competitor to
 [special-measure](https://code.google.com/p/special-measure/).
 
+This file is written in the [markdown
+format](http://daringfireball.net/projects/markdown/syntax). If you use, for
+instance, the chrome extension [Markdown Preview
+Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl),
+and enable local file-system access,
+you will have a pleasant reading experience, with all links working.
+
 ## Important notice
 
 The API is under development. Changes likely to cause problems for users will
@@ -12,11 +19,16 @@ updating the package. In addition, you should restart daemons and clear your
 matlab workspaces after updating (unless you know better).
 
 ## Installation
-To install json submodule run the following in Git Shell:
+
+*matlab-qd* depends on a few other libraries. To install them,
+run the following commands in a git shell:
 
 `git submodule init`
 
 `git submodule update --recursive`
+
+Some equipment needs continuously running daemons, see [Configuring
+Daemons](+qd/+daemons/config-example/README.md).
 
 ## Examples
 
@@ -83,7 +95,3 @@ ramping in a similar fashion.
 
 ## Contact
 * Anders Jellinggaard: <anders.jel@gmail.com>.
-
-## Notes
-* This readme is written in the [markdown
-  format](http://daringfireball.net/projects/markdown/syntax).

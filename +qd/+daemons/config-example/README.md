@@ -1,12 +1,12 @@
-Configuring MATLAB daemons
---------------------------
+# Configuring Daemons
+
+Here is what to do:
 
 1. Copy the files in this folder into some folder outside the matlab-qd project.
 2. Make sure this folder is on the MATLAB path.
 3. Edit *run_some_deamon.m* etc. to fit your setup.
 
-Rationale
----------
+## Rationale
 
 If the temperature of a cryostat starts rising, magnets need to be shut down
 (to avoid a quench) and users need to be contacted. Therefore we need
