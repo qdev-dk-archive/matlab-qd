@@ -52,10 +52,6 @@ classdef StandardRun < qd.run.Run
             end
         end
 
-        function zero_all_sweept_channels(obj)
-            obj.move_to_zero()
-        end
-
     end
 
     methods(Access=protected)
