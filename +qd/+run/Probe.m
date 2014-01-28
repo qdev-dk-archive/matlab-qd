@@ -1,6 +1,6 @@
 classdef Probe < qd.run.StandardRun
-    % A Probe run is like a StandardRun, but it after a run, it does the run
-    % again with all sweeps reversed. The run makes to tables in the data
+    % A Probe run is like a StandardRun, but after a run, it does the run
+    % again with all sweeps reversed. The run makes two tables in the data
     % folder, one called 'forward' and one called 'backward'.
     methods(Access=protected)
 
