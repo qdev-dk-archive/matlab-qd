@@ -3,8 +3,7 @@ classdef BreakdownRun < qd.run.StandardRun
         % breakdown_condition should be set to a funtion handle taking a
         % single parameter 'inputs', which is a containers.Map mapping the
         % name of each input to the last meassured value. If the function
-        % returns true, then the move_to_zero is called, and the run
-        % terminates.
+        % returns true, then move_to_zero is called, and the run terminates.
         breakdown_condition = @(inputs) false;
     end
 
