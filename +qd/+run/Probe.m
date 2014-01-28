@@ -19,7 +19,7 @@ classdef Probe < qd.run.StandardRun
             end
             
             % Sweep forward
-            obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, table.forward);
+            obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, tables.forward);
             % Reverse all sweep direction and sweep the other way.
             reversed_sweeps = {};
             for sweep = obj.sweeps
@@ -28,7 +28,7 @@ classdef Probe < qd.run.StandardRun
                 reversed_sweep.to = sweep{1}.from;
                 reversed_sweeps{end + 1} = reversed_sweep;
             end
-            obj.handle_sweepsreversed_sweeps, [], obj.initial_settle, table.backward);
+            obj.handle_sweeps(reversed_sweeps, [], obj.initial_settle, tables.backward);
         end
 
     end
