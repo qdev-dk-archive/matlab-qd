@@ -1,5 +1,12 @@
 # Breaking changes
 
+## Version 0.5
+
+* New class hierarchy for runs. I.e. RunWithInputs is now an ancestor of StandardRun.
+* Changed the interface of qd.run.Probe. It is now a StandardRun, which when
+  executing the run() method, will do first a normal run, then an identical run
+  with all sweeps reversed.
+
 ## Version 0.4
 
 * Removed *StandardRun.zero_all_sweept_channels*. Someone added *move_to_zero*
