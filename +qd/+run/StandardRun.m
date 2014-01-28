@@ -1,7 +1,6 @@
-classdef StandardRun < qd.run.Run
+classdef StandardRun < qd.run.RunWithInputs
     properties
         sweeps = {}
-        inputs = {}
         initial_settle = 0;
     end
     methods
@@ -16,22 +15,11 @@ classdef StandardRun < qd.run.Run
             sweep.points = points;
             sweep.settle = p.Results.settle;
             sweep.chan = obj.resolve_channel(name_or_channel);
-            if(strcmp(name_or_channel,'time/time') && (sweep.from == 0))
-                sweep.chan.instrument.reset;
-            end
             obj.sweeps{end + 1} = sweep;
         end
 
         function obj = clear_sweeps(obj)
             obj.sweeps = {};
-        end
-
-        function obj = input(obj, name_or_channel)
-            chan = obj.resolve_channel(name_or_channel);
-            obj.inputs{end + 1} = chan;
-            if(strcmp(name_or_channel,'time/time'))
-                chan.instrument.reset;
-            end
         end
 
         function move_to_start(obj)
@@ -57,10 +45,6 @@ classdef StandardRun < qd.run.Run
     methods(Access=protected)
 
         function meta = add_to_meta(obj, meta, register)
-            meta.inputs = {};
-            for inp = obj.inputs
-                meta.inputs{end + 1} = register.put('channels', inp{1});
-            end
             meta.sweeps = {};
             for sweep = obj.sweeps
                 sweep = sweep{1};
@@ -72,6 +56,7 @@ classdef StandardRun < qd.run.Run
                 s.chan = register.put('channels', sweep.chan);
                 meta.sweeps{end+1} = s;
             end
+            add_to_meta@qd.run.RunWithInputs(obj, meta, register);
         end
 
         function perform_run(obj, out_dir)
@@ -87,6 +72,21 @@ classdef StandardRun < qd.run.Run
 
             % Now perform all the measurements.
             obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, table);
+        end
+
+        function row_hook(obj, sweep_values, inputs)
+        % row_hook(sweep_values, inputs)
+        %
+        % This method is called by handle_sweeps after a row is added to the
+        % table. sweep_values and inputs are arays of doubles. inputs contains
+        % one value for each input channel (in the same order as obj.inputs).
+        % sweep_values is [ealier_values sweeps] where earlier_values is as
+        % specified to the call to handle_sweeps (usually []) and sweeps is
+        % the current value of each swept parameter. The default implementaion
+        % of this function does nothing.
+        %
+        % This function can be used to print out status information or abort
+        % the run (by throwing an exception).
         end
 
         function handle_sweeps(obj, sweeps, earlier_values, settle, table)
@@ -108,15 +108,10 @@ classdef StandardRun < qd.run.Run
                 if(settle > 0)
                     pause(settle);
                 end
-                values = [earlier_values];
-                futures = {};
-                for inp = obj.inputs
-                    futures{end + 1} = inp{1}.get_async();
-                end
-                for future = futures
-                    values(end + 1) = future{1}.exec();
-                end
+                inputs = obj.read_inputs();
+                values = [earlier_values inputs];
                 table.add_point(values);
+                obj.row_hook(earlier_values, inputs);
                 drawnow();
                 return
             end
