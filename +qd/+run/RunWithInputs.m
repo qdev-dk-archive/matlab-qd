@@ -9,7 +9,7 @@ classdef RunWithInputs < qd.run.Run
         function obj = input(obj, name_or_channel)
             chan = obj.resolve_channel(name_or_channel);
             obj.inputs{end + 1} = chan;
-            if(strcmp(name_or_channel,'time/time'))
+            if(obj.is_time_chan(chan))
                 chan.instrument.reset;
             end
         end
@@ -37,6 +37,5 @@ classdef RunWithInputs < qd.run.Run
             end
             add_to_meta@qd.run.Run(obj, meta, register);
         end
-
     end
 end
