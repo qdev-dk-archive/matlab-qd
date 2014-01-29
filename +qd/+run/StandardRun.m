@@ -116,6 +116,13 @@ classdef StandardRun < qd.run.RunWithInputs
         % doubles, sweeps, is the current value of each swept parameter, and
         % inputs are the measured inputs (the channels in obj.inputs). Settle
         % is the amount of time to wait before measuring a sample (in ms).
+        %
+        % use retrace as follows:
+        % ...
+        % run.sweep('Vbg',0,10,10,0.5);
+        % run.sweep('Vsd',-0.01,0.01,100,0,'retrace',true);
+        % ...
+        % this will measure while sweeping Vsd up and down and up and down...
 
             % If there are no more sweeps left, let the system settle, then
             % measure one point.
