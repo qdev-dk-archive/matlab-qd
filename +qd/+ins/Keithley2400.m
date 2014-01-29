@@ -151,7 +151,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
                 'SOUR:VOLT:LEV', 'SOUR:VOLT:RANG'};
             if not(obj.is_2600_in_disguise)
                 % This query hangs for a 2600 running with the 2400 persona.
-                queries{end + 1} = 'SOUR:VOLT:PROT'
+                queries{end + 1} = 'SOUR:VOLT:PROT';
             end
             for q = queries
                 question = [':' q{1} '?'];
