@@ -1,10 +1,16 @@
 classdef SetFuture < handle
     properties(Access=protected)
         func
+        func_abort
     end
     methods
-        function obj = SetFuture(func)
+        function obj = SetFuture(func,varargin)
+            p = inputParser();
+            p.addOptional('abort',[]);
+            p.parse(varargin{:});
+
             obj.func = func;
+            obj.func_abort = p.Results.abort;
         end
 
         function exec(obj)
@@ -13,6 +19,19 @@ classdef SetFuture < handle
             end
             obj.func();
             obj.func = [];
+            obj.func_abort = [];
+        end
+
+        function abort(obj)
+            if isempty(obj.func)
+                warning('Nothing to abort, exec already called.');
+            end
+            if isempty(obj.func_abort)
+                error('no abort function.');
+            end
+            obj.func_abort();
+            obj.func = [];
+            obj.func_abort = [];
         end
 
         function delete(obj)
