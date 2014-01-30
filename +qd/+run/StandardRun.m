@@ -8,14 +8,14 @@ classdef StandardRun < qd.run.RunWithInputs
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
             p = inputParser();
             p.addOptional('settle', 0);
-            p.addOptional('retrace', false);
+            p.addOptional('alternate', false);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
             sweep.to = to;
             sweep.points = points;
             sweep.settle = p.Results.settle;
-            sweep.retrace = p.Results.retrace;
+            sweep.alternate = p.Results.alternate;
             sweep.chan = obj.resolve_channel(name_or_channel);
             obj.sweeps{end + 1} = sweep;
         end
@@ -67,7 +67,7 @@ classdef StandardRun < qd.run.RunWithInputs
                 s.to = sweep.to;
                 s.points = sweep.points;
                 s.settle = sweep.settle;
-                s.retrace = sweep.retrace;
+                s.alternate = sweep.alternate;
                 s.chan = register.put('channels', sweep.chan);
                 meta.sweeps{end+1} = s;
             end
@@ -104,8 +104,8 @@ classdef StandardRun < qd.run.RunWithInputs
         % the run (by throwing an exception).
         end
 
-        function handle_sweeps(obj, sweeps, earlier_values, settle, table, retrace)
-        % obj.handle_sweeps(sweeps, earlier_values, settle, table, retrace)
+        function handle_sweeps(obj, sweeps, earlier_values, settle, table, alternate)
+        % obj.handle_sweeps(sweeps, earlier_values, settle, table, alternate)
         %
         % Sweeps the channels in sweeps, takes measurements and puts them in
         % table.
@@ -117,10 +117,12 @@ classdef StandardRun < qd.run.RunWithInputs
         % inputs are the measured inputs (the channels in obj.inputs). Settle
         % is the amount of time to wait before measuring a sample (in ms).
         %
-        % use retrace as follows:
+        % when alternate is set to true, a sweep will alternate its sweep
+        % direction on every step taken for the parent sweep.
+        % Use alternate as follows:
         % ...
         % run.sweep('Vbg',0,10,10,0.5);
-        % run.sweep('Vsd',-0.01,0.01,100,0,'retrace',true);
+        % run.sweep('Vsd',-0.01,0.01,100,0,'alternate',true);
         % ...
         % this will measure while sweeping Vsd up and down and up and down...
 
@@ -154,18 +156,12 @@ classdef StandardRun < qd.run.RunWithInputs
                     if value > sweep.to
                         break
                     end
-                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, retrace);
-                    retrace = ~retrace;
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, alternate);
+                    alternate = ~alternate;
                 end
                 settle = 0;
             else
-                % % This is supposed to run a given number of times
-                % if(obj.is_time_chan(sweep.chan) && (sweep.from == 0) && (sweep.to == Inf))
-                %     % In this case a measurement is supposed to run sweep.points number of times
-                %     % ignore retrace
-                %     to = sweep.points
-                %     from = sweep.from;
-                if sweep.retrace && retrace
+                if sweep.alternate && alternate
                     % Measure backwards
                     from = sweep.to;
                     to = sweep.from;
@@ -177,8 +173,8 @@ classdef StandardRun < qd.run.RunWithInputs
                 for value = linspace(from, to, sweep.points)
                     sweep.chan.set(value);
                     settle = max(settle, sweep.settle);
-                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, retrace);
-                    retrace = ~retrace;
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, alternate);
+                    alternate = ~alternate;
                     % In the first iteration of the loop, we need to wait for the
                     % previously changed value to settle. We also need to wait for
                     % this value to settle, whichever is greater. In the next
