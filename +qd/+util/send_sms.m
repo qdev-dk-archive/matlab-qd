@@ -1,7 +1,7 @@
 function send_sms(cellphone, content)
     % Usage: send_sms('+4526642790', 'Triton 6 is so hot.')
     %
-    % This serves costs 1 cent. Remember to always use a country code on the
+    % This service costs 1 cent. Remember to always use a country code on the
     % cell number (the message will be send from Quebec).
 
     % This is specific to our Twilio account.
