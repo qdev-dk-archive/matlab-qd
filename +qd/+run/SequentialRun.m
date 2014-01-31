@@ -1,7 +1,6 @@
 classdef SequentialRun < qd.run.RunWithInputs
     properties
         sweeps = {}
-        inputs = {}
         initial_settle = 0;
     end
     methods
@@ -46,14 +45,6 @@ classdef SequentialRun < qd.run.RunWithInputs
             obj.sweeps = {};
         end
 
-        function obj = input(obj, name_or_channel)
-            chan = obj.resolve_channel(name_or_channel);
-            obj.inputs{end + 1} = chan;
-            if obj.is_time_chan(chan)
-                chan.instrument.reset;
-            end
-        end
-
         function move_to_start(obj)
             futures = {};
             for sweep = obj.sweeps
@@ -94,10 +85,6 @@ classdef SequentialRun < qd.run.RunWithInputs
     methods(Access=protected)
 
         function meta = add_to_meta(obj, meta, register)
-            meta.inputs = {};
-            for inp = obj.inputs
-                meta.inputs{end + 1} = register.put('channels', inp{1});
-            end
             meta.sweeps = {};
             for sweep = obj.sweeps
                 if strcmp(sweep{1}.type,'sweep')
