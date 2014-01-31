@@ -48,8 +48,9 @@ classdef OxfMagnet1D < handle
                     obj.server.serve_period(obj.check_period);
                     obj.check_temperature()
                 catch err
-                    obj.server.send_alert_from_exception(...
-                        'Error in magnet control server', err);
+                    disp(err);
+                    %obj.server.send_alert_from_exception(...
+                    %    'Error in magnet control server', err);
                 end
             end
         end
@@ -112,6 +113,13 @@ classdef OxfMagnet1D < handle
             cw = obj.cool_water_chan.get();
             ok = pt2 <= obj.max_pt2_temp ...
                 && cw <= obj.max_cooling_water_temp;
+            if ~ok
+                pause(90);
+                pt2 = obj.pt2_chan.get();
+                cw = obj.cool_water_chan.get();
+                ok = pt2 <= obj.max_pt2_temp ...
+                    && cw <= obj.max_cooling_water_temp;
+            end
         end
         
         function check_temperature(obj)
