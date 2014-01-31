@@ -136,7 +136,7 @@ classdef StandardRun < qd.run.RunWithInputs
                 values = [earlier_values inputs];
                 table.add_point(values);
                 obj.row_hook(earlier_values, inputs);
-                drawnow();
+                drawnow(); % This makes it possible to break a run using Ctrl-C
                 return
             end
 
