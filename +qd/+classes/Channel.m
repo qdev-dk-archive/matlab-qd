@@ -53,10 +53,10 @@ classdef Channel < qd.classes.Nameable
             future = qd.classes.GetFuture(@()obj.get());
         end
 
-        function future = set_async(obj, val)
+        function future = set_async(obj, val, varargin)
             if ~isempty(obj.instrument) && ...
                     qd.util.is_reimplemented(obj.instrument, 'setc_async', ?qd.classes.Instrument)
-                future = obj.instrument.setc_async(obj.channel_id, val);
+                future = obj.instrument.setc_async(obj.channel_id, val, varargin{:});
                 return
             end
             future = qd.classes.SetFuture(@()obj.set(val));

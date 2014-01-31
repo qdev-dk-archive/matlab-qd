@@ -7,7 +7,7 @@ classdef AgilentAWG < qd.classes.ComInstrument
         function  obj = AgilentAWG(com)
             obj@qd.classes.ComInstrument(com);
         end
-        
+
         function r = model(obj)
             r = 'Agilent';
             idn = obj.query('*IDN?');
@@ -27,13 +27,21 @@ classdef AgilentAWG < qd.classes.ComInstrument
                 case 'dev'
                     obj.sendf('FM:DEV %.16E', value);
                 case 'volt'
-                    obj.sendf('VOLT:UNIT VPP'); % setting units to peak-peak voltage 
+                    obj.sendf('VOLT:UNIT VPP'); % setting units to peak-peak voltage
                     obj.sendf('VOLT %.16E', value);
                 otherwise
                     error('not supported.')
             end
         end
-        
+
+        function turn_on_output(obj)
+            obj.send('OUTP 1')
+        end
+
+        function turn_off_output(obj)
+            obj.send('OUTP 0')
+        end
+
         function val = getc(obj, channel)
             switch channel
                 case 'freq'
@@ -46,7 +54,7 @@ classdef AgilentAWG < qd.classes.ComInstrument
                     error('not supported.')
             end
         end
-        
+
         function playsound(obj, varargin)
             % THIS CHANGES CURRENT SETTINGS!!!
             num = 0; % Default value
@@ -71,15 +79,15 @@ classdef AgilentAWG < qd.classes.ComInstrument
                     warning('Sound not available.')
             end
         end
-                    
-            
-        
-                
+
+
+
+
         function apply(obj, mode, freq, amp, offset)
             str = sprintf('APPL:%s %f, %f, %f', mode, freq, amp, offset);
             obj.sendf(str);
         end
-        
+
         function r = describe(obj, register)
             r = obj.describe@qd.classes.ComInstrument(register);
             r.config = struct();

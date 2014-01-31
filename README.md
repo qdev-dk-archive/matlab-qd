@@ -4,10 +4,10 @@ A framework to write high-level instrument drivers, to do basic measurement,
 and to quickly browse the resulting data. This is a direct competitor to
 [special-measure](https://code.google.com/p/special-measure/).
 
-This file is written in the 
-[markdown format](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet). 
-If you use, for instance, the chrome extension 
-[Markdown Preview Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl), 
+This file is written in the
+[markdown format](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
+If you use, for instance, the chrome extension
+[Markdown Preview Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl),
 and enable local file-system access, you will have a pleasant reading
 experience, with all links working.
 
@@ -34,6 +34,8 @@ Some equipment needs continuously running daemons, see [Configuring
 Daemons](+qd/+daemons/config-example/README.md).
 
 ## Examples
+
+A sequential run example is here: [SequentialRun.md](SequentialRun.md).
 
 ### Using instruments
 

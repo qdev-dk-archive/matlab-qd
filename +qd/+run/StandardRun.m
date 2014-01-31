@@ -8,12 +8,14 @@ classdef StandardRun < qd.run.RunWithInputs
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
             p = inputParser();
             p.addOptional('settle', 0);
+            p.addOptional('alternate', false);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
             sweep.to = to;
             sweep.points = points;
             sweep.settle = p.Results.settle;
+            sweep.alternate = p.Results.alternate;
             sweep.chan = obj.resolve_channel(name_or_channel);
             obj.sweeps{end + 1} = sweep;
         end
@@ -23,20 +25,32 @@ classdef StandardRun < qd.run.RunWithInputs
         end
 
         function move_to_start(obj)
+            futures = {};
             for sweep = obj.sweeps
-                sweep{1}.chan.set(sweep{1}.from);
+                futures{end + 1} = sweep{1}.chan.set_async(sweep{1}.from);
+            end
+            for i = futures
+                i{1}.exec();
             end
         end
 
         function move_to_end(obj)
+            futures = {};
             for sweep = obj.sweeps
-                sweep{1}.chan.set(sweep{1}.to);
+                futures{end + 1} = sweep{1}.chan.set_async(sweep{1}.to);
+            end
+            for i = futures
+                i{1}.exec();
             end
         end
 
         function move_to_zero(obj)
+            futures = {};
             for sweep = obj.sweeps
-                sweep{1}.chan.set(0);
+                futures{end + 1} = sweep{1}.chan.set_async(0);
+            end
+            for i = futures
+                i{1}.exec();
             end
         end
 
@@ -53,6 +67,7 @@ classdef StandardRun < qd.run.RunWithInputs
                 s.to = sweep.to;
                 s.points = sweep.points;
                 s.settle = sweep.settle;
+                s.alternate = sweep.alternate;
                 s.chan = register.put('channels', sweep.chan);
                 meta.sweeps{end+1} = s;
             end
@@ -71,7 +86,7 @@ classdef StandardRun < qd.run.RunWithInputs
             table.init();
 
             % Now perform all the measurements.
-            obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, table);
+            obj.handle_sweeps(obj.sweeps, [], obj.initial_settle, table, false);
         end
 
         function row_hook(obj, sweep_values, inputs)
@@ -89,8 +104,8 @@ classdef StandardRun < qd.run.RunWithInputs
         % the run (by throwing an exception).
         end
 
-        function handle_sweeps(obj, sweeps, earlier_values, settle, table)
-        % obj.handle_sweeps(sweeps, earlier_values, settle, table)
+        function handle_sweeps(obj, sweeps, earlier_values, settle, table, alternate)
+        % obj.handle_sweeps(sweeps, earlier_values, settle, table, alternate)
         %
         % Sweeps the channels in sweeps, takes measurements and puts them in
         % table.
@@ -101,6 +116,15 @@ classdef StandardRun < qd.run.RunWithInputs
         % doubles, sweeps, is the current value of each swept parameter, and
         % inputs are the measured inputs (the channels in obj.inputs). Settle
         % is the amount of time to wait before measuring a sample (in ms).
+        %
+        % when alternate is set to true, a sweep will alternate its sweep
+        % direction on every step taken for the parent sweep.
+        % Use alternate as follows:
+        % ...
+        % run.sweep('Vbg',0,10,10,0.5);
+        % run.sweep('Vsd',-0.01,0.01,100,0,'alternate',true);
+        % ...
+        % this will measure while sweeping Vsd up and down and up and down...
 
             % If there are no more sweeps left, let the system settle, then
             % measure one point.
@@ -112,7 +136,7 @@ classdef StandardRun < qd.run.RunWithInputs
                 values = [earlier_values inputs];
                 table.add_point(values);
                 obj.row_hook(earlier_values, inputs);
-                drawnow();
+                drawnow(); % This makes it possible to break a run using Ctrl-C
                 return
             end
 
@@ -120,19 +144,47 @@ classdef StandardRun < qd.run.RunWithInputs
             % function with one less channel to sweep.
             sweep = sweeps{1};
             next_sweeps = sweeps(2:end);
-            for value = linspace(sweep.from, sweep.to, sweep.points)
-                sweep.chan.set(value);
+            if(obj.is_time_chan(sweep.chan) && (~sweep.points))
+                % This is supposed to run until sweep.to time has passed,
+                % and then measure as many points as possible during the given time.
+                % sometimes you don't know how long it takes to set a channel
                 settle = max(settle, sweep.settle);
-                obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table);
-                % In the first iteration of the loop, we need to wait for the
-                % previously changed value to settle. We also need to wait for
-                % this value to settle, whichever is greater. In the next
-                % iteration of the loop, we only need to wait for this value,
-                % therefore settle is set to 0 here.
+                % Go to starting point and begin timer
+                sweep.chan.set(sweep.from);
+                while true
+                    value = sweep.chan.get();
+                    if value > sweep.to
+                        break
+                    end
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, alternate);
+                    alternate = ~alternate;
+                end
                 settle = 0;
-                if ~isempty(next_sweeps)
-                    % Nicely seperate everything for gnuplot.
-                    table.add_divider();
+            else
+                if sweep.alternate && alternate
+                    % Measure backwards
+                    from = sweep.to;
+                    to = sweep.from;
+                else
+                    % Measure as usual
+                    from = sweep.from;
+                    to = sweep.to;
+                end
+                for value = linspace(from, to, sweep.points)
+                    sweep.chan.set(value);
+                    settle = max(settle, sweep.settle);
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], settle, table, alternate);
+                    alternate = ~alternate;
+                    % In the first iteration of the loop, we need to wait for the
+                    % previously changed value to settle. We also need to wait for
+                    % this value to settle, whichever is greater. In the next
+                    % iteration of the loop, we only need to wait for this value,
+                    % therefore settle is set to 0 here.
+                    settle = 0;
+                    if ~isempty(next_sweeps)
+                        % Nicely seperate everything for gnuplot.
+                        table.add_divider();
+                    end
                 end
             end
         end

@@ -87,7 +87,7 @@ classdef Run < handle
 
         function out_dir = run(obj, varargin)
             meta = obj.describe();
-            
+
             % Get a directory to store the output.
             if ~isempty(obj.directory)
                 out_dir = obj.directory;
@@ -107,6 +107,13 @@ classdef Run < handle
         end
 
         function meta = add_to_meta(obj, meta, register)
+        end
+
+        function r = is_time_chan(obj, chan)
+            % This function compares the original channel name with 'time',
+            % this does not conflict with a renamed time channel
+            % and allows to sweep something else than time/time
+            r = strcmp(chan.channel_id,'time');
         end
     end
 end
