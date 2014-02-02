@@ -2,7 +2,7 @@ classdef OxfMagnet3D < handle
     properties(Constant)
         bind_address = 'tcp://127.0.0.1:9738/'
     end
-    
+
     properties
         check_period = 3*60
         limit1_pt2 = 4.0
@@ -28,6 +28,9 @@ classdef OxfMagnet3D < handle
 
         function obj = OxfMagnet3D(com_port)
             obj.magnet_serial = serial(com_port);
+            % If you want to use Ethernet connection to mercury UPS: ping times are faster,
+            % I guess it would be speed up if there is a direct conntection pypassing the LAN - Merlin
+            % obj.magnet_serial = visa('ni','TCPIP::172.20.??.??::7020::SOCKET');
             fopen(obj.magnet_serial);
             obj.magnet = qd.protocols.OxfordSCPI(...
                 @(req)query(obj.magnet_serial, req, '%s\n', '%s\n'));
@@ -189,6 +192,5 @@ classdef OxfMagnet3D < handle
         function axes = get_axes(obj)
             axes = obj.axes;
         end
-        
     end
 end
