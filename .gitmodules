@@ -1,9 +1,12 @@
 [submodule "dependencies/matlab-json"]
 	path = dependencies/matlab-json
 	url = git://github.com/kyamagu/matlab-json.git
+	ignore = dirty
 [submodule "dependencies/matlab-daemon"]
 	path = dependencies/matlab-daemon
 	url = git@qdev-data.fys.ku.dk:anders/matlab-daemon
+	ignore = dirty
 [submodule "dependencies/zmqmat"]
 	path = dependencies/zmqmat
 	url = git@qdev-data.fys.ku.dk:anders/zmqmat
+	ignore = dirty
