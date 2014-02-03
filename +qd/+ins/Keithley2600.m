@@ -1,10 +1,24 @@
 classdef Keithley2600 < qd.classes.ComInstrument
-    % Instrument driver of Keithley series 2600. If the keithley has several
-    % physical channels, instantiate one object for each channel and change smu.
+    % Instrument driver for Keithley series 2600. 
+    %
+    % If the keithley has several physical channels, instantiate one object
+    % for each channel and change smu. E.g.
+    %
+    %   com = gpib('ni', 0, 1)
+    %   fopen(com)
+    %   a = Keithley2600()
+    %   a.com = com
+    %   a.smu = 'smua' % This is the default.
+    %   b = Keithley2600()
+    %   b.com = com
+    %   b.smu = 'smub' % makes this instrument refer to the second channel.
+    %
+    % Note that com cannot be suplied to the Keithley2600 constructor as it
+    % will attempt to open it (which will cause it to open twice).
 
     properties
         % Some keithley 2600s have several channels. This is the channel this
-        % instrument refers to.
+        % instrument refers to. The default is 'smua'.
         smu = 'smua'
         % ramp_rate.i is the ramp rate of the i channel in A/s and ramp_rate.v
         % is the ramp rate of the v channel in V/s. Default for both is []
@@ -19,8 +33,21 @@ classdef Keithley2600 < qd.classes.ComInstrument
     end
 
     methods
-        function obj = Keithley2600(com)
-            obj = obj@qd.classes.ComInstrument(com);
+        function obj = Keithley2600(varargin)
+            % Keithley2600() or Keithley2600(com)
+            %
+            % If com is supplied, it should be a serial object which will be
+            % opened. If you are making multiple instances of this class for
+            % one physical instrument, set com manually on each instance. E.g.
+            %
+            %   com = gpib('ni', 0, 1)
+            %   fopen(com)
+            %   a = Keithley2600()
+            %   a.com = com
+            %   b = Keithley2600()
+            %   b.com = com
+            %   b.smu = 'smub' % makes this instrument refer to the second channel.
+            obj = obj@qd.classes.ComInstrument(varargin{:});
         end
 
         function r = model(obj)
