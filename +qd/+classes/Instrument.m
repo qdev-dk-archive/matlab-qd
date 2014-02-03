@@ -61,7 +61,7 @@ classdef Instrument < qd.classes.Nameable
         % Set the value of the channel with name 'id'.
         % Equivalent to ins.channel(id).set(val).
             if qd.util.is_reimplemented(obj, 'setc_async', ?qd.classes.Instrument)
-                val = obj.setc_async(id, val).exec();
+                obj.setc_async(id, val).exec();
                 return
             end
             chan = obj.channel_if_reimplemented(id);

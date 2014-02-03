@@ -21,6 +21,11 @@ classdef GetFuture < handle
             val = obj.value;
         end
 
+        % Calls force. (mirrors SetFuture.resolve)
+        function resolve(obj)
+            obj.force();
+        end
+
         function delete(obj)
             if ~isempty(obj.func)
                 warning(['A qd.classes.GetFuture was thrown away ' ...

@@ -41,6 +41,23 @@ classdef ComInstrument < qd.classes.Instrument
             rep = qd.util.match(obj.queryf(req, varargin{1:end-1}), varargin{end});
         end
 
+        function rep = read(obj)
+            rep = fscanf(obj.com);
+        end
+
+        function rep = readm(obj, rep)
+        % Read a line from the instrument. Then check if the line matches a
+        % format string and parse it. For example:
+        %
+        % field = ins.readm(%fT')
+        %
+        % would parse a value like '3.1T'.
+        %
+        % This function raises an error if the response does not match the
+        % format string supplied at the end.
+            rep = qd.util.match(obj.read(), rep);
+        end
+
         function send(obj, req)
         % Send command expecting no response.
             fwrite(obj.com, req);
@@ -48,7 +65,7 @@ classdef ComInstrument < qd.classes.Instrument
 
         function sendf(obj, req, varargin)
         % Send command expecting no response. With a format string.
-            fprintf(obj.com, req, varargin{:});
+            obj.send(sprintf(req, varargin{:}));
         end
 
         function delete(obj)

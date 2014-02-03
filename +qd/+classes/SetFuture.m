@@ -13,6 +13,7 @@ classdef SetFuture < handle
             obj.func_abort = p.Results.abort;
         end
 
+        % Wait for this future to complete.
         function exec(obj)
             if isempty(obj.func)
                 error('exec already called once.');
@@ -22,9 +23,10 @@ classdef SetFuture < handle
             obj.func_abort = [];
         end
 
+        % Stop whatever this future is doing.
         function abort(obj)
             if isempty(obj.func)
-                warning('Nothing to abort, exec already called.');
+                warning('Nothing to abort, exec or abort has already been called.');
             end
             if isempty(obj.func_abort)
                 error('no abort function.');
@@ -32,6 +34,11 @@ classdef SetFuture < handle
             obj.func_abort();
             obj.func = [];
             obj.func_abort = [];
+        end
+
+        % Calls abort. (mirrors GetFuture.resolve)
+        function resolve(obj)
+            obj.abort();
         end
 
         function delete(obj)
