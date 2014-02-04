@@ -194,7 +194,6 @@ classdef FolderBrowser < handle
         function plot_loc(obj, tables, loc, meta)
             if isempty(obj.fig)
                 obj.fig = figure();
-                set(obj.fig, 'Color', 'white');
             end
             old_view = obj.table_view;
             obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
