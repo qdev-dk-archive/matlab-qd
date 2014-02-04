@@ -38,6 +38,7 @@ classdef Triton < qd.classes.Instrument
             chans{end + 1} = 'RAMP';
             chans{end + 1} = 'RATE';
             chans{end + 1} = 'RANGE';
+            chans{end + 1} = 'CCHAN';
         end
 
         function autorange(obj,value)
@@ -68,6 +69,9 @@ classdef Triton < qd.classes.Instrument
                         val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RANGE', obj.control_channel), '%f');
                     case 'MODE'
                         val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:MODE', obj.control_channel), '%s');
+                    case 'CCHAN'
+                        val = obj.get_control_channel();
+                        val = qd.util.match(val, 'T%d');
                     otherwise
                         error('No such channel (%s).', chan);
                 end
@@ -91,6 +95,16 @@ classdef Triton < qd.classes.Instrument
                     obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:RANGE', obj.control_channel), value, '%f');
                 case 'MODE'
                     obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:MODE', obj.control_channel), value, '%s');
+                case 'CCHAN'
+                    % Set the temperature control_channel
+                    if isstr(value)
+                        % Expects 'T5'
+                        obj.control_channel = value;
+                    elseif isfloat(value)
+                        % Expects just a number
+                        obj.control_channel = sprintf('T%d',value);
+                    end
+                    obj.triton.set(sprintf('DEV:%s:TEMP:LOOP:HTR', obj.control_channel), 'H1', '%s');
                 otherwise
                     error('No such channel (%s).', chan);
             end
