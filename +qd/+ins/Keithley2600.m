@@ -103,7 +103,7 @@ classdef Keithley2600 < qd.classes.ComInstrument
                 obj.current_future = [];
             end
             if isempty(obj.ramp_rate.(channel))
-                obj.current_future = qd.classes.SetFuture(@exec, 'abort', @abort);
+                obj.current_future = qd.classes.SetFuture(@exec, @abort);
             else
                 obj.current_future = ramp(obj, channel, value);
             end
@@ -143,7 +143,7 @@ classdef Keithley2600 < qd.classes.ComInstrument
                 end
                 obj.current_future = [];
             end
-            future = qd.classes.SetFuture(@exec, 'abort', @abort);
+            future = qd.classes.SetFuture(@exec, @abort);
         end
     end
 end

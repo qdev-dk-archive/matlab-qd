@@ -133,9 +133,27 @@ classdef OxfMagnet3D < handle
         end
 
         function trip_level1(obj)
+            % First level of protection tries to ramp the field to zero.
+            % This goes against oxfords request to just hold the magnet.
+            % If the temperature keeps increasing. Then we hold as requested.
+
             if strcmp(obj.status, 'level1') || strcmp(obj.status, 'level2')
                 return
             end
+            
+            obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
+            obj.status = 'level1';
+
+            % If the magnet is in persistent mode, don't do anything. (the user will
+            % have to respond).
+            for i = 1:length(obj.axes)
+                persist = obj.read(obj.axes(i), 'SIG:SWHT');
+                if strcmp(persist, 'OFF')
+                    obj.server.send_alert('Cannot ramp magnet to zero', ...
+                        'Magnet is in persistent mode, cannot ramp to zero automatically.')
+                end
+            end
+            
             % Bring to zero along direction of field. Vect will hold the
             % direction.
             vect = zeros(0, length(obj.axes));
@@ -154,8 +172,6 @@ classdef OxfMagnet3D < handle
                 obj.force_set(obj.axes(i), 'SIG:RFST', vect(i), '%.16f');
                 obj.force_set(obj.axes(i), 'ACTN', 'RTOZ');
             end
-            obj.status = 'level1';
-            obj.server.send_alert('Magnet at level1 overheating', obj.get_report());
         end
 
         function reset_status(obj)
