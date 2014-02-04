@@ -35,7 +35,7 @@ classdef RunWithInputs < qd.run.Run
             for inp = obj.inputs
                 meta.inputs{end + 1} = register.put('channels', inp{1});
             end
-            add_to_meta@qd.run.Run(obj, meta, register);
+            meta = add_to_meta@qd.run.Run(obj, meta, register);
         end
     end
 end

@@ -71,7 +71,7 @@ classdef StandardRun < qd.run.RunWithInputs
                 s.chan = register.put('channels', sweep.chan);
                 meta.sweeps{end+1} = s;
             end
-            add_to_meta@qd.run.RunWithInputs(obj, meta, register);
+            meta = add_to_meta@qd.run.RunWithInputs(obj, meta, register);
         end
 
         function perform_run(obj, out_dir)
