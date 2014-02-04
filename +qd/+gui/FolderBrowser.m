@@ -7,7 +7,6 @@ classdef FolderBrowser < handle
         fig
         update_timer
         has_been_closed = false
-        pseudo_columns = {}
         cache
         editor
     end
@@ -15,7 +14,9 @@ classdef FolderBrowser < handle
         tbl
         loc
         meta
+        tables
         table_view
+        pseudo_columns = {}
         % This is a containers.Map mapping strings to strings.
         % The key is the name of a column, the value is the desired label
         % on the axis of that column.
@@ -113,15 +114,15 @@ classdef FolderBrowser < handle
         end
 
         function select(obj, val)
-            loc = obj.content{val}.loc;
-            meta = json.read(fullfile(loc, 'meta.json'));
-            tables = containers.Map;
-            for table_name = obj.list_table_names(loc)
-                tbl = qd.data.load_table(loc, table_name{1});
+            obj.loc = obj.content{val}.loc;
+            obj.meta = json.read(fullfile(obj.loc, 'meta.json'));
+            obj.tables = containers.Map;
+            for table_name = obj.list_table_names(obj.loc)
+                tbl = qd.data.load_table(obj.loc, table_name{1});
                 for pseudo_column = obj.pseudo_columns
                     try
                         func = pseudo_column{1};
-                        new_columns = func(qd.data.view_table(tbl), meta);
+                        new_columns = func(qd.data.view_table(tbl), obj.meta);
                         for column = new_columns
                             assert(isfield(column{1}, 'data'));
                             assert(isfield(column{1}, 'name'));
@@ -137,10 +138,10 @@ classdef FolderBrowser < handle
                         tbl{i}.label = obj.column_label_override(tbl{i}.name);
                     end
                 end
-                tables(table_name{1}) = tbl;
+                obj.tables(table_name{1}) = tbl;
             end
-            obj.plot_loc(tables, loc, meta);
-            obj.view_loc(loc, meta, tables);
+            obj.plot_loc(obj.tables, obj.loc, obj.meta);
+            obj.view_loc(obj.tables);
         end
 
         function add_pseudo_column(obj, func, name)
@@ -157,6 +158,39 @@ classdef FolderBrowser < handle
             obj.pseudo_columns{end + 1} = func;
         end
 
+        % Adds a column to the currently plotted data.
+        %
+        % Call as inject_column(name, data), where data is a string and data
+        % is a list of doubles. This list should be as long as the other
+        % columns in the data. Optionally takes a third argument which is the
+        % name of the table to add the column to (some runs generate multiple
+        % tables).
+        function inject_column(obj, name, data, varargin)
+            p = inputParser();
+            p.addOptional('table', []);
+            p.parse(varargin{:});
+            for key = obj.tables.keys()
+                if ~isempty(p.Results.table) && ~strcmp(p.Results.table, key)
+                    continue;
+                end
+                table = obj.tables(key{1});
+                table{end+1} = struct('name', name, 'data', data);
+                obj.tables(key{1}) = table;
+            end
+            obj.plot_loc(obj.tables, obj.loc, obj.meta);
+            obj.view_loc(obj.tables);
+        end
+
+        % Updates the plot to view the supplied arguments.
+        % 
+        % Params:
+        %   tables: a Map mapping table names to tables.
+        %   loc:    the path to the folder containing the data.
+        %   meta:   parsed metadata
+        %
+        % In this context a table is a cell array of structs. Each struct has
+        % a name field and a data field. The data field is an array of
+        % doubles.
         function plot_loc(obj, tables, loc, meta)
             if isempty(obj.fig)
                 obj.fig = figure();
@@ -178,9 +212,15 @@ classdef FolderBrowser < handle
             obj.table_view.update();
         end
 
-        function view_loc(obj, loc, meta, tables)
-            obj.loc = loc;
-            obj.meta = meta;
+        % Updates the obj.tbl property to reflect the supplied argument.
+        % 
+        % Params:
+        %   tables: a Map mapping table names to tables.
+        %
+        % In this context a table is a cell array of structs. Each struct has
+        % a name field and a data field. The data field is an array of
+        % doubles.
+        function view_loc(obj, tables)
             if length(tables) == 1
                 tbl = tables.values();
                 obj.tbl = qd.data.view_table(tbl{1});
