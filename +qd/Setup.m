@@ -90,6 +90,20 @@ classdef Setup < handle
         % are stored under meta.(name).
             obj.meta_funcs{end + 1} = {name, func};
         end
+
+        % Get the value of a channel.
+        %
+        % Convenience function to do obj.find_channel(id).get().
+        function val = getc(obj, id)
+            val = obj.find_channel(id).get();
+        end
+
+        % Set a channel.
+        %
+        % Convenience function to do obj.find_channel(id).set(val).
+        function setc(obj, id, val)
+            obj.find_channel(id).set(val);
+        end
     end
     methods(Access=private)
         function chan = find_in_instruments(obj, id)
