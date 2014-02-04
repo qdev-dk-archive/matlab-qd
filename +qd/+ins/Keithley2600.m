@@ -124,17 +124,21 @@ classdef Keithley2600 < qd.classes.ComInstrument
             obj.sendf('%s.trigger.count = %i', obj.smu, count);
             obj.sendf('%s.source.delay = %.16f', obj.smu, step/rate);
             obj.sendf('%s.trigger.initiate()', obj.smu);
+            function done = is_done()
+                % Query the status of the instrument.
+                r = obj.querym('print(bit.bitand(status.operation.sweeping.condition, status.operation.sweeping.%s));', ...
+                    upper(obj.smu), '%f');
+                done = r == 0.0;
+            end
             function abort()
-                obj.sendf('%s.abort()', obj.smu);
+                if ~is_done()
+                    obj.sendf('%s.abort()', obj.smu);
+                    warning('%s: A ramp was aborted before it was finished.', obj.name);
+                end
                 obj.current_future = [];
             end
             function exec()
-                while true
-                    r = obj.querym('print(bit.bitand(status.operation.sweeping.condition, status.operation.sweeping.%s));', ...
-                        upper(obj.smu), '%f');
-                    if r == 0.0 
-                        break
-                    end
+                while ~is_done()
                     pause(0.001);
                 end
                 obj.current_future = [];
