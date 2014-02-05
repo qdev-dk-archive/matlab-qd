@@ -95,19 +95,13 @@ classdef Keithley2600 < qd.classes.ComInstrument
             if not(ismember(channel, {'i', 'v'}))
                 error('not supported.');
             end
-            function exec()
-                obj.sendf('%s.source.level%s = %.16f', obj.smu, channel, value);
-                obj.current_future = [];
-            end
-            function abort()
-                obj.current_future = [];
-            end
             if isempty(obj.ramp_rate.(channel))
-                obj.current_future = qd.classes.SetFuture(@exec, @abort);
+                obj.sendf('%s.source.level%s = %.16f', obj.smu, channel, value);
+                future = qd.classes.SetFuture.do_nothing_future();
             else
                 obj.current_future = ramp(obj, channel, value);
+                future = obj.current_future;
             end
-            future = obj.current_future;
         end
     end
 
