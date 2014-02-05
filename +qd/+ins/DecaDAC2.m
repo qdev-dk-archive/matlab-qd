@@ -16,7 +16,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         futures = struct
     end
     methods
-        function obj = DecaDAC(port)
+        function obj = DecaDAC2(port)
             obj.com = serial(port, ...
                 'BaudRate', 9600, ...
                 'Parity',   'none', ...
@@ -25,9 +25,9 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             fopen(obj.com);
 
             for ch = obj.channels
-                limits.(ch{1}) = [-10, 10];
-                ramp_rates.(ch{1}) = 0.1;
-                ranges.(ch{1}) = [-10, 10];
+                obj.limits.(ch{1}) = [-10, 10];
+                obj.ramp_rates.(ch{1}) = 0.1;
+                obj.ranges.(ch{1}) = [-10, 10];
             end
         end
 
@@ -38,7 +38,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         function val = getc(obj, ch)
             n = obj.parse_ch(ch);
             obj.select(n);
-            raw = obj.instrument.querym('d;', 'd%d!');
+            raw = obj.querym('d;', 'd%d!');
             val = raw / (2^16 - 1) * obj.span(ch) + obj.low(ch);
         end
 
@@ -84,6 +84,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         % n is parse_ch(ch). Before calling this, make sure to call obj.select(n).
         % goal is an integer (see setc_async above and decadac docs).
             value_now = obj.querym('d;', 'd%d!');
+            rate = obj.ramp_rates.(ch);
             % the ramp stops when it reaches the limit. We set it appropriately.
             if value_now < goal
                 obj.queryf('U%d;', goal);
@@ -103,31 +104,39 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             slope = slope * sign(goal - value_now);
             % Initiate the ramp.
             obj.queryf('T%d;G0;S%d;', ramp_clock, slope);
+            % Now we construct a future.
+            function b = is_done()
+                % must be selected first!
+                val = obj.querym('d;', 'd%d!');
+                b = val == goal;
+            end
             function abort()
                 % someone might have selected a different channel
                 obj.select(n);
                 obj.queryf('S0;L0;U%d;', 2^16-1);
+                if ~is_done()
+                    warning('%s: A ramp was aborted before it was finished.', obj.name);
+                end
+                obj.futures = rmfield(obj.futures, ch);
             end
             function exec()
                 % someone might have selected a different channel
                 obj.select(n);
-                while true
-                    val = ins.querym('d;', 'd%d!');
-                    if val == goal
-                        break;
-                    end
+                while ~is_done()
                     pause(ramp_clock * 1E-6 * 3); % wait a few ramp_clock periods
                 end
                 obj.queryf('S0;L0;U%d;', 2^16-1);
+                obj.futures = rmfield(obj.futures, ch);
             end
             future = qd.classes.SetFuture(@exec, @abort);
+            obj.futures.(ch) = future;
         end
 
         function n = parse_ch(obj, ch)
             try
-                n = qd.util.match(id, 'CH%d');
+                n = qd.util.match(ch, 'CH%d');
             catch
-                error('No such channel (%s).', id);
+                error('No such channel (%s).', ch);
             end
             qd.util.assert(n < 20);
             qd.util.assert(n >= 0);

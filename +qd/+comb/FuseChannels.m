@@ -1,6 +1,7 @@
 classdef FuseChannels < qd.classes.Channel
     properties(Access=private)
         base_channels
+        future = []
     end
     methods
         function obj = FuseChannels(base_channels, name)
@@ -21,10 +22,28 @@ classdef FuseChannels < qd.classes.Channel
             val = mean(vals);
         end
 
-        function set(obj, val)
-            for chan = obj.base_channels
-                chan.set(val);
+        function future = set_async(obj, val)
+            if ~isempty(obj.future)
+                obj.future.resolve();
             end
+            futures = {};
+            for chan = obj.base_channels
+                futures{end + 1} = chan.set_async(val);
+            end
+            function abort()
+                for f = futures
+                    f{1}.abort();
+                end
+                obj.future = [];
+            end
+            function exec()
+                for f = futures
+                    f{1}.exec();
+                end
+                obj.future = [];
+            end
+            future = qd.classes.SetFuture(@exec, @abort);
+            obj.future = future;
         end
     end
 end

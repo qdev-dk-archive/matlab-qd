@@ -53,7 +53,7 @@ classdef SetFuture < handle
             end
             function abort()
             end
-            f = SetFuture(@exec, @abort);
+            f = qd.classes.SetFuture(@exec, @abort);
         end
     end
 end
