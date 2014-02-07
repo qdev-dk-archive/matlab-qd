@@ -25,8 +25,9 @@ following commands in a git shell:
 
 `git submodule update --recursive`
 
-Then add all the files in the `dependencies` folder to the MATLAB path and run
-the command `zmq.install_jar` in MATLAB.
+Then add the root folder of the library to the MATLAB past, as well as all the
+folders immediately inside the `dependencies` folder. Run the command
+`zmq.install_jar` in MATLAB.
 
 Some equipment needs continuously running daemons, see [Configuring
 Daemons][daemons].
@@ -48,6 +49,7 @@ Find help and information here:
 * [Configuring Daemons][daemons]
 * A sequential run example: [SequentialRun.md](SequentialRun.md)
 * [Markdown Cheatsheet][mdcheat] for writing documentation
+* The code itself (don't be afraid).
 
 ## Contact
 * Anders Jellinggaard: <anders.jel@gmail.com>.

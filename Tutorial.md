@@ -140,9 +140,16 @@ that is also a `get_async` for instrument with long integration times.
 ## Running measurements
 
 Beyond being a collection of drivers with a uniform interface, *matlab-qd*
-also offers classes that will let you run basic measurements with ease. In
-particular, sweeping *n* output channels in a nested loop, measuring from *m*
-input channels at each point.
+also offers classes that will let you run basic measurements with ease.
+
+The class `qd.data.Store` exist to create empty directorties in some base
+folder into which data can be stored.
+
+```matlab
+store = qd.data.Store('D:\Data\Me\');
+store.cd('DeviceNr1959');
+blank_dir = store.new_dir()
+```
 
 ## Plotting measurements
 
