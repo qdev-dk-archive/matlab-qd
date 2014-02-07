@@ -140,16 +140,97 @@ that is also a `get_async` for instrument with long integration times.
 ## Running measurements
 
 Beyond being a collection of drivers with a uniform interface, *matlab-qd*
-also offers classes that will let you run basic measurements with ease.
+also offers classes that will let you run basic measurements with ease. First
+we will look at two simple classes that we will use later.
 
 The class `qd.data.Store` exist to create empty directorties in some base
 folder into which data can be stored.
 
 ```matlab
-store = qd.data.Store('D:\Data\Me\');
-store.cd('DeviceNr1959');
-blank_dir = store.new_dir()
+>> store = qd.data.Store('D:\Data\Me\');
+>> store.cd('DeviceNr1959');
+>> blank_dir = store.new_dir()
 ```
+
+The class `qd.Setup` is a class that knows every instrument in your setup.
+
+```matlab
+>> keithley.name = 'keithley';
+>> decadac = qd.ins.DecaDAC2('COM1');
+>> decadac.name = 'dac';
+>> setup = qd.Setup();
+>> setup.add_instrument(keithley);
+>> setup.add_instrument(decadac);
+```
+
+There is also an `add_channel`.
+
+The setup lets you lookup channels by name (preceded by the instrument name
+and a `/`). For instance
+
+```matlab
+>> voltage = setup.find_channel('keithley/v');
+>> voltage.set(0);
+>> % or you can do
+>> setup.setc('keithley/v', 0);
+>> setup.setc('dac/CH0', 0);
+```
+
+and you can access instruements and named channels through the `ins` and
+`chans` properties
+
+```matlab
+>> setup.ins.keithley.turn_output_on();
+```
+
+It is standard practice, to make a function that sets up a setup object for
+your setup.
+
+### The *StadardRun* class
+
+Lets try to run an experiment. Here is a simple IV curve.
+
+```matlab
+>> run = qd.run.StandardRun();
+>> run.store = store;
+>> run.setup = setup;
+>> run.sweep('keithley/v', 0, 10, 100); % 0 to 10 in 100 steps.
+>> run.input('keithley/i');
+>> run.name = 'IV curve';
+>> run.run();
+```
+
+The *sweep* and *input* methods look up a channels using the *setup*
+configured for the run, but you could also pass a channel directly
+(`run.sweep(voltage, 0, 10, 100);` and `run.input(current);`).
+
+If you supply multiple sweeps, they are nested:
+
+```matlab
+>> gate = setup.find_channel('dac/CH0');
+>> run.clear_sweeps();
+>> run.sweep(gate, 0, 10, 11);
+>> run.sweep('keithley/v', 0, 10, 100);
+>> run.name = 'Gate dependence';
+>> run.run(); % One IV curve for each gate value.
+```
+
+Note, many of the methods of a *run* return the *run* itself so that calls can
+be chained. E.g.
+
+```matlab
+>> run.clear_sweeps().sweep('keithley/v', 0, 10, 100).set_name('IV curve 2').run();
+```
+
+There is more to runs, use the `doc` command. For reference, here is the
+signature of *sweep*
+
+```matlab
+run.sweep(channel, start, end, points, [settle]);
+```
+
+where the optional value *settle*, specifies how long to wait after setting
+this value (in seconds).
 
 ## Plotting measurements
 
@@ -164,6 +245,10 @@ TODO
 TODO
 
 ### Writing instrument drivers
+
+TODO
+
+### Subclassing or forgoing the run classes
 
 TODO
 
