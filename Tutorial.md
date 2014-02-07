@@ -117,12 +117,32 @@ complete or to abort an ongoing ramp.
 >> future.abort(); % abort it prematurely.
 ```
 
-The real strength of futures comes when you need to ramp several channels.
-TODO.
+The real strength of futures comes when you need to ramp several channels. For
+instance, if you have six gates driven by DecaDACs that need to be ramped 1
+volt at 0.1 volt/second, ramping one at a time with `setc` would take 1 min.
+However, this piece of code
+
+```matlab
+% First we initate all the ramping.
+futures = {};
+for i = 1:length(gates)
+    futures{i} = gates{i}.set_async(1.0);
+end
+% Then we wait for the ramps to finish
+for i = 1:length(gates)
+    futures{i}.exec();
+end
+```
+
+would only take 10 seconds. This method is used throughout *matlab-qd*. Note,
+that is also a `get_async` for instrument with long integration times.
 
 ## Running measurements
 
-TODO
+Beyond being a collection of drivers with a uniform interface, *matlab-qd*
+also offers classes that will let you run basic measurements with ease. In
+particular, sweeping *n* output channels in a nested loop, measuring from *m*
+input channels at each point.
 
 ## Plotting measurements
 
