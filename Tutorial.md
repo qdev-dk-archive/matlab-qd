@@ -284,8 +284,8 @@ a function to be called whenever you plot a data file.
 
 Now all data you plot will get a conductance column. The syntax above is for
 lambda functions in MATLAB. Ignore the *meta* parameter for now. You could
-also write the above code using a function handle (though only in a file). The
-above code could look like
+also write the above code using a function handle (though only in a file, not
+at the prompt). The above code could look like
 
 ```matlab
 % Put this code in 'load_my_folder_browser.m'
@@ -303,9 +303,19 @@ function column = conductance(tbl, meta)
 end
 ```
 
+Exceptions thrown in a metafunction are turned into warnings, and that column
+will be skipped when the data is plotted.
+
 ## Advanced topics
 
 ### Describing objects (meta information)
+
+Lots of information is available to the computer when a run is started. For
+instance, settings of equipment can be queried, temperatures of the cryostat,
+etc. and it would be a shame to throw it all out. Therefore *matlab-qd* has an
+interface by which instruments and other object can expose a detailed
+description of their state. This kind of information is called *meta*
+information in *matlab-qd*.
 
 TODO
 
