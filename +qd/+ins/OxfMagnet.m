@@ -1,4 +1,9 @@
 classdef OxfMagnet < qd.classes.Instrument
+% Drivers for vector magnets from Oxford Instr.
+%
+% This class replaces OxfMagnet3D. It does not have as many features, but it
+% implements the async interface for ramping, and thus plays more nicely with
+% the rest of matlab-qd.
     properties
         daemon
         futures = struct();
