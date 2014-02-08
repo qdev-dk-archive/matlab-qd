@@ -317,7 +317,44 @@ interface by which instruments and other object can expose a detailed
 description of their state. This kind of information is called *meta*
 information in *matlab-qd*.
 
-TODO
+You can see the meta information for an instrument, channel, or setup by using
+the *qd.util.describe* function
+
+```matlab
+>> qd.util.describe(voltage);
+Lots of text ...
+```
+
+Notice that the description is broken into two secions. One called *Object*
+which contains the description of the *voltage* channel, and one called
+*Register* which contains a description of the Keithley. The Keithley is
+included because the description of the *voltage* channel refers to it by
+name. If the description of the Keithley in turn referred to other objects,
+they would also be put in the register, and so forth. 
+
+Here is a simplified version of *qd.util.describe* so you can see what it does
+
+```matlab
+function describe(thing)
+    register = qd.classes.Register();
+    object_description = thing.describe(register);
+    register_description = register.describe();
+    nicely_print(register_description); % This function doesn't really exist.
+    nicely_print(object_description);
+end
+```
+
+Notice how the *describe* method of *thing* takes the register as an argument,
+so that it can add to it.
+
+You may have noticed that each section of the output from *qd.util.describe*
+is in [JSON format](http://json.org/). When you execute a run, it does
+something similar to *qd.util.describe* and puts the output in a file called
+`meta.json` in the data folder. You should look at some of the `meta.json`
+files that were generated earlier. Since JSON is a very common and very simple
+format, readily available parsers exist for practically every programming
+language in existence. This makes it easy to load meta information into
+whatever language you use for data processing, MATLAB or otherwise.
 
 ### Using channel combinators
 
