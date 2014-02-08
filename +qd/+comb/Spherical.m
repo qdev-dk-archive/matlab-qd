@@ -8,11 +8,15 @@ classdef Spherical < qd.classes.Instrument
     end
     methods
         function obj = Spherical(base_channels)
+            if ~iscell(base_channels)
+                warning('Using an array for base_channels is deprecated, use a cell array instead');
+                base_channels = num2cell(base_channels);
+            end
             qd.util.assert(length(base_channels) == 3);
             obj.base_channels = struct();
-            obj.base_channels.x = base_channels(1);
-            obj.base_channels.y = base_channels(2);
-            obj.base_channels.z = base_channels(3);
+            obj.base_channels.x = base_channels{1};
+            obj.base_channels.y = base_channels{2};
+            obj.base_channels.z = base_channels{3};
             obj.base_offsets.theta = 0;
             obj.base_offsets.phi = 0;
             obj.reinitialize();

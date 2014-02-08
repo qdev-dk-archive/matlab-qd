@@ -135,7 +135,7 @@ end
 ```
 
 would only take 10 seconds. This method is used throughout *matlab-qd*. Note,
-that is also a `get_async` for instrument with long integration times.
+there is also a `get_async` for instrument with long integration times.
 
 ## Running measurements
 
@@ -357,6 +357,12 @@ language in existence. This makes it easy to load meta information into
 whatever language you use for data processing, MATLAB or otherwise.
 
 ### Using channel combinators
+
+Sometimes you want to change the coordinate system you use to set channels.
+For instance, you might want to use spherical coordinates for a magnet, or do
+a linear transformation on gate channels to eliminate capacitive cross-talk.
+For instances such as these, *matlab-qd* has channel combinator, which take
+one or more base channels to generate a new set of channels.
 
 TODO
 

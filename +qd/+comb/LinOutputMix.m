@@ -1,4 +1,5 @@
 classdef LinOutputMix < qd.classes.Instrument
+% TODO, this class really needs to be documented.
     properties(GetAccess=public, SetAccess=private)
         base_channels
         transform

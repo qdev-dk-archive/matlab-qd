@@ -5,6 +5,10 @@ classdef FuseChannels < qd.classes.Channel
     end
     methods
         function obj = FuseChannels(base_channels, name)
+            if ~iscell(base_channels)
+                warning('Using an array for base_channels is deprecated, use a cell array instead');
+                base_channels = num2cell(base_channels);
+            end
             obj.base_channels = base_channels;
             obj.name = name;
         end
@@ -13,12 +17,12 @@ classdef FuseChannels < qd.classes.Channel
             r = obj.describe@qd.classes.Channel(register);
             r.base_channels = {};
             for chan = obj.base_channels
-                r.base_channels{end + 1} = register.put('channels', chan(1));
+                r.base_channels{end + 1} = register.put('channels', chan{1});
             end
         end
 
         function val = get(obj)
-            vals = arrayfun(@(x) x.get(), obj.base_channels);
+            vals = arrayfun(@(x) x{1}.get(), obj.base_channels);
             val = mean(vals);
         end
 
@@ -28,7 +32,7 @@ classdef FuseChannels < qd.classes.Channel
             end
             futures = {};
             for chan = obj.base_channels
-                futures{end + 1} = chan.set_async(val);
+                futures{end + 1} = chan{1}.set_async(val);
             end
             function abort()
                 for f = futures
