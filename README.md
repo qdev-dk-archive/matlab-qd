@@ -4,12 +4,10 @@ A framework to write high-level instrument drivers, to do basic measurement,
 and to quickly browse the resulting data. This is a direct competitor to
 [special-measure](https://code.google.com/p/special-measure/).
 
-This file is written in the
-[markdown format](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
-If you use, for instance, the chrome extension
-[Markdown Preview Plus](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl),
-and enable local file-system access, you will have a pleasant reading
-experience, with all links working.
+This file is written in the [markdown format][mdcheat]. If you use, for
+instance, the chrome extension [Markdown Preview Plus][mdpreview], and enable
+local file-system access, you will have a pleasant reading experience, with
+all links working.
 
 ## Important notice
 
@@ -20,83 +18,42 @@ and clear your matlab workspaces after updating (unless you know better).
 
 ## Installation
 
-*matlab-qd* depends on a few other libraries. To install them,
-run the following commands in a git shell:
+*matlab-qd* depends on a few other libraries. To install them, run the
+following commands in a git shell:
 
 `git submodule init`
 
 `git submodule update --recursive`
 
-Then add all the files in the `dependencies` folder to the MATLAB path and run
-the command `zmq.install_jar` in MATLAB.
+Then add the root folder of the library to the MATLAB past, as well as all the
+folders immediately inside the `dependencies` folder. Run the command
+`zmq.install_jar` in MATLAB.
 
 Some equipment needs continuously running daemons, see [Configuring
-Daemons](+qd/+daemons/config-example/README.md).
+Daemons][daemons].
 
-## Examples
+## Usage
+
+See **[the tutorial](Tutorial.md)**. Note, if you plan to contribute code to
+the project, then the tutorial is mandatory reading.
 
 A sequential run example is here: [SequentialRun.md](SequentialRun.md).
 
-### Using instruments
+## Documentation
 
-### Performing standard measurements
+Find help and information here:
 
-## Output format
-
-### Metadata
-
-## GUI
-
-## Contributing
-
-### Writing instrument drivers
-
-For now, have a look at qd.ins.SRLockIn for inspiration.
-
-### Working with futures
-
-Instrument drivers can optionally implement asynchronous get and set
-operations using [futures](http://en.wikipedia.org/wiki/Futures_and_promises).
-The qd framework uses two specific types of futures: a _GetFuture_, which
-represents a running _get_async_ operation, and a _SetFuture_, which
-represents a running _set_async_ operation.
-
-A _GetFuture_ has the following methods:
-* `future = GetFuture(func)` &mdash; Constructs a _GetFuture_. The function
-  handle _func_ is kept by the future.
-* `future.force()` &mdash; Causes _func_ to be called, caches the return
-  value. Does nothing the second time it is called.
-* `future.exec()` &mdash; Calls `future.force()`. Returns the cached value.
-
-The _AgilentDMM_ is a good example of an instrument which benefits from an
-asynchronous get operation. Calling _get_async_ on the _in_ channel initiates
-a reading on the instrument and returns a future immediately; calling _force_
-on that future blocks until the reading is complete. Compare the following two sequences:
-
-    tic
-    v1 = dmm1.getc('in'); % takes 1 second (assuming an integration time of 1s)
-    v2 = dmm2.getc('in'); % takes 1 second
-    toc % total time is 2 seconds
-
-    tic
-    f1 = dmm1.getc_async('in'); % takes a few ms.
-    f2 = dmm2.getc_async('in'); % takes a few ms.
-    v1 = f1.exec(); % takes 1 second.
-    v2 = f2.exec(); % takes a few ms.
-    toc % total time 1 second
-
-When implementing an instrument, you only have to implement either a
-synchronous or an asynchronous get method, the other will be defaulted
-sensibly. You should ensure that calling _getc_async_ multiple times without
-forcing the returned futures does not cause problems, for example by
-automatically forcing old futures when a new is requested, as in the
-_AgilentDMM_ drivers.
-
-Note: the class _StandardRun_ uses asynchronous read operations for all
-input channels.
-
-The API of the _SetFuture_ is still unstable, but the plan is to handle
-ramping in a similar fashion.
+* **[The Tutorial](Tutorial.md)**
+* The `doc` command in MATLAB. E.g. type `doc qd.classes.Instrument`
+* [List of breaking changes](BREAKING_CHANGES.md)
+* [Configuring Daemons][daemons]
+* A sequential run example: [SequentialRun.md](SequentialRun.md)
+* [Markdown Cheatsheet][mdcheat] for writing documentation
+* The code itself (don't be afraid).
 
 ## Contact
 * Anders Jellinggaard: <anders.jel@gmail.com>.
+
+[mdcheat]: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+[mdpreview]: https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl
+[daemons]: +qd/+daemons/config-example/README.md

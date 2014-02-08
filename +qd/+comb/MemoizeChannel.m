@@ -17,7 +17,7 @@ classdef MemoizeChannel < qd.classes.Channel
 
         function r = describe(obj, register)
             r = obj.describe@qd.classes.Channel(register);
-            r.base_channel = register.put('channels', obj.base_channel{1});
+            r.base_channel = register.put('channels', obj.base_channel);
             r.memoize_time = obj.memoize_time;
         end
 

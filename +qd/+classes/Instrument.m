@@ -1,4 +1,5 @@
 classdef Instrument < qd.classes.Nameable
+% The base class of all instruments.
     methods
         function r = model(obj)
         % The name of the type of instrument as given by the manufacturer. For

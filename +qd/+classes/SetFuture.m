@@ -47,4 +47,13 @@ classdef SetFuture < handle
             end
         end
     end
+    methods(Static)
+        function f = do_nothing_future()
+            function exec()
+            end
+            function abort()
+            end
+            f = qd.classes.SetFuture(@exec, @abort);
+        end
+    end
 end

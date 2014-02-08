@@ -36,7 +36,7 @@ classdef Channel < qd.classes.Nameable
 
         function set(obj, val)
             if qd.util.is_reimplemented(obj, 'set_async', ?qd.classes.Channel)
-                val = obj.set_async(val).exec();
+                obj.set_async(val).exec();
             elseif ~isempty(obj.instrument)
                 obj.instrument.setc(obj.channel_id, val);
             else

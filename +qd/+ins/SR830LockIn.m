@@ -16,7 +16,7 @@ classdef SR830LockIn < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'ampl'};
+            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'oflt' 'ampl'};
         end
 
         function val = getc(obj, channel)
@@ -71,11 +71,11 @@ classdef SR830LockIn < qd.classes.ComInstrument
 
         function set_time_constant(obj,value)
             [c index] = min(abs(obj.time_const_choices-value));
-            if obj.time_const_choices(index) ~= value
-                warning(sprintf('Integration time %f not available. Now set to the closest value: %f',value,obj.time_const_choices(index)));
+            if c ~= 0
+                warning('Integration time %f not available. Using %f instead.', ...
+                    value, obj.time_const_choices(index));
             end
-            % obj.sendf('OFLT %.1f', index-1);
-            obj.setc('oflt',index-1)
+            obj.sendf('OFLT %i', index-1);
         end
 
         function val = get_time_constant(obj,value)
@@ -84,12 +84,12 @@ classdef SR830LockIn < qd.classes.ComInstrument
         end
 
         function set_sensitivity(obj,value)
-            senslist = obj.sensitivity_volt;
-            [c index] = min(abs(senslist-value));
-            if c ~= value
-                warning(sprintf('Sensitivity of %f not available. Now set to the closest value: %f',value,c));
+            [c index] = min(abs(obj.sensitivity_volt-value));
+            if c ~= 0
+                warning('Sensitivity of %f not available. Using %f instead.', ...
+                    value, obj.sensitivity_volt(index));
             end
-            obj.sendf('SENS %.1f', index-1);
+            obj.sendf('SENS %i', index-1);
         end
 
         function val = get_sensitivity(obj,value)

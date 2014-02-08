@@ -42,6 +42,7 @@ classdef LinOutputMix < qd.classes.Instrument
             for i = 1:length(obj.base_channels)
                 obj.base_channels{i}.set(base_values(i, 1));
             end
+            % TODO, add async interface.
         end
     end
     methods(Access = private)
