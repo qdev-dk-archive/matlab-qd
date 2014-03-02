@@ -75,6 +75,7 @@ classdef StandardRun < qd.run.RunWithInputs & matlab.mixin.CustomDisplay
                     fprintf('\n');
                 end
             end
+            fprintf('\n');
         end
 
         function meta = add_to_meta(obj, meta, register)
