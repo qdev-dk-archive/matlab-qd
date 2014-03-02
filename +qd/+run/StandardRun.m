@@ -66,7 +66,7 @@ classdef StandardRun < qd.run.RunWithInputs & matlab.mixin.CustomDisplay
                 fprintf('      %s from %G to %G in %d points\n', ...
                     s.chan.name, s.from, s.to, s.points);
             end
-            fprintf('    Inputs:\n    ')
+            fprintf('    Inputs:\n      ')
             for i = 1:length(obj.inputs)
                 fprintf('%s', obj.inputs{i}.name);
                 if i ~= length(obj.inputs)
