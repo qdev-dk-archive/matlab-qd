@@ -115,9 +115,5 @@ classdef attocube < qd.classes.ComInstrument
         function stop(obj)
             obj.query('stop 1');
         end
-        
-        function ret = get_angle(obj)
-            ret = -330.14*obj.ref1()/obj.ref2()+191.59;
-        end
     end
 end

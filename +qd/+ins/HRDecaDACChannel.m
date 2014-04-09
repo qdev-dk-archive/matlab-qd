@@ -239,8 +239,16 @@ classdef HRDecaDACChannel < qd.classes.Channel
             r.ramp_rate = obj.ramp_rate;
             r.slope = obj.slope;
         end
+        
+        function set_mode(obj, mode)
+            obj.mode=mode;
+        end
+        
+        function mode = get_mode(obj)
+            mode = obj.mode;
+        end
     end
-    methods(Access=private)
+    methods(Access=private)        
         function select(obj)
             % Select this channel on the DAC.
             obj.instrument.queryf('B%d;C%d;', obj.board, obj.chan);

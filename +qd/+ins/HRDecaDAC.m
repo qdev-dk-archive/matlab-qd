@@ -55,6 +55,10 @@ classdef HRDecaDAC < qd.classes.ComInstrument
                     warning('Mode must be 0,1, or 2. Now set to 0')
                 end
                 obj.queryf('B%d;M%d;', i-1, mode);
+                board_channels = {obj.channels{1+4*(i-1):4+4*(i-1)}};
+                for board_channel = board_channels
+                    obj.channel(board_channel{1}).set_mode(boards{i});
+                end
             end
         end
         

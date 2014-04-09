@@ -31,7 +31,14 @@ classdef SR5210LockIn < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R', 'theta', 'freq'};
+            r = {'X' 'Y' 'R', 'theta', 'freq', 'sensitivity'};
+        end
+        
+        function setc(obj, channel, value)
+            switch channel
+                case 'OA'
+                    obj.sendf('OA %i', value);
+            end
         end
 
         function val = getc(obj, channel)

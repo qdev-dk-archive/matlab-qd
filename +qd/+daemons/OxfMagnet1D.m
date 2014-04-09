@@ -9,9 +9,11 @@ classdef OxfMagnet1D < handle
         check_period = 3*60
         max_pt2_temp = 4.5
         max_cooling_water_temp = 21
-        magnet_com = 'COM3'
-        smtp_server = 'mail.fys.ku.dk'
-        alert_email = 'chrede@me.com'
+        magnet_com = 'COM8'
+        mail = 'guendata@gmail.com';    % Replace with your email address
+        password = 'iwannameasure';          % Replace with your email password
+        smtp_server = 'smtp.gmail.com';     % Replace with your SMTP server
+        alert_email = 'CJS.Olsen@nbi.dk'
         magnet
         server
         pt2_chan
@@ -38,6 +40,19 @@ classdef OxfMagnet1D < handle
             obj.initiate_magnet();
         end
         
+        function setup_mail(obj)
+            props = java.lang.System.getProperties;
+            props.setProperty('mail.smtp.port','465');
+            pp=props.setProperty('mail.smtp.auth','true'); %#ok
+            pp=props.setProperty('mail.smtp.socketFactory.class','javax.net.ssl.SSLSocketFactory'); %#ok
+            pp=props.setProperty('mail.smtp.socketFactory.port','465'); %#ok
+            % Apply prefs and props
+            setpref('Internet','E_mail',obj.mail);
+            setpref('Internet','SMTP_Server',obj.smtp_server);
+            setpref('Internet','SMTP_Username',obj.mail);
+            setpref('Internet','SMTP_Password',obj.password);
+        end
+        
         function run(obj)
             obj.server = obj.make_server();
             obj.server.smtp_server = obj.smtp_server;
@@ -49,6 +64,8 @@ classdef OxfMagnet1D < handle
                     obj.check_temperature()
                 catch err
                     disp(err);
+                    obj.setup_mail();
+                    sendmail(obj.alert_email, 'Error in magnet control server', getReport(err, 'extended', 'hyperlinks', 'off'))
                     %obj.server.send_alert_from_exception(...
                     %    'Error in magnet control server', err);
                 end
@@ -158,7 +175,9 @@ classdef OxfMagnet1D < handle
             obj.status = 'tripped';
             body = sprintf('Temp. PT2: %f\nTemp. cooling water: %f.\n', ...
                 obj.triton.get_temp(1), obj.get_cooling_water_temp());
-            obj.server.send_alert('Magnet too warm', body);
+            %obj.server.send_alert('Magnet too warm', body);
+            obj.setup_mail();
+            sendmail(obj.alert_email, 'Magnet too warm', body);
         end
 
         function assert_temperature_ok(obj)
