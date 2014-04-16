@@ -16,7 +16,7 @@ classdef SR830LockIn < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'oflt' 'ampl'};
+            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'oflt' 'ampl' 'auxout1' 'auxout2' 'auxout3' 'auxout4'};
         end
 
         function val = getc(obj, channel)
@@ -43,6 +43,14 @@ classdef SR830LockIn < qd.classes.ComInstrument
                     val = obj.querym('OFLT?', '%f');
                 case 'sens'
                     val = obj.querym('SENS?', '%f');
+                case 'auxout1'
+                    val = obj.querym('AUXV?1', '$f');
+                case 'auxout2'
+                    val = obj.querym('AUXV?2', '$f');
+                case 'auxout3'
+                    val = obj.querym('AUXV?1', '$f');
+                case 'auxout4'
+                    val = obj.querym('AUXV?1', '$f');
 
                 otherwise
                     error('Not supported.')
@@ -63,6 +71,14 @@ classdef SR830LockIn < qd.classes.ComInstrument
             case 'ampl'
                 % amplitude
                 obj.sendf('SLVL %.10f', value);
+            case 'auxout1'
+                    obj.sendf('AUXV1 %.10f', value);
+            case 'auxout2'
+                    obj.sendf('AUXV2 %.10f', value);
+            case 'auxout3'
+                    obj.sendf('AUXV3 %.10f', value);
+            case 'auxout4'
+                    obj.sendf('AUXV4 %.10f', value);
             otherwise
                 error('Not supported');
             end
