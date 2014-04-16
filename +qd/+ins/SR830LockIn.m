@@ -44,13 +44,13 @@ classdef SR830LockIn < qd.classes.ComInstrument
                 case 'sens'
                     val = obj.querym('SENS?', '%f');
                 case 'auxout1'
-                    val = obj.querym('AUXV?1', '$f');
+                    val = obj.querym('AUXV?1', '%f');
                 case 'auxout2'
-                    val = obj.querym('AUXV?2', '$f');
+                    val = obj.querym('AUXV?2', '%f');
                 case 'auxout3'
-                    val = obj.querym('AUXV?1', '$f');
+                    val = obj.querym('AUXV?3', '%f');
                 case 'auxout4'
-                    val = obj.querym('AUXV?1', '$f');
+                    val = obj.querym('AUXV?4', '%f');
 
                 otherwise
                     error('Not supported.')
@@ -72,13 +72,13 @@ classdef SR830LockIn < qd.classes.ComInstrument
                 % amplitude
                 obj.sendf('SLVL %.10f', value);
             case 'auxout1'
-                    obj.sendf('AUXV1 %.10f', value);
+                    obj.sendf('AUXV1, %.10f', value);
             case 'auxout2'
-                    obj.sendf('AUXV2 %.10f', value);
+                    obj.sendf('AUXV2, %.10f', value);
             case 'auxout3'
-                    obj.sendf('AUXV3 %.10f', value);
+                    obj.sendf('AUXV3, %.10f', value);
             case 'auxout4'
-                    obj.sendf('AUXV4 %.10f', value);
+                    obj.sendf('AUXV4, %.10f', value);
             otherwise
                 error('Not supported');
             end
