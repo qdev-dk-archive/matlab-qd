@@ -2,6 +2,9 @@ classdef Store < handle
     properties(GetAccess=public)
         loc
         name
+        directory
+        timestamp
+        datestamp
     end
     methods
         function obj = Store(loc, name)
@@ -10,6 +13,7 @@ classdef Store < handle
             if nargin == 2
                 obj.name = name;
             end
+            obj.directory = obj.loc;
         end
 
         function cd(obj, d)
@@ -43,6 +47,9 @@ classdef Store < handle
                   mkdir(strcat(obj.loc, '\', datestamp));
                 end
                 mkdir(directory);
+                obj.directory = directory;
+                obj.datestamp = datestamp;
+                obj.timestamp = timestamp;
             end
         end
     end
