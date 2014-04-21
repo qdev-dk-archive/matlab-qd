@@ -39,7 +39,7 @@ classdef Store < handle
                 mkdir(directory);
             else
                 % Date and time-style data directories
-                datestamp = strcat(strrep(datestr(now, 6), '/',''),datestr(now,10));
+                datestamp = strcat(datestr(now,10),strrep(datestr(now, 6), '/',''));
                 timestamp = strrep(datestr(now, 13), ':','');
                 directory = strcat(obj.loc, '\', datestamp, '\', timestamp, '_', obj.name);
 

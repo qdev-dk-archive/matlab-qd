@@ -84,14 +84,15 @@ classdef OxfMagnet3D < qd.classes.Instrument
             obj.show_waitbar_handle = varargin{1};
             state = obj.show_waitbar_handle;
         end
+        function set_sensitivity(obj, value)
+            obj.sensitivity = value;
+        end
         function setc(obj, ax, value, varargin)
             % The setc is necessary to allow use of varargin, could this be added to the channel class?
             % If I try it breaks instruments not accepting varargin.
             future = obj.setc_async( ax, value, varargin{:} );
             future.exec();
         end
-
-
         function future = setc_async(obj, ax, value, varargin)
         % The setc_async command takes takes all axes combinations; 'xy', 'xz', 'zx' etc...
         % Optionally set the rates for axes, examples:
