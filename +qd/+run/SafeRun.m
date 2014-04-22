@@ -3,6 +3,7 @@ classdef SafeRun < qd.run.StandardRun
         running = false;
         stopnow = false;
         plots = {} %Cell array containing plots
+        data = [] %Data matrix for plotting
     end
     properties(Access=private)
         columns
@@ -34,8 +35,16 @@ classdef SafeRun < qd.run.StandardRun
 
         function create_plots(obj)
             for pnum = 1:length(obj.plots)
-                h = figure(obj.plots{pnum}('fignum'));
+                fignum = obj.plots{pnum}('fignum');
+                if fignum>0
+                    figure(fignum);
+                else
+                    fignum = figure();
+                    obj.plots{pnum}('fignum') = fignum;
+                end
                 clf();
+                varargin = obj.plots{pnum}('varargin');
+                h = plot(0,0,varargin{:});
                 obj.plots{pnum}('handle') = h;
                 xname = obj.plots{pnum}('xname');
                 yname = obj.plots{pnum}('yname');
@@ -47,16 +56,19 @@ classdef SafeRun < qd.run.StandardRun
 
         function update_plots(obj, values)
             for p = obj.plots
-                h = p{1}('handle');
-                xname = p{1}('xname');
-                yname = p{1}('yname');
-                varargin = p{1}('varargin');
+                p = p{1};
+                h = p('handle');
+                fignum = p('fignum');
+                xname = p('xname');
+                yname = p('yname');
                 xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
                 yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
-                figure(h); hold on;
-                x = values(xindex);
-                y = values(yindex);
-                plot(x, y, varargin{:});
+                figure(fignum);
+                hold on;
+                obj.data = [obj.data; values];
+                x = obj.data(:,xindex);
+                y = obj.data(:,yindex);
+                set(h, 'XData', x', 'YData', y');
                 mytitle = [obj.store.datestamp, '/', obj.store.timestamp, ' ', strrep(obj.store.name,'_','\_')];
                 title(mytitle);
                 xlabel(xname);
