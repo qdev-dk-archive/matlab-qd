@@ -9,7 +9,7 @@ classdef TableWriter < handle
     
     methods
     
-        function obj = TableWriter(directory, name);
+        function obj = TableWriter(directory, name)
             obj.meta_path = fullfile(directory, [name '.json']);
             obj.data_path = fullfile(directory, [name '.dat']);
             qd.util.assert(~exist(obj.meta_path));
@@ -31,12 +31,12 @@ classdef TableWriter < handle
             obj.initialized = true;
         end
 
-        function add_point(obj, data)
+        function add_point(obj, data_point)
             if ~obj.initialized
                 obj.init();
             end
-            qd.util.assert(length(data) == length(obj.columns));
-            fprintf(obj.file, '%.16G\t', data);
+            qd.util.assert(length(data_point) == length(obj.columns));
+            fprintf(obj.file, '%.16G\t', data_point);
             fprintf(obj.file, '\n');
         end
 
