@@ -26,7 +26,7 @@ classdef QDAC < qd.classes.ComInstrument
             r = qd.util.map(@(n)['CH' num2str(n)], 1:4);
         end
         
-        function set(obj, channel, val)
+        function setc(obj, channel, val)
             if isempty(obj.ramp_rate)
                 % Just set the output to val.
                 channel_string = strsplit(channel,'CH');
@@ -59,13 +59,17 @@ classdef QDAC < qd.classes.ComInstrument
         function rate = get_ramp_rate(obj)
             rate = obj.ramp_rate;
         end
-    end
-    
-    methods(Access=private)
+        
+        function set_range(obj, low_limit, high_limit)
+            obj.range_low = low_limit;
+            obj.range_high = high_limit;
+        end
+        
         function range = get_range(obj)
             range = [obj.range_low, obj.range_high];
         end
-        
+    end
+    methods(Access=private)        
         function span = range_span(obj)
             span = obj.range_high - obj.range_low;
         end
