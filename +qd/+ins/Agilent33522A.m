@@ -53,7 +53,6 @@ classdef Agilent33522A < qd.classes.ComInstrument
             end
           end
           
-<<<<<<< HEAD
           function setc(obj, channel, value)
             switch channel
             % Set et output mode. Choose between
@@ -83,45 +82,6 @@ classdef Agilent33522A < qd.classes.ComInstrument
                 otherwise
                     error('not supported.')
             end
-          end   
-=======
-          function setc(obj, output, channel, value)
-            switch output
-                  case 1
-                    switch channel
-                        % Set et output mode. Choose between
-                        % SIN,DC,SQU,RAMP,PULS,NOIS,PRBS,ARB
-                        case 'wave'
-                            obj.sendf('SOUR1:FUNC %s', value);
-                        case 'freq'
-                            obj.sendf('SOUR1:FREQ %.16E', value);
-                        case 'volt'
-                                obj.send('SOUR1:VOLT:UNIT VRMS'); % setting units to RMS voltage
-                                obj.sendf('SOUR1:VOLT %.16E', value);
-                        case 'offset'
-                            % Use offset in DC mode
-                            obj.sendf('SOUR1:VOLT:OFFS %.16E', value);
-                        otherwise
-                            error('not supported.')
-                    end
-                  case 2
-                      switch channel
-                            % Set et output mode. Choose between
-                            % SIN,DC,SQU,RAMP,PULS,NOIS,PRBS,ARB
-                            case 'wave'
-                                obj.sendf('SOUR2:FUNC %s', value);
-                            case 'freq'
-                                obj.sendf('SOUR2:FREQ %.16E', value);
-                            case 'volt'
-                                obj.sendf('SOUR2:VOLT:UNIT VRMS'); % setting units to RMS voltage
-                                obj.sendf('SOUR2:VOLT %.16E', value);
-                            case 'offset'
-                              % Use offset in DC mode
-                              obj.sendf('SOUR2:VOLT:OFFS %.16E', value);
-                            otherwise
-                                error('not supported.')
-                      end
-            end   
           end
           
           function ramp_rate = get_ramp_rate_offset(obj)
@@ -151,6 +111,6 @@ classdef Agilent33522A < qd.classes.ComInstrument
               steps_raw = abs(current_value-value)/obj.get_ramp_rate_offset;
               steps = round(steps_raw);
           end
->>>>>>> a2afe4093e61024ca8a7760e305a85742c5e5fb1
+
     end
 end

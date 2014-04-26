@@ -23,13 +23,27 @@ classdef SafeRun < qd.run.StandardRun
             disp('Run stopped.');
             obj.stopnow = true;
         end
-
-        function add_plot(obj, xname, yname, fignum, varargin)
+        
+        % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
+        function add_plot(obj, xname, yname, title, fignum, varargin)
             p = containers.Map;
             p('xname') = xname;
             p('yname') = yname;
             p('varargin') = varargin;
             p('fignum') = fignum;
+            p('title') = title;
+            obj.plots{end+1} = p;
+        end
+        
+        % varargin defines be the colormap type: hot, jet ...
+        function add_2dplot(obj, xname, yname, zname, title, fignum, varargin)
+            p = containers.Map;
+            p('xname') = xname;
+            p('yname') = yname;
+            p('zname') = zname;
+            p('varargin') = varargin;
+            p('fignum') = fignum;
+            p('title') = title;
             obj.plots{end+1} = p;
         end
 
@@ -44,13 +58,49 @@ classdef SafeRun < qd.run.StandardRun
                 end
                 clf();
                 varargin = obj.plots{pnum}('varargin');
-                h = plot(0,0,varargin{:});
-                obj.plots{pnum}('handle') = h;
-                xname = obj.plots{pnum}('xname');
-                yname = obj.plots{pnum}('yname');
-                xlabel(xname);
-                ylabel(yname);
-                title(strrep(obj.store.name,'_','\_'));
+                Keyset = {'zname'};
+                surfaceplot = isKey(obj.plots{pnum},Keyset);
+                if ~surfaceplot
+                    h = plot(0,0,varargin{:});
+                    obj.plots{pnum}('handle') = h;
+                    xname = obj.plots{pnum}('xname');
+                    yname = obj.plots{pnum}('yname');
+                    title1 = obj.plots{pnum}('title');
+                    xlabel(xname);
+                    ylabel(yname);
+                    title(title1);
+                else
+                    x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
+                    y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
+                    x_extents = [min(x_limits) max(x_limits)];
+                    y_extents = [min(y_limits) max(y_limits)];
+                    x_points = obj.sweeps{1,1}.points;
+                    y_points = obj.sweeps{1,2}.points;
+                    xp = linspace(x_extents(1), x_extents(2), x_points);
+                    yp = linspace(y_extents(1), y_extents(2), y_points);
+                    [X, Y] = meshgrid(xp, yp);
+                    obj.plots{pnum}('gridX') = X;
+                    obj.plots{pnum}('gridY') = Y;
+                    obj.plots{pnum}('counter_outloop') = 0;
+                    obj.plots{pnum}('counter_inloop') = 1;
+                    xdata = obj.sweeps{1,1}.values;
+                    ydata = obj.sweeps{1,2}.values;
+                    zdata = nan(length(ydata),length(xdata));
+                    obj.plots{pnum}('zdata') = zdata;
+                    h = imagesc(x_extents, y_extents, zdata);
+                    colormap(varargin{:});
+                    obj.plots{pnum}('handle') = h;
+                    cb = colorbar;
+                    set(gca,'YDir','normal');
+                    xname = obj.plots{pnum}('xname');
+                    yname = obj.plots{pnum}('yname');
+                    zname = obj.plots{pnum}('zname');
+                    title1 = obj.plots{pnum}('title');
+                    xlabel(xname);
+                    ylabel(yname);
+                    ylabel(cb, zname);
+                    title(title1);
+                end
             end
         end
 
@@ -61,18 +111,35 @@ classdef SafeRun < qd.run.StandardRun
                 fignum = p('fignum');
                 xname = p('xname');
                 yname = p('yname');
+                title1 = p('title');
                 xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
                 yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
                 figure(fignum);
-                hold on;
                 obj.data = [obj.data; values];
                 x = obj.data(:,xindex);
                 y = obj.data(:,yindex);
-                set(h, 'XData', x', 'YData', y');
-                mytitle = [obj.store.datestamp, '/', obj.store.timestamp, ' ', strrep(obj.store.name,'_','\_')];
-                title(mytitle);
-                xlabel(xname);
-                ylabel(yname);
+                Keyset = {'zname'};
+                surfaceplot = isKey(p,Keyset);
+                if ~surfaceplot
+                    hold on;
+                    set(h, 'XData', x', 'YData', y');
+                else
+                    j = p('counter_outloop');
+                    i = p('counter_inloop');
+                    zdata = p('zdata');
+                    zname = p('zname');
+                    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
+                    z = obj.data(:,zindex);
+                    zdata(i,j+1) = z(i+j*obj.sweeps{1,2}.points);
+                    p('zdata') = zdata;
+                    if p('counter_inloop') == obj.sweeps{1,2}.points
+                        set(h, 'Cdata', zdata);
+                        p('counter_outloop') = j+1;
+                        p('counter_inloop') = 1;
+                    else
+                        p('counter_inloop') = i+1;
+                    end
+                end
             end
         end
 
