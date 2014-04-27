@@ -4,6 +4,7 @@ classdef SafeRun < qd.run.StandardRun
         stopnow = false;
         plots = {} %Cell array containing plots
         data = [] %Data matrix for plotting
+        zdata = []
     end
     properties(Access=private)
         columns
@@ -23,7 +24,7 @@ classdef SafeRun < qd.run.StandardRun
             disp('Run stopped.');
             obj.stopnow = true;
         end
-        
+
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
         function add_plot(obj, xname, yname, title, fignum, varargin)
             p = containers.Map;
@@ -34,7 +35,7 @@ classdef SafeRun < qd.run.StandardRun
             p('title') = title;
             obj.plots{end+1} = p;
         end
-        
+
         % varargin defines be the colormap type: hot, jet ...
         function add_2dplot(obj, xname, yname, zname, title, fignum, varargin)
             p = containers.Map;
@@ -86,7 +87,8 @@ classdef SafeRun < qd.run.StandardRun
                     xdata = obj.sweeps{1,1}.values;
                     ydata = obj.sweeps{1,2}.values;
                     zdata = nan(length(ydata),length(xdata));
-                    obj.plots{pnum}('zdata') = zdata;
+                    % obj.plots{pnum}('zdata') = zdata;
+                    obj.zdata = zdata;
                     h = imagesc(x_extents, y_extents, zdata);
                     colormap(varargin{:});
                     obj.plots{pnum}('handle') = h;
@@ -124,20 +126,12 @@ classdef SafeRun < qd.run.StandardRun
                     hold on;
                     set(h, 'XData', x', 'YData', y');
                 else
-                    j = p('counter_outloop');
-                    i = p('counter_inloop');
-                    zdata = p('zdata');
-                    zname = p('zname');
-                    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
-                    z = obj.data(:,zindex);
-                    zdata(i,j+1) = z(i+j*obj.sweeps{1,2}.points);
-                    p('zdata') = zdata;
-                    if p('counter_inloop') == obj.sweeps{1,2}.points
-                        set(h, 'Cdata', zdata);
-                        p('counter_outloop') = j+1;
-                        p('counter_inloop') = 1;
-                    else
-                        p('counter_inloop') = i+1;
+                    y_points = obj.sweeps{1,2}.points;
+                    if mod(length(obj.data),y_points) == 0
+                        zname = p('zname');
+                        zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
+                        z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
+                        set(h, 'XData', x, 'YData', y, 'Cdata', z);
                     end
                 end
             end
