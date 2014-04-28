@@ -4,7 +4,11 @@ classdef SafeRun < qd.run.StandardRun
         stopnow = false;
         plots = {} %Cell array containing plots
         data = [] %Data matrix for plotting
+<<<<<<< HEAD
         zdata = [] %Data matrix for 2d surface plot
+=======
+        zdata = []
+>>>>>>> FETCH_HEAD
     end
     properties(Access=private)
         columns
@@ -86,11 +90,17 @@ classdef SafeRun < qd.run.StandardRun
                     obj.plots{pnum}('counter_inloop') = 1;
                     xdata = obj.sweeps{1,1}.values;
                     ydata = obj.sweeps{1,2}.values;
+<<<<<<< HEAD
                     obj.zdata = nan(length(ydata),length(xdata));
                     h = imagesc(x_extents, y_extents, obj.zdata);
                     % zdata = nan(length(ydata),length(xdata));
                     % obj.plots{pnum}('zdata') = zdata;
                     % obj.zdata = zdata;
+=======
+                    zdata = nan(length(ydata),length(xdata));
+                    % obj.plots{pnum}('zdata') = zdata;
+                    obj.zdata = zdata;
+>>>>>>> FETCH_HEAD
                     h = imagesc(x_extents, y_extents, zdata);
                     colormap(varargin{:});
                     obj.plots{pnum}('handle') = h;
@@ -125,6 +135,7 @@ classdef SafeRun < qd.run.StandardRun
                     hold on;
                     set(h, 'XData', x', 'YData', y');
                 else
+<<<<<<< HEAD
                     inner_loop_points = obj.sweeps{1,2}.points;
                     outer_loop_points = obj.sweeps{1,1}.points;
                     zname = p('zname');
@@ -143,6 +154,14 @@ classdef SafeRun < qd.run.StandardRun
                     %    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
                     %    z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
                     %    set(h, 'XData', x, 'YData', y, 'Cdata', z);
+=======
+                    y_points = obj.sweeps{1,2}.points;
+                    if mod(length(obj.data),y_points) == 0
+                        zname = p('zname');
+                        zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
+                        z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
+                        set(h, 'XData', x, 'YData', y, 'Cdata', z);
+>>>>>>> FETCH_HEAD
                     end
                 end
             end
