@@ -88,10 +88,6 @@ classdef SafeRun < qd.run.StandardRun
                     ydata = obj.sweeps{1,2}.values;
                     obj.zdata = nan(length(ydata),length(xdata));
                     h = imagesc(x_extents, y_extents, obj.zdata);
-                    % zdata = nan(length(ydata),length(xdata));
-                    % obj.plots{pnum}('zdata') = zdata;
-                    % obj.zdata = zdata;
-                    h = imagesc(x_extents, y_extents, zdata);
                     colormap(varargin{:});
                     obj.plots{pnum}('handle') = h;
                     cb = colorbar;
@@ -137,12 +133,6 @@ classdef SafeRun < qd.run.StandardRun
                         end
                         obj.zdata = reshape(z,inner_loop_points,outer_loop_points);
                         set(h, 'Cdata', obj.zdata);
-                    %y_points = obj.sweeps{1,2}.points;
-                    %if mod(length(obj.data),y_points) == 0
-                    %    zname = p('zname');
-                    %    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
-                    %    z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
-                    %    set(h, 'XData', x, 'YData', y, 'Cdata', z);
                     end
                 end
             end
