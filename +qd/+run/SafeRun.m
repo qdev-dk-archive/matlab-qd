@@ -4,6 +4,7 @@ classdef SafeRun < qd.run.StandardRun
         stopnow = false;
         plots = {} %Cell array containing plots
         data = [] %Data matrix for plotting
+        zdata = [] %Data matrix for 2d surface plot
     end
     properties(Access=private)
         columns
@@ -23,7 +24,7 @@ classdef SafeRun < qd.run.StandardRun
             disp('Run stopped.');
             obj.stopnow = true;
         end
-        
+
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
         function add_plot(obj, xname, yname, title, fignum, varargin)
             p = containers.Map;
@@ -34,7 +35,7 @@ classdef SafeRun < qd.run.StandardRun
             p('title') = title;
             obj.plots{end+1} = p;
         end
-        
+
         % varargin defines be the colormap type: hot, jet ...
         function add_2dplot(obj, xname, yname, zname, title, fignum, varargin)
             p = containers.Map;
@@ -85,8 +86,11 @@ classdef SafeRun < qd.run.StandardRun
                     obj.plots{pnum}('counter_inloop') = 1;
                     xdata = obj.sweeps{1,1}.values;
                     ydata = obj.sweeps{1,2}.values;
-                    zdata = nan(length(ydata),length(xdata));
-                    obj.plots{pnum}('zdata') = zdata;
+                    obj.zdata = nan(length(ydata),length(xdata));
+                    h = imagesc(x_extents, y_extents, obj.zdata);
+                    % zdata = nan(length(ydata),length(xdata));
+                    % obj.plots{pnum}('zdata') = zdata;
+                    % obj.zdata = zdata;
                     h = imagesc(x_extents, y_extents, zdata);
                     colormap(varargin{:});
                     obj.plots{pnum}('handle') = h;
@@ -107,37 +111,38 @@ classdef SafeRun < qd.run.StandardRun
         function update_plots(obj, values)
             for p = obj.plots
                 p = p{1};
-                h = p('handle');
-                fignum = p('fignum');
-                xname = p('xname');
-                yname = p('yname');
-                title1 = p('title');
-                xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
-                yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
-                figure(fignum);
                 obj.data = [obj.data; values];
-                x = obj.data(:,xindex);
-                y = obj.data(:,yindex);
-                Keyset = {'zname'};
-                surfaceplot = isKey(p,Keyset);
+                h = p('handle');
+                keyset = {'zname'};
+                surfaceplot = isKey(p,keyset);
                 if ~surfaceplot
+                    xname = p('xname');
+                    yname = p('yname');
+                    xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
+                    yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
+                    x = obj.data(:,xindex);
+                    y = obj.data(:,yindex);
                     hold on;
                     set(h, 'XData', x', 'YData', y');
                 else
-                    j = p('counter_outloop');
-                    i = p('counter_inloop');
-                    zdata = p('zdata');
+                    inner_loop_points = obj.sweeps{1,2}.points;
+                    outer_loop_points = obj.sweeps{1,1}.points;
                     zname = p('zname');
                     zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
                     z = obj.data(:,zindex);
-                    zdata(i,j+1) = z(i+j*obj.sweeps{1,2}.points);
-                    p('zdata') = zdata;
-                    if p('counter_inloop') == obj.sweeps{1,2}.points
-                        set(h, 'Cdata', zdata);
-                        p('counter_outloop') = j+1;
-                        p('counter_inloop') = 1;
-                    else
-                        p('counter_inloop') = i+1;
+                    if ~mod(length(z),inner_loop_points)
+                        if length(z) ~= inner_loop_points*outer_loop_points
+                             dif = inner_loop_points.*outer_loop_points - length(z);
+                             z = [z;nan(dif,1)];
+                        end
+                        obj.zdata = reshape(z,inner_loop_points,outer_loop_points);
+                        set(h, 'Cdata', obj.zdata);
+                    %y_points = obj.sweeps{1,2}.points;
+                    %if mod(length(obj.data),y_points) == 0
+                    %    zname = p('zname');
+                    %    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
+                    %    z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
+                    %    set(h, 'XData', x, 'YData', y, 'Cdata', z);
                     end
                 end
             end
