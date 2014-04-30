@@ -109,9 +109,9 @@ classdef SafeRun < qd.run.StandardRun
         end
 
         function update_plots(obj, values)
+            obj.data = [obj.data; values];
             for p = obj.plots
                 p = p{1};
-                obj.data = [obj.data; values];
                 h = p('handle');
                 keyset = {'zname'};
                 surfaceplot = isKey(p,keyset);
