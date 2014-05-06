@@ -26,13 +26,13 @@ classdef SafeRun < qd.run.StandardRun
         end
 
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
-        function add_plot(obj, xname, yname, title, fignum, varargin)
+        function add_plot(obj, xname, yname, varargin)
             p = containers.Map;
             p('xname') = xname;
             p('yname') = yname;
             p('varargin') = varargin;
-            p('fignum') = fignum;
-            p('title') = title;
+            p('fignum') = 0;
+            p('title') = '';
             obj.plots{end+1} = p;
         end
 
@@ -61,15 +61,16 @@ classdef SafeRun < qd.run.StandardRun
                 varargin = obj.plots{pnum}('varargin');
                 Keyset = {'zname'};
                 surfaceplot = isKey(obj.plots{pnum},Keyset);
+                mytitle = obj.plots{pnum}('title');
+                if isempty(mytitle)
+                    obj.plots{pnum}('title') = [obj.store.datestamp, '/', obj.store.timestamp, ' ', strrep(obj.store.name,'_','\_')];
+                end
                 if ~surfaceplot
                     h = plot(0,0,varargin{:});
                     obj.plots{pnum}('handle') = h;
-                    xname = obj.plots{pnum}('xname');
-                    yname = obj.plots{pnum}('yname');
-                    title1 = obj.plots{pnum}('title');
-                    xlabel(xname);
-                    ylabel(yname);
-                    title(title1);
+                    xlabel(obj.plots{pnum}('xname'));
+                    ylabel(obj.plots{pnum}('yname'));
+                    title(obj.plots{pnum}('title'));
                 else
                     x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
                     y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
@@ -88,10 +89,6 @@ classdef SafeRun < qd.run.StandardRun
                     ydata = obj.sweeps{1,2}.values;
                     obj.zdata = nan(length(ydata),length(xdata));
                     h = imagesc(x_extents, y_extents, obj.zdata);
-                    % zdata = nan(length(ydata),length(xdata));
-                    % obj.plots{pnum}('zdata') = zdata;
-                    % obj.zdata = zdata;
-                    h = imagesc(x_extents, y_extents, zdata);
                     colormap(varargin{:});
                     obj.plots{pnum}('handle') = h;
                     cb = colorbar;
@@ -99,11 +96,10 @@ classdef SafeRun < qd.run.StandardRun
                     xname = obj.plots{pnum}('xname');
                     yname = obj.plots{pnum}('yname');
                     zname = obj.plots{pnum}('zname');
-                    title1 = obj.plots{pnum}('title');
                     xlabel(xname);
                     ylabel(yname);
                     ylabel(cb, zname);
-                    title(title1);
+                    title(mytitle);
                 end
             end
         end
@@ -137,14 +133,16 @@ classdef SafeRun < qd.run.StandardRun
                         end
                         obj.zdata = reshape(z,inner_loop_points,outer_loop_points);
                         set(h, 'Cdata', obj.zdata);
-                    %y_points = obj.sweeps{1,2}.points;
-                    %if mod(length(obj.data),y_points) == 0
-                    %    zname = p('zname');
-                    %    zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
-                    %    z = reshape(obj.data(:,zindex), y_points, length(obj.data)/y_points);
-                    %    set(h, 'XData', x, 'YData', y, 'Cdata', z);
                     end
                 end
+            end
+        end
+
+        function save_plots(obj)
+            for plot = obj.plots
+                figure(plot{1}('fignum'));
+                name = [strrep(plot{1}('xname'),'/','_'), '_vs_', strrep(plot{1}('yname'),'/','_')];
+                saveas(gcf, [obj.store.directory, '/', name, '.png'], 'png');
             end
         end
 
@@ -225,9 +223,6 @@ classdef SafeRun < qd.run.StandardRun
                 for inp = obj.inputs
                     futures{end + 1} = inp{1}.get_async();
                 end
-                % for sweep = obj.sweeps
-                %     values(end + 1) = earlier_values(end);
-                % end
                 for future = futures
                     values(end + 1) = future{1}.exec();
                 end
@@ -250,31 +245,51 @@ classdef SafeRun < qd.run.StandardRun
             % function with one less channel to sweep.
             sweep = sweeps{1};
             next_sweeps = sweeps(2:end);
-            for value = sweep.values
-                sweep.chan.set(value);
-                if ~isempty(sweep.tolerance)
-                    curval = sweep.chan.get();
-                    fprintf('Setting %s=%f to %f\r',sweep.chan.name,curval,value);
-                    while true
-                        curval = sweep.chan.get();
-                        if abs(value-curval)<sweep.tolerance
-                            break;
-                        else
-                            pause(sweep.settle);
-                        end
+            if(obj.is_time_chan(sweep.chan) && (~sweep.points))
+                % This is supposed to run until sweep.to time has passed,
+                % and then measure as many points as possible during the given time.
+                % sometimes you don't know how long it takes to set a channel
+                settle = 0;
+                settle = max(settle, sweep.settle);
+                % Go to starting point and begin timer
+                sweep.chan.set(sweep.from);
+                while true
+                    value = sweep.chan.get();
+                    if value > sweep.to
+                        break
                     end
-                else
-                    pause(sweep.settle);
+                    if obj.stopnow
+                        break
+                    end
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], table);
                 end
-                %settle = max(settle, sweep.settle);
-                obj.handle_sweeps(next_sweeps, [earlier_values value], table);
-                if ~isempty(next_sweeps)
-                    % Nicely seperate everything for gnuplot.
-                    table.add_divider();
-                end
-                % If the measurement has to be stopped, break here
-                if obj.stopnow
-                    break
+            else
+                for value = sweep.values
+                    sweep.chan.set(value);
+                    if ~isempty(sweep.tolerance)
+                        curval = sweep.chan.get();
+                        fprintf('Setting %s=%f to %f\r',sweep.chan.name,curval,value);
+                        while true
+                            curval = sweep.chan.get();
+                            if abs(value-curval)<sweep.tolerance
+                                break;
+                            else
+                                pause(sweep.settle);
+                            end
+                        end
+                    else
+                        pause(sweep.settle);
+                    end
+                    %settle = max(settle, sweep.settle);
+                    obj.handle_sweeps(next_sweeps, [earlier_values value], table);
+                    if ~isempty(next_sweeps)
+                        % Nicely seperate everything for gnuplot.
+                        table.add_divider();
+                    end
+                    % If the measurement has to be stopped, break here
+                    if obj.stopnow
+                        break
+                    end
                 end
             end
         end
