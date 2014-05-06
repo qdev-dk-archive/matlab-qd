@@ -5,6 +5,7 @@ classdef SafeRun < qd.run.StandardRun
         plots = {} %Cell array containing plots
         data = [] %Data matrix for plotting
         zdata = [] %Data matrix for 2d surface plot
+        %wdata = [] %Data matrix for waterfall plot
     end
     properties(Access=private)
         columns
@@ -31,8 +32,14 @@ classdef SafeRun < qd.run.StandardRun
             p('xname') = xname;
             p('yname') = yname;
             p('varargin') = varargin;
+<<<<<<< HEAD
             p('fignum') = 0;
             p('title') = '';
+=======
+            p('fignum') = fignum;
+            p('title') = title;
+            p('type') = '1d';
+>>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
             obj.plots{end+1} = p;
         end
 
@@ -45,6 +52,20 @@ classdef SafeRun < qd.run.StandardRun
             p('varargin') = varargin;
             p('fignum') = fignum;
             p('title') = title;
+            p('type') = 'surface';
+            obj.plots{end+1} = p;
+        end
+        
+        % varargin defines the plot type: points or line ...
+        function add_waterfall_plot(obj, xname, yname, title, fignum, varargin)
+            p = containers.Map;
+            p('xname') = xname;
+            p('yname') = yname;
+            p('varargin') = varargin;
+            p('fignum') = fignum;
+            p('title') = title;
+            p('type') = 'waterfall';
+            p('counter') = 0;
             obj.plots{end+1} = p;
         end
 
@@ -52,13 +73,14 @@ classdef SafeRun < qd.run.StandardRun
             for pnum = 1:length(obj.plots)
                 fignum = obj.plots{pnum}('fignum');
                 if fignum>0
-                    figure(fignum);
+                    hFig = figure(fignum);
                 else
-                    fignum = figure();
-                    obj.plots{pnum}('fignum') = fignum;
+                    hFig = figure();
+                    obj.plots{pnum}('fignum') = hFig;
                 end
                 clf();
                 varargin = obj.plots{pnum}('varargin');
+<<<<<<< HEAD
                 Keyset = {'zname'};
                 surfaceplot = isKey(obj.plots{pnum},Keyset);
                 mytitle = obj.plots{pnum}('title');
@@ -72,19 +94,23 @@ classdef SafeRun < qd.run.StandardRun
                     ylabel(obj.plots{pnum}('yname'));
                     title(obj.plots{pnum}('title'));
                 else
+=======
+                type = obj.plots{pnum}('type');
+                if strcmp(type,'1d') || strcmp(type,'waterfall')
+                    h = plot(NaN,NaN,varargin{:});
+                    obj.plots{pnum}('handle') = h;
+                    xname = obj.plots{pnum}('xname');
+                    yname = obj.plots{pnum}('yname');
+                    title1 = obj.plots{pnum}('title');
+                    xlabel(xname);
+                    ylabel(yname);
+                    title(title1);
+                elseif strcmp(type,'surface')
+>>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                     x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
                     y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
                     x_extents = [min(x_limits) max(x_limits)];
                     y_extents = [min(y_limits) max(y_limits)];
-                    x_points = obj.sweeps{1,1}.points;
-                    y_points = obj.sweeps{1,2}.points;
-                    xp = linspace(x_extents(1), x_extents(2), x_points);
-                    yp = linspace(y_extents(1), y_extents(2), y_points);
-                    [X, Y] = meshgrid(xp, yp);
-                    obj.plots{pnum}('gridX') = X;
-                    obj.plots{pnum}('gridY') = Y;
-                    obj.plots{pnum}('counter_outloop') = 0;
-                    obj.plots{pnum}('counter_inloop') = 1;
                     xdata = obj.sweeps{1,1}.values;
                     ydata = obj.sweeps{1,2}.values;
                     obj.zdata = nan(length(ydata),length(xdata));
@@ -99,7 +125,13 @@ classdef SafeRun < qd.run.StandardRun
                     xlabel(xname);
                     ylabel(yname);
                     ylabel(cb, zname);
+<<<<<<< HEAD
                     title(mytitle);
+=======
+                    title(title1);
+                else
+                    error('Supported plottypes is: 1d, surface and waterfall');
+>>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                 end
             end
         end
@@ -109,18 +141,18 @@ classdef SafeRun < qd.run.StandardRun
             for p = obj.plots
                 p = p{1};
                 h = p('handle');
-                keyset = {'zname'};
-                surfaceplot = isKey(p,keyset);
-                if ~surfaceplot
+                type = p('type');
+                if strcmp(type,'1d')
                     xname = p('xname');
                     yname = p('yname');
                     xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
                     yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
                     x = obj.data(:,xindex);
                     y = obj.data(:,yindex);
+                    % hold on doesn't do anything!
                     hold on;
                     set(h, 'XData', x', 'YData', y');
-                else
+                elseif strcmp(type,'surface')
                     inner_loop_points = obj.sweeps{1,2}.points;
                     outer_loop_points = obj.sweeps{1,1}.points;
                     zname = p('zname');
@@ -133,6 +165,28 @@ classdef SafeRun < qd.run.StandardRun
                         end
                         obj.zdata = reshape(z,inner_loop_points,outer_loop_points);
                         set(h, 'Cdata', obj.zdata);
+<<<<<<< HEAD
+=======
+                    end
+                elseif strcmp(type,'waterfall')
+                    inner_loop_points = obj.sweeps{1,2}.points;
+                    outer_loop_points = obj.sweeps{1,1}.points;
+                    counter = p('counter');
+                    xname = p('xname');
+                    xindex = not(cellfun('isempty', strfind(obj.columns, xname)));
+                    x = obj.data(:,xindex);
+                    if ~mod(length(x),inner_loop_points)
+                        yname = p('yname');
+                        yindex = not(cellfun('isempty', strfind(obj.columns, yname)));
+                        y = obj.data(inner_loop_points*counter+1:inner_loop_points+inner_loop_points*counter,yindex);
+                        x = obj.data(inner_loop_points*counter+1:inner_loop_points+inner_loop_points*counter,xindex);
+                        figure(p('fignum'));
+                        h = plot(x,y);
+                        set(h,'color',hsv2rgb([1-counter/(outer_loop_points-1) 1 1]));
+                        p('handle') = h;
+                        hold on;
+                        p('counter') = counter+1;
+>>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                     end
                 end
             end
