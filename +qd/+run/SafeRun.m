@@ -32,14 +32,11 @@ classdef SafeRun < qd.run.StandardRun
             p('xname') = xname;
             p('yname') = yname;
             p('varargin') = varargin;
-<<<<<<< HEAD
             p('fignum') = 0;
             p('title') = '';
-=======
             p('fignum') = fignum;
             p('title') = title;
             p('type') = '1d';
->>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
             obj.plots{end+1} = p;
         end
 
@@ -55,7 +52,7 @@ classdef SafeRun < qd.run.StandardRun
             p('type') = 'surface';
             obj.plots{end+1} = p;
         end
-        
+
         % varargin defines the plot type: points or line ...
         function add_waterfall_plot(obj, xname, yname, title, fignum, varargin)
             p = containers.Map;
@@ -80,7 +77,6 @@ classdef SafeRun < qd.run.StandardRun
                 end
                 clf();
                 varargin = obj.plots{pnum}('varargin');
-<<<<<<< HEAD
                 Keyset = {'zname'};
                 surfaceplot = isKey(obj.plots{pnum},Keyset);
                 mytitle = obj.plots{pnum}('title');
@@ -94,7 +90,6 @@ classdef SafeRun < qd.run.StandardRun
                     ylabel(obj.plots{pnum}('yname'));
                     title(obj.plots{pnum}('title'));
                 else
-=======
                 type = obj.plots{pnum}('type');
                 if strcmp(type,'1d') || strcmp(type,'waterfall')
                     h = plot(NaN,NaN,varargin{:});
@@ -106,7 +101,6 @@ classdef SafeRun < qd.run.StandardRun
                     ylabel(yname);
                     title(title1);
                 elseif strcmp(type,'surface')
->>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                     x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
                     y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
                     x_extents = [min(x_limits) max(x_limits)];
@@ -125,13 +119,10 @@ classdef SafeRun < qd.run.StandardRun
                     xlabel(xname);
                     ylabel(yname);
                     ylabel(cb, zname);
-<<<<<<< HEAD
                     title(mytitle);
-=======
                     title(title1);
                 else
                     error('Supported plottypes is: 1d, surface and waterfall');
->>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                 end
             end
         end
@@ -165,8 +156,6 @@ classdef SafeRun < qd.run.StandardRun
                         end
                         obj.zdata = reshape(z,inner_loop_points,outer_loop_points);
                         set(h, 'Cdata', obj.zdata);
-<<<<<<< HEAD
-=======
                     end
                 elseif strcmp(type,'waterfall')
                     inner_loop_points = obj.sweeps{1,2}.points;
@@ -186,7 +175,6 @@ classdef SafeRun < qd.run.StandardRun
                         p('handle') = h;
                         hold on;
                         p('counter') = counter+1;
->>>>>>> 3e1c2a27d439d7f8853f1aa7abef249918d3ac28
                     end
                 end
             end
