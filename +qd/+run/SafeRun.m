@@ -34,8 +34,6 @@ classdef SafeRun < qd.run.StandardRun
             p('varargin') = varargin;
             p('fignum') = 0;
             p('title') = '';
-            p('fignum') = fignum;
-            p('title') = title;
             p('type') = '1d';
             obj.plots{end+1} = p;
         end
@@ -90,39 +88,40 @@ classdef SafeRun < qd.run.StandardRun
                     ylabel(obj.plots{pnum}('yname'));
                     title(obj.plots{pnum}('title'));
                 else
-                type = obj.plots{pnum}('type');
-                if strcmp(type,'1d') || strcmp(type,'waterfall')
-                    h = plot(NaN,NaN,varargin{:});
-                    obj.plots{pnum}('handle') = h;
-                    xname = obj.plots{pnum}('xname');
-                    yname = obj.plots{pnum}('yname');
-                    title1 = obj.plots{pnum}('title');
-                    xlabel(xname);
-                    ylabel(yname);
-                    title(title1);
-                elseif strcmp(type,'surface')
-                    x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
-                    y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
-                    x_extents = [min(x_limits) max(x_limits)];
-                    y_extents = [min(y_limits) max(y_limits)];
-                    xdata = obj.sweeps{1,1}.values;
-                    ydata = obj.sweeps{1,2}.values;
-                    obj.zdata = nan(length(ydata),length(xdata));
-                    h = imagesc(x_extents, y_extents, obj.zdata);
-                    colormap(varargin{:});
-                    obj.plots{pnum}('handle') = h;
-                    cb = colorbar;
-                    set(gca,'YDir','normal');
-                    xname = obj.plots{pnum}('xname');
-                    yname = obj.plots{pnum}('yname');
-                    zname = obj.plots{pnum}('zname');
-                    xlabel(xname);
-                    ylabel(yname);
-                    ylabel(cb, zname);
-                    title(mytitle);
-                    title(title1);
-                else
-                    error('Supported plottypes is: 1d, surface and waterfall');
+                    type = obj.plots{pnum}('type');
+                    if strcmp(type,'1d') || strcmp(type,'waterfall')
+                        h = plot(NaN,NaN,varargin{:});
+                        obj.plots{pnum}('handle') = h;
+                        xname = obj.plots{pnum}('xname');
+                        yname = obj.plots{pnum}('yname');
+                        title1 = obj.plots{pnum}('title');
+                        xlabel(xname);
+                        ylabel(yname);
+                        title(title1);
+                    elseif strcmp(type,'surface')
+                        x_limits = [obj.sweeps{1,1}.from obj.sweeps{1,1}.to];
+                        y_limits = [obj.sweeps{1,2}.from obj.sweeps{1,2}.to];
+                        x_extents = [min(x_limits) max(x_limits)];
+                        y_extents = [min(y_limits) max(y_limits)];
+                        xdata = obj.sweeps{1,1}.values;
+                        ydata = obj.sweeps{1,2}.values;
+                        obj.zdata = nan(length(ydata),length(xdata));
+                        h = imagesc(x_extents, y_extents, obj.zdata);
+                        colormap(varargin{:});
+                        obj.plots{pnum}('handle') = h;
+                        cb = colorbar;
+                        set(gca,'YDir','normal');
+                        xname = obj.plots{pnum}('xname');
+                        yname = obj.plots{pnum}('yname');
+                        zname = obj.plots{pnum}('zname');
+                        xlabel(xname);
+                        ylabel(yname);
+                        ylabel(cb, zname);
+                        title(mytitle);
+                        title(title1);
+                    else
+                        error('Supported plottypes is: 1d, surface and waterfall');
+                    end
                 end
             end
         end
@@ -142,7 +141,12 @@ classdef SafeRun < qd.run.StandardRun
                     y = obj.data(:,yindex);
                     % hold on doesn't do anything!
                     hold on;
-                    set(h, 'XData', x', 'YData', y');
+                    try
+                        set(h, 'XData', x', 'YData', y');
+                    catch
+                        obj.create_plots();
+                        set(h, 'XData', x', 'YData', y');
+                    end
                 elseif strcmp(type,'surface')
                     inner_loop_points = obj.sweeps{1,2}.points;
                     outer_loop_points = obj.sweeps{1,1}.points;
@@ -214,6 +218,7 @@ classdef SafeRun < qd.run.StandardRun
             obj.sweeps{end + 1} = sweep;
         end
     end
+    
 
     methods(Access=protected)
         function perform_run(obj, out_dir)

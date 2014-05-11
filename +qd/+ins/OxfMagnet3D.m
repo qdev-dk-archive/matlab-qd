@@ -325,9 +325,9 @@ classdef OxfMagnet3D < qd.classes.Instrument
             obj.axes_limits = lim;
         end
 
-        function set_sweep_rate(obj, sweep_rate)
-            obj.sweep_rate = sweep_rate;
-        end
+%         function set_sweep_rate(obj, sweep_rate)
+%             obj.sweep_rate = sweep_rate;
+%         end
 
         function val = get_ramp_rate( obj, ax )
             val = [];
