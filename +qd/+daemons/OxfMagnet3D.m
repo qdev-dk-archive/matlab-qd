@@ -26,7 +26,13 @@ classdef OxfMagnet3D < handle
 
     methods
 
-        function obj = OxfMagnet3D(com_port)
+        % Call as OxfMagnet3D('COM1') or OxfMagnet3D('COM1', 'no_triton'). If
+        % the 'skip_checks' parameter is added, the magnet will not contact
+        % the cryostat to check for temperature rises.
+        function obj = OxfMagnet3D(com_port, varargin)
+            p = inputParser();
+            p.addOptional('no_triton', [], @(x)strcmp(x, 'no_triton'));
+            p.parse(varargin{:});
             obj.magnet_serial = serial(com_port);
             % If you want to use Ethernet connection to mercury UPS: ping times are faster,
             % I guess it would be speed up if there is a direct conntection pypassing the LAN - Merlin
@@ -34,7 +40,11 @@ classdef OxfMagnet3D < handle
             fopen(obj.magnet_serial);
             obj.magnet = qd.protocols.OxfordSCPI(...
                 @(req)query(obj.magnet_serial, req, '%s\n', '%s\n'));
-            obj.triton = qd.ins.Triton();
+            if p.Results.no_triton
+                obj.triton = []
+            else
+                obj.triton = qd.ins.Triton();
+            end
             obj.server = daemon.Daemon(obj.bind_address);
             obj.server.daemon_name = 'oxfmagnet3d-daemon';
             obj.server.expose(obj, 'set');
@@ -48,10 +58,12 @@ classdef OxfMagnet3D < handle
         end
 
         function run_daemon(obj)
-            obj.pt2_chan = qd.comb.MemoizeChannel( ...
-                obj.triton.channel('PT2'), obj.check_period/2);
-            obj.cool_water_chan = qd.comb.MemoizeChannel( ...
-                obj.triton.channel('cooling_water'), obj.check_period/2);
+            if ~isempty(obj.triton)
+                obj.pt2_chan = qd.comb.MemoizeChannel( ...
+                    obj.triton.channel('PT2'), obj.check_period/2);
+                obj.cool_water_chan = qd.comb.MemoizeChannel( ...
+                    obj.triton.channel('cooling_water'), obj.check_period/2);
+            end
             while true % loop forever
                 try
                     obj.server.serve_period(obj.check_period);
@@ -94,16 +106,20 @@ classdef OxfMagnet3D < handle
             if strcmp(obj.status, 'level2')
                 return
             end
-            if obj.pt2_chan.get() > obj.limit2_pt2 ...
-                || obj.cool_water_chan.get() > obj.limit2_cool_water
-                obj.trip_level2();
+            if ~isempty(obj.triton)
+                if obj.pt2_chan.get() > obj.limit2_pt2 ...
+                    || obj.cool_water_chan.get() > obj.limit2_cool_water
+                    obj.trip_level2();
+                end
             end
             if strcmp(obj.status, 'level1')
                 return
             end
-            if obj.pt2_chan.get() > obj.limit1_pt2 ...
-                || obj.cool_water_chan.get() > obj.limit1_cool_water
-                obj.trip_level1();
+            if ~isempty(obj.triton)
+                if obj.pt2_chan.get() > obj.limit1_pt2 ...
+                    || obj.cool_water_chan.get() > obj.limit1_cool_water
+                    obj.trip_level1();
+                end
             end
         end
 
@@ -185,8 +201,12 @@ classdef OxfMagnet3D < handle
         end
 
         function report = get_report(obj)
-            report = sprintf('PT2: %f\nCooling water: %f\nStatus: %s\n', ...
-                obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
+            if ~isempty(obj.triton)
+                report = sprintf('PT2: %f\nCooling water: %f\nStatus: %s\n', ...
+                    obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
+            else
+                report = 'Triton communication disabled by no_triton flag.'
+            end
         end
 
         function force_set(obj, axis, prop, value, varargin)
