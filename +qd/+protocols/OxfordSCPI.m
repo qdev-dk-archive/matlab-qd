@@ -30,8 +30,8 @@ classdef OxfordSCPI < handle
             
             % check the reply
             qd.util.assert(strcmp(parts{1}, 'STAT'));
-            expected = qd.util.strjoin(parts(2:end-1), ':');
-            qd.util.assert(strcmp(expected, prop));
+            req_echo = rep(6:6+len(prop)-1);
+            qd.util.assert(strcmp(req_echo, prop));
             
             value = qd.util.match(parts{end}, read_format);
         end
