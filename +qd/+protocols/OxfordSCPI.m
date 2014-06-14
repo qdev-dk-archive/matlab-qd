@@ -29,11 +29,20 @@ classdef OxfordSCPI < handle
             parts = qd.util.strsplit(rep, ':');
             
             % check the reply
-            qd.util.assert(strcmp(parts{1}, 'STAT'));
-            req_echo = rep(6:6+length(prop)-1);
-            qd.util.assert(strcmp(req_echo, prop));
-            
-            value = qd.util.match(rep(6+length(prop)+1:end), read_format);
+            try
+                qd.util.assert(strcmp(parts{1}, 'STAT'));
+                req_echo = rep(6:6+length(prop)-1);
+                qd.util.assert(strcmp(req_echo, prop));
+                
+                value = qd.util.match(rep(6+length(prop)+1:end), read_format);
+            catch err
+                exception = MException('OxfordSCPI:Invalid', ...
+                  'Could not parse reply. Req: ''%s'', Rep: ''%s''.', ...
+                  req, rep ...
+                );
+                exception.addCause(err);
+                exception.throw();
+            end
         end
         
         function set(obj, prop, value, varargin)
