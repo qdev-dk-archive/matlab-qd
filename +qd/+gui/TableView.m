@@ -367,10 +367,13 @@ classdef TableView < handle
             extents = [];
             extents(1,:) = obj.get_limits('x', min(a), max(a));
             extents(2,:) = obj.get_limits('y', min(b), max(b));
-            xp = linspace(extents(1,1), extents(1,2), res);
-            yp = linspace(extents(2,1), extents(2,2), res);
+            xp = linspace(0, 1, res);
+            yp = linspace(0, 1, res);
             [X, Y] = meshgrid(xp, yp);
-            data = griddata(a, b, c, X, Y, 'nearest');
+            data = griddata(...
+                (a - extents(1,1))./(extents(1,2) - extents(1,1)), ...
+                (b - extents(2,1))./(extents(2,2) - extents(2,1)), ...
+                c, X, Y, 'nearest');
         end
 
         function select(obj, dim, column)
