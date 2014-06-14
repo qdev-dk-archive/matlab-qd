@@ -41,7 +41,7 @@ classdef OxfMagnet3D < handle
             obj.magnet = qd.protocols.OxfordSCPI(...
                 @(req)query(obj.magnet_serial, req, '%s\n', '%s\n'));
             if p.Results.no_triton
-                obj.triton = []
+                obj.triton = [];
             else
                 obj.triton = qd.ins.Triton();
             end
@@ -205,7 +205,7 @@ classdef OxfMagnet3D < handle
                 report = sprintf('PT2: %f\nCooling water: %f\nStatus: %s\n', ...
                     obj.pt2_chan.get(), obj.cool_water_chan.get(), obj.status);
             else
-                report = 'Triton communication disabled by no_triton flag.'
+                report = 'Triton communication disabled by no_triton flag.';
             end
         end
 
