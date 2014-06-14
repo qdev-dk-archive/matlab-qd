@@ -30,10 +30,10 @@ classdef OxfordSCPI < handle
             
             % check the reply
             qd.util.assert(strcmp(parts{1}, 'STAT'));
-            req_echo = rep(6:6+len(prop)-1);
+            req_echo = rep(6:6+length(prop)-1);
             qd.util.assert(strcmp(req_echo, prop));
             
-            value = qd.util.match(parts{end}, read_format);
+            value = qd.util.match(rep(6+length(prop)+1:end), read_format);
         end
         
         function set(obj, prop, value, varargin)
