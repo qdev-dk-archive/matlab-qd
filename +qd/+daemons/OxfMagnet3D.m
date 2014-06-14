@@ -27,8 +27,8 @@ classdef OxfMagnet3D < handle
     methods
 
         % Call as OxfMagnet3D('COM1') or OxfMagnet3D('COM1', 'no_triton'). If
-        % the 'skip_checks' parameter is added, the magnet will not contact
-        % the cryostat to check for temperature rises.
+        % the 'no_triton' parameter is added, the magnet will not contact the
+        % cryostat to check for temperature rises.
         function obj = OxfMagnet3D(com_port, varargin)
             p = inputParser();
             p.addOptional('no_triton', [], @(x)strcmp(x, 'no_triton'));
