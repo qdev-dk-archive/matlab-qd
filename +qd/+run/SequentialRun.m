@@ -41,6 +41,26 @@ classdef SequentialRun < qd.run.RunWithInputs
             obj.sweeps{end + 1} = func;
         end
 
+        function obj = list(obj, name_or_channel, list, varargin)
+            p = inputParser();
+            p.addOptional('settle', 0);
+            p.addOptional('initial_settle', 0);
+            p.parse(varargin{:});
+            sweep = struct();
+            sweep.type = 'list';
+            sweep.list = list;
+            sweep.from = list(1);
+            sweep.to = list(end);
+            sweep.points = length(list);
+            sweep.settle = p.Results.settle;
+            sweep.initial_settle = p.Results.initial_settle;
+            sweep.chan = obj.resolve_channel(name_or_channel);
+            if(obj.is_time_chan(sweep.chan) && (sweep.list(0) == 0))
+                sweep.chan.instrument.reset;
+            end
+            obj.sweeps{end + 1} = sweep;
+        end
+
         function obj = clear_sweeps(obj)
             obj.sweeps = {};
         end
@@ -91,6 +111,7 @@ classdef SequentialRun < qd.run.RunWithInputs
                 if strcmp(sweep{1}.type,'sweep')
                     sweep = sweep{1};
                     s = struct();
+                    s.type = sweep.type;
                     s.from = sweep.from;
                     s.to = sweep.to;
                     s.points = sweep.points;
@@ -98,6 +119,18 @@ classdef SequentialRun < qd.run.RunWithInputs
                     s.initial_settle = sweep.initial_settle;
                     s.chan = register.put('channels', sweep.chan);
                     meta.sweeps{end+1} = s;
+                elseif strcmp(sweep{1}.type,'list')
+                    sweep = sweep{1};
+                    l = struct();
+                    l.type = sweep.type;
+                    l.from = sweep.from;
+                    l.to = sweep.to;
+                    l.points = sweep.points;
+                    l.list = sweep.list;
+                    l.settle = sweep.settle;
+                    l.initial_settle = sweep.initial_settle;
+                    l.chan = register.put('channels', sweep.chan);
+                    meta.sweeps{end+1} = l;
                 elseif (strcmp(sweep{1}.type,'func'))
                     sweep = sweep{1};
                     f = struct();
@@ -154,13 +187,22 @@ classdef SequentialRun < qd.run.RunWithInputs
                         drawnow();
                         settle = 0;
                     end
-                elseif strcmp(sweep.type,'sweep')
-                    % if channel is from a Time instrument and sweep.from is 0 reset the timer
-                    if(strcmp(sweep.chan.instrument.default_name,'Time') && (sweep.from == 0))
-                        sweep.chan.instrument.reset();
+                elseif strcmp(sweep.type,'sweep') or strcmp(sweep.type,'list')
+                    if strcmp(sweep.type,'list')
+                        % if channel is from a Time instrument and sweep.from is 0 reset the timer
+                        if(strcmp(sweep.chan.instrument.default_name,'Time') && (sweep.list(1) == 0))
+                            sweep.chan.instrument.reset();
+                        end
+                        value = sweep.list
+                    else
+                        % if channel is from a Time instrument and sweep.from is 0 reset the timer
+                        if(strcmp(sweep.chan.instrument.default_name,'Time') && (sweep.from == 0))
+                            sweep.chan.instrument.reset();
+                        end
+                        value = linspace(sweep.from, sweep.to, sweep.points)
                     end
                     % Create the sweep
-                    for value = linspace(sweep.from, sweep.to, sweep.points)
+                    for value
                         % Set the value
                         sweep.chan.set(value);
                         % get the settle time, on first iteration also include the initial settle
