@@ -33,7 +33,7 @@ classdef SequentialRun < qd.run.RunWithInputs
             func = struct();
             func.type = 'func';
             func.args = args;
-            func.func = func_handle;
+            func.func_handle = func_handle;
             func.runs = p.Results.runs;
             func.settle = p.Results.settle;
             func.initial_settle = p.Results.initial_settle;
@@ -86,6 +86,7 @@ classdef SequentialRun < qd.run.RunWithInputs
 
         function meta = add_to_meta(obj, meta, register)
             meta.sweeps = {};
+            meta.funcs = {};
             for sweep = obj.sweeps
                 if strcmp(sweep{1}.type,'sweep')
                     sweep = sweep{1};
@@ -100,7 +101,7 @@ classdef SequentialRun < qd.run.RunWithInputs
                 elseif (strcmp(sweep{1}.type,'func'))
                     sweep = sweep{1};
                     f = struct();
-                    f.func = func2str(sweep.func_handle);
+                    f.func_handle = func2str(sweep.func_handle);
                     f.runs = sweep.runs;
                     f.settle = sweep.settle;
                     f.initial_settle = sweep.initial_settle;
@@ -143,7 +144,7 @@ classdef SequentialRun < qd.run.RunWithInputs
                 if strcmp(sweep.type,'func')
                     % evaluate function
                     for i = 1:sweep.runs
-                        sweep.func(sweep.args{:});
+                        sweep.func_handle(sweep.args{:});
                         % get the settle time, on first iteration also include the initial settle
                         settle = max(settle, sweep.settle);
                         if(sweep.settle > 0)
