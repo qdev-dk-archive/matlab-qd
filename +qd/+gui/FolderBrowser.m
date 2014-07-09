@@ -62,6 +62,11 @@ classdef FolderBrowser < handle
             obj.editor = editor;
         end
 
+        % set_title(title) renames the docked figure showing the list of runs.
+        function set_title(obj, title)
+            set(obj.listbox_fig, 'Name', title);
+        end
+
         function close(obj)
             close(obj.listbox_fig);
         end
