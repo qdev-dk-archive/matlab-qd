@@ -1,5 +1,24 @@
 classdef LinOutputMix < qd.classes.Instrument
-% TODO, this class really needs to be documented.
+% Derive new channels from existing using a linear transformation.
+%
+% LinOutputMix(base_channels, transform, [names])
+%
+%   Constructs a LinOutputMix from a cell-array of n channels each supporting
+%   the set method, an m-by-n matrix (let us call this T), and optionally a
+%   cell-array of m strings. The constructed object is an instrument with m
+%   channels with names from the 'names' argument. The instrument caches the
+%   last set value from each of the m channels, let us call the vector of
+%   these values V. Whenever one of the m derived channels are set, the vector
+%   V is updated and
+%
+%       V' = T V
+%   
+%   is calculated. The base channels are then set to the values in V'.
+%
+%   Note: at the time of construction, get is called for each channel in
+%   base_channels, and an initial V is calculated as V = T' V' where T' is the
+%   Moore–Penrose pseudoinverse of T (which is equal to the inverse if it
+%   exists).
     properties(GetAccess=public, SetAccess=private)
         base_channels
         transform
