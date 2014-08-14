@@ -8,10 +8,15 @@ ctx.resolve_channel(channel_name_or_obj) -> channel object
     recipe1.apply(ctx, recipe2.apply(ctx, job))
 
 job.exec(ctx, settle, prefix)
-job.time(ctx, options, settling_time)
+job.time(options, settling_time)
 job.reversed() -> a new job.
-job.columns()  -> a cell array of json parseable structs with at least a name field.
+job.columns() -> a cell array of json serializeable 
+                 structs with at least a name field.
+job.describe(register) -> json serializeable object
 ctx.add_point(point)
+In addition to points, we also need to put a blank line after every inner
+sweep to make gnuplot happy.
+ctx.add_divider()
 
 q = qd.q.Q()
 q.store = ...
@@ -31,3 +36,4 @@ inputs.with(chan_obj) -> fresh object
 inputs.without(name) -> fresh object
 inputs.read() -> array of doubles
 inputs.columns()
+inputs.describe(register) -> json serializeable object

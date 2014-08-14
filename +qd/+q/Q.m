@@ -27,5 +27,27 @@ classdef Q < handle
         function plan = make_plan(obj)
             plan = qd.q.Plan(obj, obj.inputs);
         end
+
+        function plan = send_sms(obj, varargin)
+            plan = obj.make_plan().send_sms(varargin{:});
+        end
+        function plan = as(obj, varargin)
+            plan = obj.make_plan().as(varargin{:});
+        end
+        function plan = with(obj, varargin)
+            plan = obj.make_plan().with(varargin{:});
+        end
+        function plan = without(obj, varargin)
+            plan = obj.make_plan().without(varargin{:});
+        end
+        function plan = do(obj, varargin)
+            plan = obj.make_plan().do(varargin{:});
+        end
+        function plan = sw(obj, varargin)
+            plan = obj.make_plan().sw(varargin{:});
+        end
+        function go(obj, varargin)
+            obj.make_plan().go(varargin{:});
+        end
     end
 end

@@ -39,5 +39,12 @@ classdef Inputs
                 values(i) = futures{i}.exec();
             end
         end
+
+        function meta = describe(obj, register)
+            meta = {};
+            for i in 1:length(obj.inputs)
+                meta{i} = obj.inputs{i}.describe(register);
+            end
+        end
     end
 end

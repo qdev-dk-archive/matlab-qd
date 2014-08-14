@@ -54,13 +54,37 @@ classdef Plan
                     qd.util.assert(false);
             end
             % If the execution reaches this point, varargin is empty.
-            qt.util.assert(not isempty(obj.name));
-            % TODO
+            qt.util.assert(~isempty(obj.name));
+            out_dir = obj.q.store.new_dir();
+            meta = obj.describe();
+            json.write(meta, fullfile(out_dir, 'meta.json'), 'indent', 2);
+            table = qd.data.TableWriter(out_dir, 'data');
+            job = obj.make_job()
+            for column = job.columns()
+                table.add_column(column{1}.name)
+            end
+            table.init();
+            job.exec(table, 0, []);
         end
 
         function job = make_job(obj)
-            qt.util.assert(not isempty(obj.recipe));
+            qt.util.assert(~isempty(obj.recipe));
             job = obj.recipe.apply(obj.inputs.make_job());
+        end
+
+        function meta = describe(obj)
+            meta = struct;
+            register = qd.classes.Register();
+            meta.setup = obj.q.setup.describe(register);
+            meta.meta = obj.q.meta;
+            job = obj.make_job();
+            meta.job = job.describe(register);
+            meta.columns = job.columns();
+            meta.name = obj.name;
+            meta.timestamp = datestr(clock(),31);
+            meta.type = 'Q';
+            meta.version = '0.0.1';
+            meta.register = register.describe();
         end
     end
 end

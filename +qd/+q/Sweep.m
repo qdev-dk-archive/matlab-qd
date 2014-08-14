@@ -16,9 +16,9 @@ classdef Sweep
             end
         end
 
-        function t = time(obj, ctx, options, settling_time)
+        function t = time(obj, options, settling_time)
             extra_settle_on_first_point = max(0, settling_time - obj.settle);
-            time_per_point = (obj.job.time(ctx, options, obj.settle));
+            time_per_point = (obj.job.time(options, obj.settle));
             t = self.points * time_per_point + extra_settle_on_first_point;
         end
 
@@ -34,6 +34,16 @@ classdef Sweep
 
         function cs = columns(obj)
             cs = {struct('name', obj.chan.name()) obj.job.columns()};
+        end
+
+        function meta = describe(obj, register)
+            meta = struct;
+            meta.chan = obj.chan.describe(register);
+            meta.from = obj.from;
+            meta.to = obj.to;
+            meta.points = obj.points;
+            meta.settle = obj.settle;
+            meta.job = obj.job.describe(register);
         end
 
     end
