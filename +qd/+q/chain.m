@@ -10,7 +10,11 @@ classdef chain
         end
 
         function job = apply(obj, ctx, sub_job)
-            obj.a.apply(ctx, obj.b.apply(sub_job));
+            if isempty(obj.b)
+                job = obj.a.apply(ctx, sub_job);
+            else
+                job = obj.a.apply(ctx, obj.b.apply(sub_job));
+            end
         end
     end
 end

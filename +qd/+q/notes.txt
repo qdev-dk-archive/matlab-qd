@@ -13,15 +13,21 @@ job.reversed() -> a new job.
 job.columns()  -> a cell array of json parseable structs with at least a name field.
 ctx.add_point(point)
 
-q = qd.job.Q()
+q = qd.q.Q()
 q.store = ...
 q.setup = ...
 q.add_input(chan) -- Note, in contrast to with() below, this method modifies q.
 q.cellphone = '+4520786406'
 
 All below methods return a fresh object. They do not modify q.
-q.do(qd.job.until('3 am') | sw('g4', ...)).go('name')
+q.do(qd.q.until('3 am') | sw('g4', ...)).go('name')
 q.as('name').sw('g4', ...).without('lock-in/curr').go()
 q.sw('g3', ...).with(some_input).time()
 q.sw('gate', ...).do(bias_sweep).send_sms().go('name')
 q.go(sw('g2', ...) | sw('bias', ...), 'name')
+
+inputs = qd.q.Inputs()
+inputs.with(chan_obj) -> fresh object
+inputs.without(name) -> fresh object
+inputs.read() -> array of doubles
+inputs.columns()
