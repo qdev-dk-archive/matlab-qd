@@ -1,0 +1,27 @@
+The q module is designed to replace the run module. It is work in progress,
+below are some examples of how I want the API to behave.
+
+job = recipe.apply(ctx, sub_job)
+ctx.resolve_channel(channel_name_or_obj) -> channel object
+
+(recipe1 | recipe2).apply(ctx, job) =
+    recipe1.apply(ctx, recipe2.apply(ctx, job))
+
+job.exec(ctx, settle, prefix)
+job.time(ctx, options, settling_time)
+job.reversed() -> a new job.
+job.columns()  -> a cell array of json parseable structs with at least a name field.
+ctx.add_point(point)
+
+q = qd.job.Q()
+q.store = ...
+q.setup = ...
+q.add_input(chan) -- Note, in contrast to with() below, this method modifies q.
+q.cellphone = '+4520786406'
+
+All below methods return a fresh object. They do not modify q.
+q.do(qd.job.until('3 am') | sw('g4', ...)).go('name')
+q.as('name').sw('g4', ...).without('lock-in/curr').go()
+q.sw('g3', ...).with(some_input).time()
+q.sw('gate', ...).do(bias_sweep).send_sms().go('name')
+q.go(sw('g2', ...) | sw('bias', ...), 'name')
