@@ -23,6 +23,7 @@ classdef FolderBrowser < handle
         column_label_override
         % Set this to false if you do not want headers on plots.
         show_headers = true
+        show_folder_names = true
     end
     methods
         function obj = FolderBrowser(loc)
@@ -207,6 +208,10 @@ classdef FolderBrowser < handle
             end
             if obj.show_headers && isfield(meta, 'name')
                 obj.table_view.header = meta.name;
+            end
+            if obj.show_folder_names
+                [pathstr,name,ext] = fileparts(loc);
+                obj.table_view.header = [obj.table_view.header ' - ' name];
             end
             if ~isempty(old_view)
                 obj.table_view.mirror_settings(old_view);
