@@ -12,6 +12,11 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         % Default is 0.1. Set to [] to disable ramping.
         ramp_rates = struct
 
+        % When setting a channel, the instrument does not ramp if the distance
+        % from the current value to the value to set is less than the
+        % skip_ramp_tolerance. Set as 
+        skip_ramp_tolerance = struct
+
         % Running futures. Format: futures.CH0.abort().
         futures = struct
     end
@@ -27,6 +32,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             for ch = obj.channels
                 obj.limits.(ch{1}) = [-10, 10];
                 obj.ramp_rates.(ch{1}) = 0.1;
+                obj.skip_ramp_tolerance.(ch{1}) = 0;
                 obj.ranges.(ch{1}) = [-10, 10];
             end
         end
@@ -52,15 +58,21 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             frac = (val - obj.low(ch))/obj.span(ch);
             % DecaDACs expect a number between 0 and 2^16-1 representing the output range.
             goal = round((2^16 - 1)*frac);
+            rate = obj.ramp_rates.(ch);
+            if ~isempty(rate)
+                tolerance = obj.skip_ramp_tolerance.(ch);
+                value_now = obj.getc(ch);
+                if abs(value_now - val) > tolerance
+                    obj.select(n);
+                    obj.query('M2;');
+                    future = obj.ramp(ch, n, goal);
+                    return
+                end
+            end
             obj.select(n);
             obj.query('M2;');
-            rate = obj.ramp_rates.(ch);
-            if isempty(rate)
-                obj.queryf('D%d;', goal);
-                future = qd.classes.SetFuture.do_nothing_future();
-            else
-                future = obj.ramp(ch, n, goal);
-            end
+            obj.queryf('D%d;', goal);
+            future = qd.classes.SetFuture.do_nothing_future();
         end
 
         function r = channels(obj)
