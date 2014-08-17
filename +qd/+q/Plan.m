@@ -65,11 +65,16 @@ classdef Plan
             end
             table.init();
             job.exec(table, 0, []);
+            if obj.send_sms:
+                qd.util.send_sms( ...
+                    obj.q.cellphone, ...
+                    sprintf('Job complete: "%s".', obj.name));
+            end
         end
 
         function job = make_job(obj)
             qt.util.assert(~isempty(obj.recipe));
-            job = obj.recipe.apply(obj.inputs.make_job());
+            job = obj.recipe.apply(obj.inputs);
         end
 
         function meta = describe(obj)
@@ -85,6 +90,17 @@ classdef Plan
             meta.type = 'Q';
             meta.version = '0.0.1';
             meta.register = register.describe();
+        end
+
+        % Measure how long this plan will take to execute.
+        % 
+        % The following named arguments are supported:
+        %   * 'read_inputs' (default: false) 
+        %      If set to true, try reading inputs to figure out how
+        %      long it takes.
+        function t = time(varargin)
+            options = struct(varargin{:});
+            t = obj.make_job().time(options, 0);
         end
     end
 end

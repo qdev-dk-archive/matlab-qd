@@ -46,5 +46,27 @@ classdef Inputs
                 meta{i} = obj.inputs{i}.describe(register);
             end
         end
+
+        function exec(obj, ctx, settle, prefix)
+            pause(settle);
+            p = obj.read();
+            ctx.add_point([prefix p]);
+        end
+
+        function t = time(obj, options, settling_time)
+            t = settling_time;
+            if isfield(options, 'read_inputs') & options.read_inputs
+                m = tic;
+                obj.read();
+                t += toc(m);
+            end
+        end
+
+        function r = reversed(obj)
+            % This should create a new job that reads points in reverse order.
+            % Since this job consists of one point, there is nothing to
+            % reverse.
+            r = obj;
+        end
     end
 end
