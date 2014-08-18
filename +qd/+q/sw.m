@@ -1,4 +1,4 @@
-classdef sw
+classdef sw < qd.q.Recipe
     properties
         chan
         from

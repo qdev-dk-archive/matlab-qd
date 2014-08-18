@@ -38,6 +38,7 @@ classdef Sweep
 
         function meta = describe(obj, register)
             meta = struct;
+            meta.type = 'Sweep'
             meta.chan = obj.chan.describe(register);
             meta.from = obj.from;
             meta.to = obj.to;

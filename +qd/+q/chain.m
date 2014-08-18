@@ -1,4 +1,4 @@
-classdef chain
+classdef chain < qd.q.Recipe
     properties
         a
         b
