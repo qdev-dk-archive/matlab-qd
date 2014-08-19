@@ -9,14 +9,19 @@ classdef TektronixAWG7000 < qd.classes.ComInstrument
         function upload_waveform_real(obj, name, waveform)
             obj.sendf('wlist:wav:del "%s"', name);
             obj.sendf('wlist:wav:new "%s",%d,REAL', name, length(waveform));
-            as_bytes = typecast(single(waveform), 'uint8');
-            % We put a single 0 byte after every 4 bytes for the marker day.
-            with_markers = reshape([reshape(as_bytes, 4, []); zeros(1, length(waveform))], 1, []);
-            block = char(with_markers);
-            qd.util.assert(log10(length(block)) < 9);
-            q = sprintf('wlist:wav:data "%s",#%1d%d%s', ...
-                name, ceil(log10(length(block))), length(block), block);
-            obj.send(q);
+            chunk_size = 90;
+            for i = 1:ceil(length(waveform)/chunk_size)
+                s_index = (i-1)*chunk_size;
+                chunk = waveform(s_index+1:min(s_index+chunk_size, length(waveform)));
+                as_bytes = typecast(single(chunk), 'uint8');
+                % We put a single 0 byte after every 4 bytes for the marker day.
+                with_markers = reshape([reshape(as_bytes, 4, []); zeros(1, length(chunk))], 1, []);
+                block = char(with_markers);
+                qd.util.assert(log10(length(block)) < 9);
+                q = sprintf('wlist:wav:data "%s",%d,%d,#%1d%d%s', ...
+                    name, s_index, length(chunk), ceil(log10(length(block))), length(block), block);
+                obj.send(q);
+            end
         end
 
         % Will delete any existing waveform with this name.
@@ -26,6 +31,13 @@ classdef TektronixAWG7000 < qd.classes.ComInstrument
             obj.sendf('wlist:wav:del "%s"', name);
             obj.sendf('wlist:wav:new "%s", %d, INT', name, length(waveform));
             % TODO
+        end
+
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.ComInstrument(register);
+            r.sour_freq = obj.awg.querym('sour:freq?', '%f');
+            r.outp1_stat = obj.awg.query('outp1:stat?');
+            r.outp2_stat = obj.awg.query('outp2:stat?');
         end
     end
 end

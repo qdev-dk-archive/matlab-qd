@@ -38,7 +38,6 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
             d = obj.Ton * obj.freq;
             % number of points that are on.
             m = round(d * n);
-            qd.util.assert(m > 0);
             waveform = (1:n < m + 1) * obj.level;
             wname = 'qd_sq_puls';
             obj.awg.upload_waveform_real(wname, waveform);
@@ -48,6 +47,14 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
         function turn_on(obj)
             obj.awg.send('awgc:run');
             obj.awg.send('outp1:stat 1');
+        end
+
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.Instrument(register);
+            r.awg = register.put('instruments', obj.awg);
+            r.freq = obj.freq;
+            r.Ton = obj.Ton;
+            r.level = obj.level;
         end
     end
 end
