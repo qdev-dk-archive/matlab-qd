@@ -1,9 +1,12 @@
 function [reshaped1, reshaped2, reshaped3] = reshape2d(column1, column2, column3)
-    different_from_first = find(column1 ~= column1(1));
+    different_from_first = find(column1 ~= column1(1), 1);
     if isempty(different_from_first)
-        sweep_length = length(column1);
+        error('every value in column1 is identical');
     else
         sweep_length = different_from_first(1) - 1;
+    end
+    if sweep_length == 1
+        error('the first two value in column 1 are unequal')
     end
     number_of_sweeps = floor(length(column1) / sweep_length);
     number_of_good_points = number_of_sweeps * sweep_length;
@@ -13,20 +16,12 @@ function [reshaped1, reshaped2, reshaped3] = reshape2d(column1, column2, column3
     reshaped1 = f(column1);
     reshaped2 = f(column2);
     reshaped3 = f(column3);
-    
-    % Next up, we reverse columns that are swept in reverse direction.
-    if reshaped1(end) < reshaped1(1)
-        % g reverses the x-direction
-        g = @(c) c(1, end:-1:1);
-    else
-        g = @(c) c;
+
+    % Test result
+    if ~isempty(find(reshaped1 ~= circshift(reshaped1, [1 0])))
+        error('column1 within a sweep');
     end
-    if reshaped2(end) < reshaped2(1)
-        h = @(c) c(end:-1:1, 1);
-    else
-        h = @(c) c;
+    if ~isempty(find(reshaped2 ~= circshift(reshaped2, [0 1])))
+        error('column2 does not attain the same values in every sweep');
     end
-    reshaped1 = h(g(reshaped1));
-    reshaped2 = h(g(reshaped2));
-    reshaped3 = h(g(reshaped3));
 end

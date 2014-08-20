@@ -287,16 +287,12 @@ classdef TableView < handle
                 end
             else
                 if (obj.resolution == 1)
-                    if ~(obj.columns(1) == 1 && obj.columns(2) == 2 ...
-                        || obj.columns(1) == 2 && obj.columns(2) == 1)
-                        obj.show_message_instead_of_plot( ...
-                            ['Plotting in native resolution is not supported for ' ...
-                             'your choice of axes. The x-axis must be column ' ...
-                             'one and the y-axis must be column two, or vice-versa. ' ...
-                             'If you want to plot these axes, set a resampling resolution.']);
-                        return;
+                    try
+                        [data, extents] = obj.get_data_in_native_resolution();
+                    catch err
+                        obj.show_message_instead_of_plot(...
+                            'Could not plot in native resolution, try resampling.');
                     end
-                    [data, extents] = obj.get_data_in_native_resolution();
                 else
                     [data, extents] = obj.resample_data();
                 end
@@ -346,16 +342,25 @@ classdef TableView < handle
         end
 
         function [data, extents] = get_data_in_native_resolution(obj)
-            assert(~isempty(obj.sweeps));
             table = obj.tables{1};
-            [data, extents] = qd.data.reshape_data( ...
-                table{obj.columns(3)}.data, obj.sweeps);
-            if obj.columns(1) == 2 && obj.columns(2) == 1
-                data = transpose(data);
-                extents = extents(end:-1:1,:);
-            else
-                assert(obj.columns(1) == 1 && obj.columns(2) == 2);
+            c1 = table{obj.columns(1)}.data;
+            c2 = table{obj.columns(2)}.data;
+            c3 = table{obj.columns(3)}.data;
+            try
+                [c1, c2, c3] = qd.data.reshape2d(c1, c2, c3);
+            catch
+                [c2, c1, c3] = qd.data.reshape2d(c2, c1, c3);
+                c1 = transpose(c1);
+                c2 = transpose(c2);
+                c3 = transpose(c3);
             end
+            data = c3;
+            extents = [];
+            extents(1,1) = c1(1, 1);
+            extents(1,2) = c1(1, end);
+            extents(2,1) = c2(1, 1);
+            extents(2,2) = c2(end, 1);
+            % TODO, check if c1(1, 1:end) and c2(1:end, 1) are linear progressions.
         end
 
         function [data, extents] = resample_data(obj)
