@@ -17,9 +17,9 @@ classdef TektronixAWG7000 < qd.classes.ComInstrument
                 % We put a single 0 byte after every 4 bytes for the marker day.
                 with_markers = reshape([reshape(as_bytes, 4, []); zeros(1, length(chunk))], 1, []);
                 block = char(with_markers);
-                qd.util.assert(log10(length(block)) < 9);
-                q = sprintf('wlist:wav:data "%s",%d,%d,#%1d%d%s', ...
-                    name, s_index, length(chunk), ceil(log10(length(block))), length(block), block);
+                qd.util.assert(log10(length(block)) < 4);
+                q = sprintf('wlist:wav:data "%s",%d,%d,#4%04d%s', ...
+                    name, s_index, length(chunk), length(block), block);
                 obj.send(q);
             end
         end
@@ -35,9 +35,9 @@ classdef TektronixAWG7000 < qd.classes.ComInstrument
 
         function r = describe(obj, register)
             r = obj.describe@qd.classes.ComInstrument(register);
-            r.sour_freq = obj.awg.querym('sour:freq?', '%f');
-            r.outp1_stat = obj.awg.query('outp1:stat?');
-            r.outp2_stat = obj.awg.query('outp2:stat?');
+            r.sour_freq = obj.querym('sour:freq?', '%f');
+            r.outp1_stat = obj.query('outp1:stat?');
+            r.outp2_stat = obj.query('outp2:stat?');
         end
     end
 end
