@@ -4,6 +4,7 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
         freq = 1E8;
         Ton = 1E-9;
         level = 1E-3;
+        is_on = false;
     end
     methods
         function obj = TektronixAWG7000SquarePulse(awg)
@@ -26,7 +27,11 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
                     error('No such channel');
             end
             obj.update();
-            obj.turn_on();
+            % update has the side-effect of turning of channel 1. If we are
+            % supposed to be on, then we call turn_on.
+            if obj.is_on
+                obj.turn_on();
+            end
         end
 
         function update(obj)
@@ -47,6 +52,12 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
         function turn_on(obj)
             obj.awg.send('awgc:run');
             obj.awg.send('outp1:stat 1');
+            obj.is_on = true;
+        end
+
+        function turn_off(obj)
+            obj.awg.send('outp1:stat 0');
+            obj.is_on = false;
         end
 
         function r = describe(obj, register)
