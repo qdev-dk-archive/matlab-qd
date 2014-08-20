@@ -43,6 +43,7 @@ classdef Sweep
             meta.from = obj.from;
             meta.to = obj.to;
             meta.points = obj.points;
+            meta.repeats = obj.points;
             meta.settle = obj.settle;
             meta.job = obj.job.describe(register);
         end
