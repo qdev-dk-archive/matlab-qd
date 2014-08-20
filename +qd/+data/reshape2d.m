@@ -19,7 +19,7 @@ function [reshaped1, reshaped2, reshaped3] = reshape2d(column1, column2, column3
 
     % Test result
     if ~isempty(find(reshaped1 ~= circshift(reshaped1, [1 0])))
-        error('column1 within a sweep');
+        error('column1 varies within a sweep');
     end
     if ~isempty(find(reshaped2 ~= circshift(reshaped2, [0 1])))
         error('column2 does not attain the same values in every sweep');
