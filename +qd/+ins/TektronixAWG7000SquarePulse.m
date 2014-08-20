@@ -5,6 +5,7 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
         Ton = 1E-9;
         level = 1E-3;
         is_on = false;
+        offset = 0;
     end
     methods
         function obj = TektronixAWG7000SquarePulse(awg)
@@ -12,7 +13,7 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
         end
 
         function c = channels(obj)
-           c = {'freq', 'Ton', 'level'};
+           c = {'freq', 'Ton', 'level', 'offset'};
         end
 
         function setc(obj, chan, val)
@@ -23,6 +24,8 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
                     obj.Ton = val;
                 case 'level'
                     obj.level = val;
+                case 'offset'
+                    obj.offset = val;
                 otherwise
                     error('No such channel');
             end
@@ -43,7 +46,7 @@ classdef TektronixAWG7000SquarePulse < qd.classes.Instrument
             d = obj.Ton * obj.freq;
             % number of points that are on.
             m = round(d * n);
-            waveform = (1:n < m + 1) * obj.level;
+            waveform = (1:n < m + 1) * obj.level + obj.offset;
             wname = 'qd_sq_puls';
             obj.awg.upload_waveform_real(wname, waveform);
             obj.awg.sendf('sour1:wav "%s"', wname);
