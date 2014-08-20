@@ -24,7 +24,7 @@ classdef Q < handle
         % inputs should be a cell-array of strings and channels.
         function set_inputs(obj, names_or_channels)
             obj.inputs.inputs = {};
-            for i in 1:length(names_or_channels)
+            for i = 1:length(names_or_channels)
                 obj.add_input(names_or_channels{i});
             end
         end

@@ -12,7 +12,7 @@ classdef Sweep
             for value = linspace(obj.from, obj.to, obj.points)
                 obj.chan.set(value);
                 obj.job.exec(ctx, max(settle, obj.settle), [prefix value]);
-                settle = 0
+                settle = 0;
             end
         end
 
@@ -33,13 +33,13 @@ classdef Sweep
         end
 
         function cs = columns(obj)
-            cs = {struct('name', obj.chan.name()) obj.job.columns()};
+            cs = [{struct('name', obj.chan.name())} obj.job.columns()];
         end
 
         function meta = describe(obj, register)
             meta = struct;
-            meta.type = 'Sweep'
-            meta.chan = obj.chan.describe(register);
+            meta.type = 'Sweep';
+            meta.chan = register.put('channels', obj.chan);
             meta.from = obj.from;
             meta.to = obj.to;
             meta.points = obj.points;

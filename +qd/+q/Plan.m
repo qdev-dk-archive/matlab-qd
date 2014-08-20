@@ -29,7 +29,11 @@ classdef Plan
         end
 
         function obj = do(obj, recipe)
-            obj.recipe = qd.q.chain(recipe, obj.recipe);
+            if isempty(obj.recipe)
+                obj.recipe = recipe;
+            else
+                obj.recipe = qd.q.chain(obj.recipe, recipe);
+            end
         end
 
         function obj = sw(obj, varargin)
@@ -54,18 +58,18 @@ classdef Plan
                     qd.util.assert(false);
             end
             % If the execution reaches this point, varargin is empty.
-            qt.util.assert(~isempty(obj.name));
+            qd.util.assert(~isempty(obj.name));
             out_dir = obj.q.store.new_dir();
             meta = obj.describe();
             json.write(meta, fullfile(out_dir, 'meta.json'), 'indent', 2);
             table = qd.data.TableWriter(out_dir, 'data');
-            job = obj.make_job()
+            job = obj.make_job();
             for column = job.columns()
-                table.add_column(column{1}.name)
+                table.add_column(column{1}.name);
             end
             table.init();
             job.exec(table, 0, []);
-            if obj.send_sms:
+            if obj.send_sms_set
                 qd.util.send_sms( ...
                     obj.q.cellphone, ...
                     sprintf('Job complete: "%s".', obj.name));
@@ -73,8 +77,9 @@ classdef Plan
         end
 
         function job = make_job(obj)
-            qt.util.assert(~isempty(obj.recipe));
-            job = obj.recipe.apply(obj.inputs);
+            qd.util.assert(~isempty(obj.recipe));
+            ctx = struct('resolve_channel', @(x) obj.q.resolve_channel(x));
+            job = obj.recipe.apply(ctx, obj.inputs);
         end
 
         function meta = describe(obj)
