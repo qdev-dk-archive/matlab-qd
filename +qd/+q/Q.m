@@ -13,6 +13,22 @@ classdef Q < handle
             obj.inputs = obj.inputs.with(chan);
         end
 
+        % Returns a cell array of channels
+        function channels = list_inputs(obj)
+            channels = obj.inputs.inputs;
+        end
+
+        % Clears the current set of default inputs, then call add_input for
+        % each element in inputs.
+        %
+        % inputs should be a cell-array of strings and channels.
+        function set_inputs(obj, names_or_channels)
+            obj.inputs.inputs = {};
+            for i in 1:length(names_or_channels)
+                obj.add_input(names_or_channels{i});
+            end
+        end
+
         function chan = resolve_channel(obj, name_or_channel)
             chan = name_or_channel;
             if ischar(name_or_channel)
