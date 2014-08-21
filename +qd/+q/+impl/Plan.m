@@ -59,8 +59,8 @@ classdef Plan
             end
             % If the execution reaches this point, varargin is empty.
             qd.util.assert(~isempty(obj.name));
-            job = obj.make_job();
-            ctx = obj.make_ctx_for_job(job);
+            job = obj.make_job_();
+            ctx = obj.make_ctx_for_job_(job);
             job.exec(ctx, 0, []);
             if obj.send_sms_set
                 qd.util.send_sms( ...
@@ -69,13 +69,13 @@ classdef Plan
             end
         end
 
-        function job = make_job(obj)
+        function job = make_job_(obj)
             qd.util.assert(~isempty(obj.recipe));
             ctx = struct('resolve_channel', @(x) obj.q.resolve_channel(x));
             job = obj.recipe.apply(ctx, obj.inputs);
         end
 
-        function ctx = make_ctx_for_job(obj, job)
+        function ctx = make_ctx_for_job_(obj, job)
             out_dir = obj.q.store.new_dir();
             meta = obj.describe();
             json.write(meta, fullfile(out_dir, 'meta.json'), 'indent', 2);
@@ -91,11 +91,11 @@ classdef Plan
                 eta.strobe();
             end
             ctx.add_point = @(p) add_point(p);
-            ctx.periodic_hook = @() obj.periodic_hook();
+            ctx.periodic_hook = @() obj.periodic_hook_();
             ctx.add_divider = @() table.add_divider();
         end
 
-        function periodic_hook(obj)
+        function periodic_hook_(obj)
             % TODO
         end
 
@@ -104,7 +104,7 @@ classdef Plan
             register = qd.classes.Register();
             meta.setup = obj.q.setup.describe(register);
             meta.meta = obj.q.meta;
-            job = obj.make_job();
+            job = obj.make_job_();
             meta.job = job.describe(register);
             meta.columns = job.columns();
             meta.name = obj.name;
@@ -122,7 +122,7 @@ classdef Plan
         %      long it takes.
         function t = time(varargin)
             options = struct(varargin{:});
-            t = obj.make_job().time(options, 0);
+            t = obj.make_job_().time(options, 0);
         end
     end
 end
