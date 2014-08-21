@@ -90,13 +90,28 @@ classdef Plan
                 table.add_point(p);
                 eta.strobe();
             end
+            cmd_sock = zmq.socket('rep');
+            cmd_sock.connect('tcp://127.0.0.1:37544')
             ctx.add_point = @(p) add_point(p);
-            ctx.periodic_hook = @() obj.periodic_hook_();
+            ctx.periodic_hook = @() obj.cmd_hook_(cmd_sock, eta);
             ctx.add_divider = @() table.add_divider();
         end
 
-        function periodic_hook_(obj)
-            % TODO
+        function cmd_hook_(obj, cmd_sock, eta)
+            try
+                msg = cmd_sock.recv('dontwait');
+            catch
+                return;
+            end
+            switch msg
+                case 'abort'
+                    cmd_sock.send('ack');
+                    error('qd:q:abort', 'Aborted by user.');
+                case 'eta'
+                    cmd_sock.send({'ack', eta.format()});
+                otherwise
+                    cmd_sock.send('nack');
+            end
         end
 
         function meta = describe(obj)
