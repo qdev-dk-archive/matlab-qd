@@ -9,6 +9,8 @@ ctx.resolve_channel(channel_name_or_obj) -> channel object
 
 job.exec(ctx, settle, prefix)
 job.time(options, settling_time)
+job.total_points() -- should recurse into subordinate jobs, may return NaN or
+    inf as is appropriate.
 job.reversed() -> a new job.
 job.columns() -> a cell array of json serializeable 
                  structs with at least a name field.
@@ -18,6 +20,9 @@ Note, ctx.add_point may raise an exception.
 In addition to points, we also need to put a blank line after every inner
 sweep to make gnuplot happy.
 ctx.add_divider()
+The following function should be called once in a while to process hooks
+from outside.
+ctx.periodic_hook()
 
 q = qd.q.Q()
 q.store = ...

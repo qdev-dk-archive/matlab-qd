@@ -53,6 +53,7 @@ classdef Inputs
             pause(settle);
             p = obj.read();
             ctx.add_point([prefix p]);
+            ctx.periodic_hook();
         end
 
         function t = time(obj, options, settling_time)
@@ -69,6 +70,10 @@ classdef Inputs
             % Since this job consists of one point, there is nothing to
             % reverse.
             r = obj;
+        end
+
+        function p = total_points(obj)
+            p = 1;
         end
     end
 end

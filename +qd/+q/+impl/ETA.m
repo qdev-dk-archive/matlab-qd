@@ -1,0 +1,19 @@
+classdef ETA < handle
+    properties
+        total
+        start_tic
+        completed = 0
+    end
+    methods
+        % total may be inf if the run will go forever or NaN if it is
+        % impossible to tell when it will stop.
+        function obj = ETA(total)
+            obj.start_tic = tic();
+            obj.total = total;
+        end
+
+        function strobe(obj)
+            obj.completed = obj.completed + 1;
+        end
+    end
+end

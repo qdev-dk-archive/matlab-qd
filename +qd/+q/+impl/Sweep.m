@@ -48,5 +48,9 @@ classdef Sweep
             meta.job = obj.job.describe(register);
         end
 
+        function p = total_points(obj)
+            p = obj.points * obj.job.total_points();
+        end
+
     end
 end

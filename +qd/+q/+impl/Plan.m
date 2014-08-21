@@ -84,8 +84,19 @@ classdef Plan
                 table.add_column(column{1}.name);
             end
             table.init();
-            ctx.add_point = @(p) table.add_point(p);
+            points = job.total_points();
+            eta = qd.q.impl.ETA(points);
+            function add_point(p)
+                table.add_point(p);
+                eta.strobe();
+            end
+            ctx.add_point = @(p) add_point(p);
+            ctx.periodic_hook = @() obj.periodic_hook();
             ctx.add_divider = @() table.add_divider();
+        end
+
+        function periodic_hook(obj)
+            % TODO
         end
 
         function meta = describe(obj)
