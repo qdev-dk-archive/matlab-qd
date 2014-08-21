@@ -7,6 +7,7 @@ classdef TableView < handle
         columns = [1 2 0]
         resolution = 1
         aspect = 'x:y'
+        track = false
         zoom = 4
         limits
         header = ''
@@ -149,6 +150,11 @@ classdef TableView < handle
                     'String', 'Edit meta', ...
                     'Callback', @(h, varargin) obj.edit_metafile());
             end
+            lists(end + 1) = uicontrol( ...
+                'Style', 'checkbox', ...
+                'String', 'track', ...
+                'Value', obj.track, ...
+                'Callback', @(h, varargin) obj.set_track(get(h, 'Value')));
             try
                 obj.do_plot();
             catch err
@@ -194,11 +200,16 @@ classdef TableView < handle
             obj.aspect = other.aspect;
             obj.zoom = other.zoom;
             obj.limits = other.limits;
+            obj.track = other.track;
         end
 
         function set_resolution(obj, res)
             obj.resolution = res;
             obj.update();
+        end
+
+        function set_track(obj, val)
+            obj.track = val;
         end
 
         function copy_to_clipboard(obj)

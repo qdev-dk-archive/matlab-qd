@@ -6,6 +6,7 @@ classdef FolderBrowser < handle
         listbox_fig
         fig
         update_timer
+        track_timer
         has_been_closed = false
         cache
         editor
@@ -24,6 +25,7 @@ classdef FolderBrowser < handle
         % Set this to false if you do not want headers on plots.
         show_headers = true
         show_folder_names = true
+        size_of_data = 0
     end
     methods
         function obj = FolderBrowser(loc)
@@ -50,9 +52,16 @@ classdef FolderBrowser < handle
             obj.update_timer.ExecutionMode = 'fixedSpacing';
             obj.update_timer.TimerFcn = @(varargin)obj.update();
             start(obj.update_timer);
+            obj.track_timer = timer();
+            obj.track_timer.Period = 0.5;
+            obj.track_timer.ExecutionMode = 'fixedSpacing';
+            obj.track_timer.TimerFcn = @(varargin)obj.track_fcn();
+            start(obj.track_timer);
             function on_close(varargin)
                 stop(obj.update_timer);
+                stop(obj.track_timer);
                 delete(obj.update_timer);
+                delete(obj.track_timer);
                 obj.has_been_closed = true;
             end
             set(obj.listbox_fig, 'DeleteFcn', @on_close);
@@ -106,6 +115,22 @@ classdef FolderBrowser < handle
             set(obj.listbox, 'String', names);
         end
 
+        function track_fcn(obj)
+            should_track = false;
+            try
+                if obj.table_view.track
+                    should_track = true;
+                end
+            end
+            if ~should_track
+                return
+            end
+            s = obj.discover_size_of_data(obj.loc);
+            if s ~= obj.size_of_data
+                obj.load_and_plot(obj.loc);
+            end
+        end
+
         function clear_cache(obj)
             obj.cache = containers.Map();
         end
@@ -121,6 +146,11 @@ classdef FolderBrowser < handle
 
         function select(obj, val)
             obj.loc = obj.content{val}.loc;
+            obj.load_and_plot(obj.loc);
+        end
+
+        function load_and_plot(obj, loc)
+            obj.loc = loc;
             obj.meta = json.read(fullfile(obj.loc, 'meta.json'));
             obj.tables = containers.Map;
             for table_name = obj.list_table_names(obj.loc)
@@ -146,8 +176,19 @@ classdef FolderBrowser < handle
                 end
                 obj.tables(table_name{1}) = tbl;
             end
+            obj.size_of_data = obj.discover_size_of_data(obj.loc);
             obj.plot_loc(obj.tables, obj.loc, obj.meta);
             obj.view_loc(obj.tables);
+        end
+
+        function s = discover_size_of_data(obj, loc)
+            s = 0;
+            for table_name = obj.list_table_names(loc)
+                tbl = qd.data.load_table(loc, table_name{1});
+                try
+                    s = s + length(tbl{1}.data);
+                end
+            end
         end
 
         function add_pseudo_column(obj, func, name)
