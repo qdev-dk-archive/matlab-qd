@@ -6,7 +6,7 @@ classdef Inputs
         % Create a new Inputs object with the channel object chan appended.
         function r = with(obj, chan)
             r = qd.q.Inputs();
-            r.inputs = [r.inputs {chan}];
+            r.inputs = [obj.inputs {chan}];
         end
 
         % Create a new Inputs object where all channels named chan_name are omitted.
@@ -33,7 +33,7 @@ classdef Inputs
             values = [];
             futures = {};
             for i = 1:length(obj.inputs)
-                futures{i} = obj.inputs{1}.get_async();
+                futures{i} = obj.inputs{i}.get_async();
             end
             for i = 1:length(futures)
                 values(i) = futures{i}.exec();

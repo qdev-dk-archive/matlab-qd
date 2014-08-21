@@ -13,7 +13,7 @@ classdef sw < qd.q.Recipe
             obj.to = to;
             obj.points = points;
             if length(varargin) == 1
-                obj.settle = varargin(1);
+                obj.settle = varargin{1};
             end
             qd.util.assert(length(varargin) < 2);
         end
