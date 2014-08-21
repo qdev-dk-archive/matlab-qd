@@ -14,6 +14,7 @@ job.columns() -> a cell array of json serializeable
                  structs with at least a name field.
 job.describe(register) -> json serializeable object
 ctx.add_point(point)
+Note, ctx.add_point may raise an exception.
 In addition to points, we also need to put a blank line after every inner
 sweep to make gnuplot happy.
 ctx.add_divider()
