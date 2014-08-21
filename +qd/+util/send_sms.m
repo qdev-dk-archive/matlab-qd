@@ -9,7 +9,9 @@ function send_sms(cellphone, content)
     token = '21c0c260ecd5fc9ba60cc8dea0751605';
     number = '+15795000080';
 
-    url = java.net.URL(sprintf('https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json', username));
+    url = java.net.URL([], ...
+        sprintf('https://api.twilio.com/2010-04-01/Accounts/%s/Messages.json', username), ...
+        sun.net.www.protocol.https.Handler);
     conn = url.openConnection();
     conn.setRequestMethod('POST')
     auth = java.lang.String([username ':' token]);
