@@ -3,7 +3,7 @@ classdef Q < handle
         setup
         store
         meta = struct
-        inputs = qd.q.Inputs()
+        inputs = qd.q.impl.Inputs()
         cellphone = ''
     end
     methods
@@ -41,7 +41,7 @@ classdef Q < handle
         end
 
         function plan = make_plan(obj)
-            plan = qd.q.Plan(obj, obj.inputs);
+            plan = qd.q.impl.Plan(obj, obj.inputs);
         end
 
         function plan = send_sms(obj, varargin)

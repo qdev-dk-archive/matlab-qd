@@ -5,13 +5,13 @@ classdef Inputs
     methods
         % Create a new Inputs object with the channel object chan appended.
         function r = with(obj, chan)
-            r = qd.q.Inputs();
+            r = qd.q.impl.Inputs();
             r.inputs = [obj.inputs {chan}];
         end
 
         % Create a new Inputs object where all channels named chan_name are omitted.
         function r = without(obj, chan_name)
-            r = qd.q.Inputs();
+            r = qd.q.impl.Inputs();
             for inp = obj.inputs
                 inp = inp{1};
                 if ~strcmp(inp.name, chan_name)

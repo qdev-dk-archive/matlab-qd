@@ -23,7 +23,7 @@ classdef Sweep
         end
 
         function r = reversed(obj)
-            r = qd.q.Sweep();
+            r = qd.q.impl.Sweep();
             r.chan = obj.chan;
             r.from = obj.to;
             r.to = obj.from;

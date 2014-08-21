@@ -31,7 +31,7 @@ q.sw('g3', ...).with(some_input).time()
 q.sw('gate', ...).do(bias_sweep).send_sms().go('name')
 q.go(sw('g2', ...) | sw('bias', ...), 'name')
 
-inputs = qd.q.Inputs()
+inputs = qd.q.impl.Inputs()
 inputs.with(chan_obj) -> fresh object
 inputs.without(name) -> fresh object
 inputs.read() -> array of doubles
