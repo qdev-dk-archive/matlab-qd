@@ -11,9 +11,9 @@ classdef RSSMF100A < qd.classes.ComInstrument
         function setc(obj, chan, val)
             switch chan
                 case 'freq'
-                    obj.sendf('FREQ %.16f', val);
+                    obj.sendf('FREQ %.11f', val);
                 case 'pow'
-                    obj.sendf('POW %.16f', val);
+                    obj.sendf('POW %.11f', val);
                 otherwise
                     error('No such channel');
             end
@@ -22,9 +22,9 @@ classdef RSSMF100A < qd.classes.ComInstrument
         function val = getc(obj, chan)
             switch chan
                 case 'freq'
-                    val = obj.querym('FREQ', '%f');
+                    val = obj.querym('FREQ?', '%f');
                 case 'pow'
-                    val = obj.querym('POW', '%f');
+                    val = obj.querym('POW?', '%f');
                 otherwise
                     error('No such channel');
             end
