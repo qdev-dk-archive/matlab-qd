@@ -134,7 +134,7 @@ classdef Plan
         %   * 'read_inputs' (default: false) 
         %      If set to true, try reading inputs to figure out how
         %      long it takes.
-        function t = time(varargin)
+        function t = time(obj, varargin)
             options = struct(varargin{:});
             t = obj.make_job_().time(options, 0);
         end

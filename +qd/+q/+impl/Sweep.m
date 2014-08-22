@@ -19,7 +19,7 @@ classdef Sweep
         function t = time(obj, options, settling_time)
             extra_settle_on_first_point = max(0, settling_time - obj.settle);
             time_per_point = (obj.job.time(options, obj.settle));
-            t = self.points * time_per_point + extra_settle_on_first_point;
+            t = obj.points * time_per_point + extra_settle_on_first_point;
         end
 
         function r = reversed(obj)
