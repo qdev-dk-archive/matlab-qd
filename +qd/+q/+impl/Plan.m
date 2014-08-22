@@ -98,10 +98,9 @@ classdef Plan
         end
 
         function cmd_hook_(obj, cmd_sock, eta)
-            try
-                msg = cmd_sock.recv('dontwait');
-            catch
-                return;
+            [msg, received] = cmd_sock.recv('dontwait');
+            if ~received
+                return
             end
             switch msg
                 case 'abort'
