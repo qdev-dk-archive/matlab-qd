@@ -1,3 +1,7 @@
+% Ask an ongoing q-job when it will be finished.
+%
+% This function will communicate with a job running in another instance of
+% matlab. If several jobs are running, a random job will be selected.
 function s = eta()
     r = qd.q.impl.send_cmd('eta');
     seconds_total = sscanf(r{1}, '%f');

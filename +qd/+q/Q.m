@@ -1,3 +1,6 @@
+% This is the main entry-point for the q module.
+%
+% See the main tutorial.
 classdef Q < handle
     properties
         setup
@@ -7,22 +10,26 @@ classdef Q < handle
         cellphone = ''
     end
     methods
-        % Add a default input for jobs spawned from this Q.
         function add_input(obj, name_or_channel)
+        % Add a default input for jobs spawned from this Q.
             chan = obj.resolve_channel(name_or_channel);
             obj.inputs = obj.inputs.with(chan);
         end
 
-        % Returns a cell array of channels
         function channels = list_inputs(obj)
+        % Returns a cell array of default inputs.
+        %
+        % The returned cell array contains only channel objects.
             channels = obj.inputs.inputs;
         end
 
-        % Clears the current set of default inputs, then call add_input for
-        % each element in inputs.
-        %
-        % inputs should be a cell-array of strings and channels.
         function set_inputs(obj, names_or_channels)
+        % Override the current list of default inputs.
+        %
+        % q.set_inputs(names_or_channels) clears the current set of default
+        % inputs, then calls add_input for each element in names_or_channels.
+        % names_or_channels should be a cell-array of strings or channel
+        % objects.
             obj.inputs.inputs = {};
             for i = 1:length(names_or_channels)
                 obj.add_input(names_or_channels{i});
@@ -30,6 +37,10 @@ classdef Q < handle
         end
 
         function chan = resolve_channel(obj, name_or_channel)
+        % Lookup a channel by name in the associated setup.
+        %
+        % Channel objects are directly returned. Strings are forwarded to
+        % find_channel in obj.setup to locate a channel with that name.
             chan = name_or_channel;
             if ischar(name_or_channel)
                 if isempty(obj.setup)
@@ -40,30 +51,41 @@ classdef Q < handle
             end
         end
 
-        function plan = make_plan_(obj)
-            plan = qd.q.impl.Plan(obj, obj.inputs);
+        function plan = make_plan(obj)
+        % Construct a bare qd.q.Plan from this Q object.
+        %
+        % Typically a user should not call this function directly, but call
+        % functions like 'do' or 'sw' instead.
+            plan = qd.q.Plan(obj, obj.inputs);
         end
 
         function plan = send_sms(obj, varargin)
-            plan = obj.make_plan_().send_sms(varargin{:});
+        % See also qd.q.Plan.send_sms
+            plan = obj.make_plan().send_sms(varargin{:});
         end
         function plan = as(obj, varargin)
-            plan = obj.make_plan_().as(varargin{:});
+        % See also qd.q.Plan.as
+            plan = obj.make_plan().as(varargin{:});
         end
         function plan = with(obj, varargin)
-            plan = obj.make_plan_().with(varargin{:});
+        % See also qd.q.Plan.with
+            plan = obj.make_plan().with(varargin{:});
         end
         function plan = without(obj, varargin)
-            plan = obj.make_plan_().without(varargin{:});
+        % See also qd.q.Plan.without
+            plan = obj.make_plan().without(varargin{:});
         end
         function plan = do(obj, varargin)
-            plan = obj.make_plan_().do(varargin{:});
+        % See also qd.q.Plan.do
+            plan = obj.make_plan().do(varargin{:});
         end
         function plan = sw(obj, varargin)
-            plan = obj.make_plan_().sw(varargin{:});
+        % See also qd.q.Plan.sw
+            plan = obj.make_plan().sw(varargin{:});
         end
         function go(obj, varargin)
-            obj.make_plan_().go(varargin{:});
+        % See also qd.q.Plan.go
+            obj.make_plan().go(varargin{:});
         end
     end
 end
