@@ -18,8 +18,9 @@ classdef ETA < handle
 
         function s = format(obj)
             running_time = toc(obj.start_tic);
-            s = sprintf('%.1f s', ...
-                obj.total/obj.completed*running_time);
+            left = obj.total - obj.completed;
+            s = sprintf('%.3f', ...
+                left/obj.completed*running_time);
         end
     end
 end
