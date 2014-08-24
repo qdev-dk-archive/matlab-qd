@@ -5,11 +5,25 @@ classdef Q < handle
     properties
         setup
         store
-        meta = struct
+        meta = struct % This will be included in the generated meta.json file.
         inputs = qd.q.impl.Inputs()
+        % Phone number of the operator. Used for notification texts.
+        %
+        % This should be a string with the area code, e.g. '+45 2664 2790'.
+        % See also qd.q.Plan.send_sms
         cellphone = ''
     end
     methods
+
+        function obj = Q(store, setup)
+            if nargin >= 1
+                obj.store = store;
+            end
+            if nargin >= 2
+                obj.setup = setup;
+            end
+        end
+
         function add_input(obj, name_or_channel)
         % Add a default input for jobs spawned from this Q.
             chan = obj.resolve_channel(name_or_channel);

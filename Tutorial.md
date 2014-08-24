@@ -38,7 +38,7 @@ TODO, put output here.
 ```
 
 Furthermore, you should not expect `getc` to return the exact same value as is
-set by `setc`. For instance, if a keithley is in current compliance, it will
+set by `setc`. For instance, if a Keithley is in current compliance, it will
 limit the voltage, making the value returned by `keithley.getc('v')` lower
 than what was set.
 
@@ -143,7 +143,7 @@ Beyond being a collection of drivers with a uniform interface, *matlab-qd*
 also offers classes that will let you run basic measurements with ease. First
 we will look at two simple classes that we will use later.
 
-The class `qd.data.Store` exist to create empty directorties in some base
+The class `qd.data.Store` exist to create empty directories in some base
 folder into which data can be stored.
 
 ```matlab
@@ -176,7 +176,7 @@ and a `/`). For instance
 >> setup.setc('dac/CH0', 0);
 ```
 
-and you can access instruements and named channels through the `ins` and
+and you can access instruments and named channels through the `ins` and
 `chans` properties
 
 ```matlab
@@ -186,51 +186,59 @@ and you can access instruements and named channels through the `ins` and
 It is standard practice, to make a function in a `.m` file that sets up a
 setup object for your setup.
 
-### The *StadardRun* class
+### The *Q* class
 
-Lets try to run an experiment. Here is a simple IV curve.
+The `qd.q.Q` class is designed to make it easy to drive measurements. Let us
+set up an instance, and run a measurement that creates an IV curve. The code
+is explained below.
 
 ```matlab
->> run = qd.run.StandardRun();
->> run.store = store;
->> run.setup = setup;
->> run.sweep('keithley/v', 0, 10, 100); % 0 to 10 in 100 steps.
->> run.input('keithley/i');
->> run.name = 'IV curve';
->> run.run();
+>> q = qd.q.Q(store, setup);
+>> q.add_input('keithley/i');
+>> q.sw('keithley/v', 0, 10, 100).go('IV curve');
 ```
 
-The *sweep* and *input* methods look up a channels using the *setup*
-configured for the run, but you could also pass a channel directly
-(`run.sweep(voltage, 0, 10, 100);` and `run.input(current);`).
+The *q* object has an associated `Store` so that it can conjure up blank
+directories for its output, and a `Setup` so that it can lookup channels by
+name. The call `q.add_input('keithley/i')` looks up a channel named
+"keithley/i" in the setup, and adds it to a list of inputs held by the *q*
+object. This list of inputs is used by all jobs spawned from the *q* object.
+The call to `q.sw('keithley/v', 0, 10, 100)` creates a *Plan* object,
+representing the intent to sweep "keithley/v" from 0V to 10V in 100 steps. The
+call to `go('IV curve')`, executes the plan with the name of the output set to
+"IV curve".
 
-If you supply multiple sweeps, they are nested:
+Instead of calling `q.add_input('keithley/i')` to set "keithley/i" as a
+default input for all measurements, we could also have replaced the last two
+line above with
+
+```matlab
+>> q.sw('keithley/v', 0, 10, 100).with('keithley/i').go('IV curve');
+```
+
+This would have included "keithley/i" in this job only, and not in any
+subsequent jobs. There is also a `without` method to temporarily remove a
+default input.
+
+Methods such as `add_input` and `sw` that take a channel by name also accept
+channel objects. We will demonstrate this below, where we also show how to
+nest multiple sweeps.
 
 ```matlab
 >> gate = setup.find_channel('dac/CH0');
->> run.clear_sweeps();
->> run.sweep(gate, 0, 10, 11);
->> run.sweep('keithley/v', 0, 10, 100);
->> run.name = 'Gate dependence';
->> run.run(); % One IV curve for each gate value.
+>> q.sw(gate, 0, 10, 20).sw('keithley/v', 0, 10, 100).go('Gate dependence');
 ```
 
-Note, many of the methods of a *run* return the *run* itself so that calls can
-be chained. E.g.
+This will do 20 IV curves, one for each value of the gate. The output will be
+placed in one file.
 
-```matlab
->> run.clear_sweeps().sweep('keithley/v', 0, 10, 100).set_name('IV curve 2').run();
-```
+The *Q* class and the *q* module in general contains many interesting ways to
+piece together more advanced jobs. These are explained in detail in the
+document [+qd/+q/concepts.md](+qd/+q/concepts.md). You can get a quick
+reference for the *Q* class, the *Plan* class, and the *q* module by typing
+`doc qd.q.Q`, `doc qd.q.Plan`, or `doc qd.q` in the Matlab prompt.
 
-There is more to runs, use the `doc` command. For reference, here is the
-signature of *sweep*
-
-```matlab
-run.sweep(channel, start, end, points, [settle]);
-```
-
-where the optional value *settle*, specifies how long to wait after setting
-this value (in seconds).
+TODO, show an example here of more advanced usage.
 
 ## Plotting measurements
 
