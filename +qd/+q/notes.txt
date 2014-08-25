@@ -7,7 +7,7 @@ ctx.resolve_channel(channel_name_or_obj) -> channel object
 (recipe1 | recipe2).apply(ctx, job) =
     recipe1.apply(ctx, recipe2.apply(ctx, job))
 
-job.exec(ctx, settle, prefix)
+job.exec(ctx, future, settle, prefix)
 job.time(options, settling_time)
 job.total_points() -- should recurse into subordinate jobs, may return NaN or
     inf as is appropriate.

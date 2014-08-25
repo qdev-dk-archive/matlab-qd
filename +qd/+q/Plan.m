@@ -61,7 +61,10 @@ classdef Plan
             qd.util.assert(~isempty(obj.name));
             job = obj.make_job_();
             ctx = obj.make_ctx_for_job_(job);
-            job.exec(ctx, 0, []);
+            future = qd.classes.SetFutute.do_nothing_future();
+            settle = 0;
+            prefix = [];
+            job.exec(ctx, future, settle, prefix);
             if obj.send_sms_set
                 qd.util.send_sms( ...
                     obj.q.cellphone, ...

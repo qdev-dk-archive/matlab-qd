@@ -8,10 +8,12 @@ classdef Sweep
         job
     end
     methods
-        function exec(obj, ctx, settle, prefix)
+        function exec(obj, ctx, future, settle, prefix)
             for value = linspace(obj.from, obj.to, obj.points)
-                obj.chan.set(value);
-                obj.job.exec(ctx, max(settle, obj.settle), [prefix value]);
+                future = future & obj.chan.set_async(value);
+                settle = max(settle, obj.settle)
+                obj.job.exec(ctx, future, settle, [prefix value]);
+                future = [];
                 settle = 0;
             end
         end

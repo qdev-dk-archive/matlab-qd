@@ -46,7 +46,8 @@ classdef Inputs
             end
         end
 
-        function exec(obj, ctx, settle, prefix)
+        function exec(obj, ctx, future, settle, prefix)
+            future.exec();
             pause(settle);
             p = obj.read();
             ctx.add_point([prefix p]);
