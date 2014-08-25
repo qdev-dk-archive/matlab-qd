@@ -1,63 +1,84 @@
 # *q* module concepts
 
-This document covers everything you need to know to use and develop the
-functions and classes in the *q* module in no particular order. For a general
-introduction, see [the tutorial](../../Tutorial.md).
+Before reading this document, you should have a look at [the
+tutorial](../../Tutorial.md). See also, the [q-examples](q-examples.md)
+document (TODO).
 
-## Overview
+### *Q* objects
 
-Here is a quick overview. Everything is covered in details below.
+Usage of the *q* module starts with an object of the *qd.q.Q* class. A *Q*
+object holds configuration that changes little between different jobs. This
+includes
 
-When using the library, the user constructs a ***Q* object** to hold some
-configuration including
-
-* A list of default inputs for all jobs.
-* A *qd.Setup* object representing all equipment connected to the system.
+* A list of inputs used by default in every job.
+* A *qd.Setup* object which knows about equipment connected to the system.
 * A *qd.data.Store* to use for output files.
 * A cellphone number for sms notifications.
 
-The *q* object is used to create a ***Plan* object**. This object has  an
-associated *recipe* which starts out blank. Methods such as *sw(...)* and
-*do(...)* modify the recipe by composition. The *go(...)* method does the
-following:
+The *Setup* object is used to resolve channel names and to add description of
+the experimental setup to the `meta.json` output file.
 
-1. It constructs a job which reads a single data point.
-2. It applies its recipe to the job and executes the resulting job.
+The only interesting method a *Q* object has is the *make_plan()* method,
+although it rarely called directly. Methods like *sw(...)*, *do(...)*,
+*with(...)* etc. all call *make_plan()* first and then forward their arguments
+directly to the similarly named method on the newly created plan, they merely
+serve as shortcuts.
 
-The following recipes exists at the moment.
+For more information, type `doc qd.q.Q` in Matlab.
 
-* `qd.q.sw(channel, start, stop, n, settle)`
+### *Plan* objects
 
-  Sweeps *channel* from *start* to *stop* in *n* points. At each point, the
-  subordinate job is executed after waiting at least *settle* seconds for the
-  system settle. *channel* can be a string or a channel object. The *settle*
-  argument is optional, it defaults to zero.
+*Plan* objects are spawned from a *Q* object using the *make_plan()* method,
+or more commonly, using one of the shortcuts explained above. It holds two
+important pieces of information
 
-* `qd.q.repeat(n)` &mdash; repeats the subordinate job *n* times.
+* A list of inputs, which is initially copied from the default inputs defined
+  by the *Q* object.
+* A recipe.
 
-Note, that recipes can be composed using the `|`-operator to form more
-advanced recipes.
+A *recipe* is an object which is applied to a *job* to create a more advanced
+job. An example of a recipe is `qd.q.repeat(10)` which when applied to a job,
+*J*, creates a new job that simply repeat *J* ten times. The recipe that a
+*Plan* object starts out with is trivial, when applied to a job it simply
+returns the job unchanged.
 
-## Details
+To modify the list of inputs, a plan has the methods *with(...)* and
+*without(...)*.
 
-This section covers the concepts used in the *q* module. For documentation on
-specific classes such as *Q* and *Plan* type `doc qd.q.Q` and `doc qd.q.Plan`
-in Matlab or look at the comments in the source code for these classes. You
-only really need to read this section if you are writing new recipes or are
-curious.
+To modify the recipe, a plan has the method *do(...)*. Recipes can be composed
+with the |-operator, and the *do* method is defined such that *do(X)* creates
+a plan with the recipe *R|X* from a plan with the recipe *R*. Note, *.sw(...)*
+is a shortcut for *.do(qd.q.sw(...))*.
+
+Once a plan has been shaped using the methods described above, it is executed
+using the *go* method. It does the following
+
+1. It creates a trivial job which simply reads the inputs once and writes the
+   resulting point to a data file.
+2. It applies the recipe to the trivial job to create the job the user wants
+   to execute.
+3. It sets up an output location using the *Store* of the *Q* object it was
+   created from.
+4. It writes a meta file.
+5. It executes the job.
+
+The full details of what constitutes a *job* can be read in [a separate
+file](jobs.md).
+
+For more information, type `doc qd.q.Plan` in Matlab.
 
 ### Recipes
 
-A recipe has a single method called apply with the following signature
+A recipe is an object with single method, called `apply`, with the following
+signature
 
 ```
 new_job = recipe.apply(ctx, old_job)
 ```
 
-Where *ctx* is the *recipe application context* defined below. The resulting
-*new_job* may execute *old_job* one or more times when it is executing (see
-below for a prices definition of *job.exec()*). Additionally, recipes support
-composition using the `|`-operator defined such that
+where *ctx* is the *recipe application context* defined below. The resulting
+*new_job* may execute *old_job* any number of times. Recipes support
+composition using the |-operator defined such that
 
 ```
 (a | b).apply(ctx, job) = a.apply(ctx, b.apply(ctx, job))
@@ -72,59 +93,15 @@ chan = ctx.resolve_channel(chan_name)
 where *chan_name* is a string and *chan* is a channel object. This lets the
 recipe look up channels by name at the time of application. *resolve_channel*
 is overloaded, such that if a channel object is supplied instead of a string,
-it is returned unchanged.
+it is returned unchanged. 
 
-### Jobs
+The following recipes exists at the moment.
 
-An object is a *job* if it supports the following operations.
+* `qd.q.sw(channel, start, stop, n, settle)`
 
-* `job.exec(ctx, future, settle, prefix)`
-  
-  Executes the job. The arguments are as follows
+  Sweeps *channel* from *start* to *stop* in *n* points. At each point, the
+  subordinate job is executed after waiting at least *settle* seconds for the
+  system settle. *channel* can be a string or a channel object. The *settle*
+  argument is optional, it defaults to zero.
 
-  * *ctx* — is the execution context. Described below.
-  * *future* — is a *qd.classes.SetFuture*.
-  * *settle* — is a float.
-  * *prefix* — is a list of floats.
-
-  Before reading any inputs, a job should call `future.exec()` and then
-  `pause(settle)`, or it should arange for another job to do so. When adding
-  points to the output datafile using `ctx.add_point(p)`. It should prefix the
-  values in *prefix*.
-
-* `columns = job.columns()`
-  
-  This method returns a cell-array of structs, each representing one column
-  that the job needs in the output file. Each struct has at least a *name*
-  field with the name of the column. If *A* is a job with a subordinate job
-  *B*, in the sense that *A.exec()* calls *B.exec()* one or more times, then
-  the following is true:
-
-  * *A.columns()* calls *B.columns()* and prepends *n* structs.
-  * *A.exec()* calls *B.exec()* with *n* extra *prefix* values.
-
-  The value *n* above can of course be zero, if the job does not add any
-  columns to the output.
-
-* `time_in_seconds = job.time(options, settle)`
-  
-  Estimate how long this job will take to execute. *settle* is the same value
-  as in the call to *exec*. *options* is a struct containing options affecting
-  the timing calculation. See `qd.q.Plan.time` for expected options. *options*
-  should be forwarded unchanged when calling *time* for subordinate jobs. *time* may return *NaN* or *inf*.
-
-* `n = job.total_points()`
-  
-  How many data points will this job output. *total_points* may return *NaN* or
-  *inf*.
-
-* `reversed_job = job.reversed()`
-  
-  Create a new job that does what this job does in reverse. Subordinate jobs
-  should be reversed by this function also. If it does not make sense to
-  reverse this job, return job itself unchanged.
-
-* `meta = job.describe(register)`
-  
-  Create a description for this job for the `meta.json` file. `register` is a
-  *qd.classes.Register* object.
+* `qd.q.repeat(n)` &mdash; repeats the subordinate job *n* times.
