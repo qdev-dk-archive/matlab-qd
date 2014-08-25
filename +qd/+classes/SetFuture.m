@@ -46,6 +46,37 @@ classdef SetFuture < handle
                 warning('A qd.classes.SetFuture was thrown away without first calling exec().');
             end
         end
+
+        % This implement the operator & so that futures can be combined.
+        %
+        % If a and b are SetFuture objects, then
+        % (a & b).exec() is the same as: a.exec(); b.exec()
+        % (a & b).abort() is the same as: a.abort(); b.abort()
+        %
+        % Empty is handled specially, such that
+        % (a & []).exec() is the same as: a.exec()
+        % ([] & a).exec() is the same as: a.exec()
+        % (a & []).abort() is the same as: a.abort() 
+        % ([] & a).abort() is the same as: a.abort() 
+        function f = and(obj, other)
+            function exec()
+                if ~isempty(obj)
+                    obj.exec();
+                end
+                if ~isempty(other)
+                    other.exec();
+                end
+            end
+            function abort()
+                if ~isempty(obj)
+                    obj.abort();
+                end
+                if ~isempty(other)
+                    other.abort();
+                end
+            end
+            f = qd.classes.SetFuture(@exec, @abort);
+        end
     end
     methods(Static)
         function f = do_nothing_future()

@@ -30,14 +30,11 @@ classdef Inputs
         % Reads all configured inputs into the array values (in parallel where
         % available).
         function values = read(obj)
-            values = [];
-            futures = {};
+            future = [];
             for i = 1:length(obj.inputs)
-                futures{i} = obj.inputs{i}.get_async();
+                future = future & obj.inputs{i}.get_async();
             end
-            for i = 1:length(futures)
-                values(i) = futures{i}.exec();
-            end
+            values = future.exec();
         end
 
         function meta = describe(obj, register)

@@ -32,5 +32,26 @@ classdef GetFuture < handle
                     'without first calling force() or exec().']);
             end
         end
+
+        % This implement the operator & so that futures can be combined.
+        %
+        % If a and b are SetFuture objects, then
+        % (a & b).exec() is the same as: [a.exec(), b.exec()]
+        %
+        % Empty is handled specially, such that
+        % (a & []).exec() is the same as: a.exec()
+        % ([] & a).exec() is the same as: a.exec()
+        function f = and(obj, other)
+            function val = func()
+                if isempty(obj)
+                    val = other.exec();
+                elseif isempty(other)
+                    val = obj.exec();
+                else
+                    val = [obj.exec(), other.exec()];
+                end
+            end
+            f = qd.classes.SetFuture(@func);
+        end
     end
 end
