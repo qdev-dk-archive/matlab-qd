@@ -51,7 +51,7 @@ classdef GetFuture < handle
                     val = [obj.exec(), other.exec()];
                 end
             end
-            f = qd.classes.SetFuture(@func);
+            f = qd.classes.GetFuture(@func);
         end
     end
 end

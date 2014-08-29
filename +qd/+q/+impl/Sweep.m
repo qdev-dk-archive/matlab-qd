@@ -11,7 +11,7 @@ classdef Sweep
         function exec(obj, ctx, future, settle, prefix)
             for value = linspace(obj.from, obj.to, obj.points)
                 future = future & obj.chan.set_async(value);
-                settle = max(settle, obj.settle)
+                settle = max(settle, obj.settle);
                 obj.job.exec(ctx, future, settle, [prefix value]);
                 future = [];
                 settle = 0;
@@ -20,8 +20,8 @@ classdef Sweep
 
         function t = time(obj, options, settling_time)
             if obj.points == 0
-                t = 0
-                return
+                t = 0;
+                return;
             end
             time_for_first = obj.job.time(options, ...
                 max(settling_time, obj.settle));
