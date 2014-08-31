@@ -11,7 +11,7 @@ classdef chain < qd.q.Recipe
 
         function job = apply(obj, ctx, sub_job)
             if ~isempty(obj.a)
-                ~if isempty(obj.b)
+                if ~isempty(obj.b)
                     job = obj.a.apply(ctx, obj.b.apply(ctx, sub_job));
                 else
                     job = obj.a.apply(ctx, sub_job);
