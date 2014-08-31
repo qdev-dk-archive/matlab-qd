@@ -28,6 +28,24 @@ classdef Plan
             obj.inputs = obj.inputs.without(name);
         end
 
+        function obj = only_with(obj, varargin)
+            % We make a map of the old inputs.
+            m = containers.Map();
+            for inp = obj.inputs.inputs
+                m(inp{1}.name) = inp{1};
+            end
+            % Clear the inputs.
+            obj.inputs = qd.q.impl.Inputs();
+            for arg = varargin
+                arg = arg{1};
+                if ischar(arg) & isKey(m, arg)
+                    obj = obj.with(m(arg));
+                else
+                    obj = obj.with(arg);
+                end
+            end
+        end
+
         function obj = do(obj, recipe)
             if isempty(obj.recipe)
                 obj.recipe = recipe;

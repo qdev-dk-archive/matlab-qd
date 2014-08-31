@@ -89,6 +89,10 @@ classdef Q < handle
         % See also qd.q.Plan.without
             plan = obj.make_plan().without(varargin{:});
         end
+        function plan = only_with(obj, varargin)
+        % See also qd.q.Plan.only_with
+            plan = obj.make_plan().only_with(varargin{:});
+        end
         function plan = do(obj, varargin)
         % See also qd.q.Plan.do
             plan = obj.make_plan().do(varargin{:});
