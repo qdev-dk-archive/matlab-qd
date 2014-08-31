@@ -77,6 +77,10 @@ classdef Q < handle
         % See also qd.q.Plan.send_sms
             plan = obj.make_plan().send_sms(varargin{:});
         end
+        function plan = verbose(obj, varargin)
+        % See also qd.q.Plan.verbose
+            plan = obj.make_plan().verbose(varargin{:});
+        end
         function plan = as(obj, varargin)
         % See also qd.q.Plan.as
             plan = obj.make_plan().as(varargin{:});

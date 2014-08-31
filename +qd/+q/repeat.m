@@ -8,7 +8,7 @@ classdef repeat < qd.q.Recipe
         end
 
         function job = apply(obj, ctx, sub_job)
-            job = qd.q.impl.Repeats();
+            job = qd.q.impl.Repeat();
             job.repeats = obj.repeats;
             job.job = sub_job;
         end

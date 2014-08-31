@@ -54,6 +54,11 @@ An object is a *job* if it supports the following operations.
   Create a description for this job for the `meta.json` file. `register` is a
   *qd.classes.Register* object.
 
+* `text = job.pprint()`
+  
+  Create a string suitable for displaying this job to the user. The string may
+  contain several lines, but should not end in a newline.
+
 ## The execution context
 
 TODO

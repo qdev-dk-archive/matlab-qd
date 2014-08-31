@@ -59,5 +59,11 @@ classdef Sweep
             p = obj.points * obj.job.total_points();
         end
 
+        function t = pprint(obj)
+            t = sprintf('sweep ''%s'' from %g to %g in %d steps\n%s', ...
+                obj.chan.name, obj.from, obj.to, obj.points, ...
+                qd.util.indent(obj.job.pprint()));
+        end
+
     end
 end

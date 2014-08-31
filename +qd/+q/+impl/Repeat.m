@@ -43,5 +43,11 @@ classdef Repeat
             p = obj.repeats * obj.job.total_points();
         end
 
+        function t = pprint(obj)
+            t = sprintf('repeat %d\n%s', ...
+                obj.repeats, ...
+                qd.util.indent(obj.job.pprint()));
+        end
+
     end
 end

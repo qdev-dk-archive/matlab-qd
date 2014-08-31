@@ -73,5 +73,15 @@ classdef Inputs
         function p = total_points(obj)
             p = 1;
         end
+
+        function t = pprint(obj)
+            if isempty(obj.inputs)
+                t = '(no inputs)';
+            else
+                t = qd.util.strjoin(...
+                    qd.util.map(@(c) ['< ''', c.name, ''''], obj.inputs, true), ...
+                    sprintf('\n'));
+            end
+        end
     end
 end

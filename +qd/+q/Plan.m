@@ -1,9 +1,10 @@
-classdef Plan
+classdef Plan < matlab.mixin.CustomDisplay
     properties
         q
         recipe
         inputs
-        send_sms_set = false
+        sms_flag = false
+        verbose_flag = false
         name
     end
     methods
@@ -13,7 +14,11 @@ classdef Plan
         end
 
         function obj = send_sms(obj)
-            obj.send_sms_set = true;
+            obj.sms_flag = true;
+        end
+
+        function obj = verbose(obj)
+            obj.verbose_flag = true;
         end
 
         function obj = as(obj, name)
@@ -78,12 +83,15 @@ classdef Plan
             % If the execution reaches this point, varargin is empty.
             qd.util.assert(~isempty(obj.name));
             job = obj.make_job_();
+            if obj.verbose_flag
+                disp(job);
+            end
             ctx = obj.make_ctx_for_job_(job);
             future = qd.classes.SetFuture.do_nothing_future();
             settle = 0;
             prefix = [];
             job.exec(ctx, future, settle, prefix);
-            if obj.send_sms_set
+            if obj.sms_flag
                 qd.util.send_sms( ...
                     obj.q.cellphone, ...
                     sprintf('Job complete: "%s".', obj.name));
@@ -158,6 +166,21 @@ classdef Plan
         function t = time(obj, varargin)
             options = struct(varargin{:});
             t = obj.make_job_().time(options, 0);
+        end
+    end
+    methods (Access = protected)
+        function displayScalarObject(obj)
+            if isempty(obj.name)
+                disp('# as (unnamed), do');
+            else
+                fprintf('# as ''%s'', do\n', obj.name);
+            end
+            if isempty(obj.recipe)
+                j = obj.inputs;
+            else
+                j = obj.make_job_();
+            end
+            disp(qd.util.indent(j.pprint()));
         end
     end
 end
