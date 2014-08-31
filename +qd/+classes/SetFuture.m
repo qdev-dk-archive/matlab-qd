@@ -38,7 +38,9 @@ classdef SetFuture < handle
 
         % Calls abort. (mirrors GetFuture.resolve)
         function resolve(obj)
-            obj.abort();
+            if ~isempty(obj.func_abort)
+                obj.abort();
+            end
         end
 
         function delete(obj)
