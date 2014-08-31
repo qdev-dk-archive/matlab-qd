@@ -24,6 +24,7 @@ classdef LinOutputMix < qd.classes.Instrument
         transform
         derived_channel_names
         cached_values
+        future
     end
     methods
         function obj = LinOutputMix(base_channels, transform, varargin)
@@ -55,14 +56,18 @@ classdef LinOutputMix < qd.classes.Instrument
             end
         end
 
-        function setc(obj, chan, val)
+        function future = setc_async(obj, chan, val)
+            if ~isempty(obj.future)
+                obj.future.resolve();
+            end
             n = obj.get_chan_num(chan);
             obj.cached_values(n, 1) = val;
             base_values = obj.transform * obj.cached_values;
+            future = []
             for i = 1:length(obj.base_channels)
-                obj.base_channels{i}.set(base_values(i, 1));
+                future = future & obj.base_channels{i}.set_async(base_values(i, 1));
             end
-            % TODO, add async interface.
+            obj.future = future;
         end
     end
     methods(Access = private)

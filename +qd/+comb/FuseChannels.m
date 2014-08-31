@@ -30,23 +30,10 @@ classdef FuseChannels < qd.classes.Channel
             if ~isempty(obj.future)
                 obj.future.resolve();
             end
-            futures = {};
+            future = [];
             for chan = obj.base_channels
-                futures{end + 1} = chan{1}.set_async(val);
+                future = future & chan{1}.set_async(val);
             end
-            function abort()
-                for f = futures
-                    f{1}.abort();
-                end
-                obj.future = [];
-            end
-            function exec()
-                for f = futures
-                    f{1}.exec();
-                end
-                obj.future = [];
-            end
-            future = qd.classes.SetFuture(@exec, @abort);
             obj.future = future;
         end
     end
