@@ -12,11 +12,11 @@ function string = format_seconds(seconds_total)
         string = sprintf('%s %d days', string, days_total);
         started_printing = true;
     end
-    if hours > 0 | started_printing
+    if hours > 0 || started_printing
         string = sprintf('%s %d h', string, hours);
         started_printing = true;
     end
-    if minutes > 0 | started_printing
+    if minutes > 0 || started_printing
         string = sprintf('%s %d min', string, minutes);
     end
     if hours_total < 1

@@ -56,7 +56,7 @@ classdef Inputs
 
         function t = time(obj, options, settling_time)
             t = settling_time;
-            if isfield(options, 'read_inputs') & options.read_inputs
+            if isfield(options, 'read_inputs') && options.read_inputs
                 m = tic;
                 obj.read();
                 t = t + toc(m);

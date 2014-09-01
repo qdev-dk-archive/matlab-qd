@@ -33,7 +33,7 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj.inputs = obj.inputs.without(name);
         end
 
-        function obj = only_with(obj, varargin)
+        function obj = with_only(obj, varargin)
             % We make a map of the old inputs.
             m = containers.Map();
             for inp = obj.inputs.inputs
@@ -43,7 +43,7 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj.inputs = qd.q.impl.Inputs();
             for arg = varargin
                 arg = arg{1};
-                if ischar(arg) & isKey(m, arg)
+                if ischar(arg) && isKey(m, arg)
                     obj = obj.with(m(arg));
                 else
                     obj = obj.with(arg);
