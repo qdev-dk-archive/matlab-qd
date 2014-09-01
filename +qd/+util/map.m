@@ -1,8 +1,5 @@
-function out = map(f, in, unbox)
-    if nargin == 2
-        unbox = false;
-    end
-    if unbox
+function out = map(f, in)
+    if iscell(in)
         out = arrayfun(@(x) f(x{:}), in, 'UniformOutput', false);
     else
         out = arrayfun(f, in, 'UniformOutput', false);

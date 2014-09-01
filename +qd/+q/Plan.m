@@ -83,14 +83,18 @@ classdef Plan < matlab.mixin.CustomDisplay
             % If the execution reaches this point, varargin is empty.
             qd.util.assert(~isempty(obj.name));
             job = obj.make_job_();
-            if obj.verbose_flag
-                disp(job);
-            end
             ctx = obj.make_ctx_for_job_(job);
+            if obj.verbose_flag
+                disp(obj);
+                start_time = tic();
+            end
             future = qd.classes.SetFuture.do_nothing_future();
             settle = 0;
             prefix = [];
             job.exec(ctx, future, settle, prefix);
+            if obj.verbose_flag
+                fprintf('job took %s.\n', qd.util.format_seconds(toc(start_time)));
+            end
             if obj.sms_flag
                 qd.util.send_sms( ...
                     obj.q.cellphone, ...
@@ -171,7 +175,7 @@ classdef Plan < matlab.mixin.CustomDisplay
     methods (Access = protected)
         function displayScalarObject(obj)
             if isempty(obj.name)
-                disp('# as (unnamed), do');
+                disp('# do');
             else
                 fprintf('# as ''%s'', do\n', obj.name);
             end
