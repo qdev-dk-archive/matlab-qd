@@ -1,5 +1,5 @@
 classdef FuseChannels < qd.classes.Channel
-    properties(Access=private)
+    properties
         base_channels
         future = []
     end

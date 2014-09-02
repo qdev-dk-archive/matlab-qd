@@ -19,6 +19,7 @@ classdef Channel < qd.classes.Nameable
             r.default_name = obj.default_name;
             r.channel_id = obj.channel_id;
             r.meta = obj.meta;
+            r.class = qd.util.class_name(obj, 'full');
             if ~isempty(obj.instrument)
                 r.instrument = register.put('instruments', obj.instrument);
             end
