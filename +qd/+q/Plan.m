@@ -21,8 +21,12 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj.verbose_flag = true;
         end
 
-        function obj = as(obj, name)
-            obj.name = name;
+        function obj = as(obj, name, varargin)
+            if isempty(varargin)
+                obj.name = name;
+            else
+                obj.name = sprintf(name, varargin{:});
+            end
         end
 
         function obj = with(obj, name_or_channel)
@@ -64,21 +68,11 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function go(obj, varargin)
-            % TODO: be nice and tell what is wrong instead of assert(false).
-
             % We overload the go function slightly so the user can give
-            % a name or a recipe and a name.
-            switch length(varargin)
-                case 0
-                    % fall through
-                case 1
-                    obj.as(varargin{1}).go();
-                    return
-                case 2
-                    obj.do(varargin{1}).go(varargin{2});
-                    return
-                otherwise
-                    qd.util.assert(false);
+            % a name with the go function.
+            if ~isempty(varargin)
+                obj.as(varargin{:}).go();
+                return;
             end
             % If the execution reaches this point, varargin is empty.
             qd.util.assert(~isempty(obj.name));
