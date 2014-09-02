@@ -29,12 +29,18 @@ classdef Plan < matlab.mixin.CustomDisplay
             end
         end
 
-        function obj = with(obj, name_or_channel)
+        function obj = with(obj, name_or_channel, varargin)
             obj.inputs = obj.inputs.with(obj.q.resolve_channel(name_or_channel));
+            if ~isempty(varargin)
+                obj = obj.with(varargin{:});
+            end
         end
 
-        function obj = without(obj, name)
+        function obj = without(obj, name, varargin)
             obj.inputs = obj.inputs.without(name);
+            if ~isempty(varargin)
+                obj = obj.without(varargin{:});
+            end
         end
 
         function obj = with_only(obj, varargin)
