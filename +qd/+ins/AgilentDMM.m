@@ -76,6 +76,12 @@ classdef AgilentDMM < qd.classes.ComInstrument
                 obj.send('DISP:WIND:STAT 1')
             end
         end
+
+        function r = describe(obj, register)
+            r = obj.describe@qd.classes.ComInstrument(register);
+            r.config = struct();
+            r.config.NPLC = obj.get_NPLC();
+        end
         
     end
 end
