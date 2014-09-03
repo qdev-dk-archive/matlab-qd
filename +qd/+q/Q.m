@@ -1,6 +1,6 @@
-% This is the main entry-point for the q module.
+% This is the main entry-point for the q module. The main tutorial and
+% concepts.md describes how to use it.
 %
-% See the main tutorial.
 classdef Q < handle
     properties
         setup
@@ -16,6 +16,7 @@ classdef Q < handle
     methods
 
         function obj = Q(store, setup)
+        % Q(store, setup) where store is a qd.data.Store and setup is a qd.Setup.
             if nargin >= 1
                 obj.store = store;
             end

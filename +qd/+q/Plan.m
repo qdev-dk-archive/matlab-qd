@@ -1,4 +1,13 @@
 classdef Plan < matlab.mixin.CustomDisplay
+    % Builds and executes jobs.
+    %
+    % See the file concepts.md for details on how to use this class. In
+    % general, it should not be constructed directly, but by the qd.q.Q class.
+    %
+    % Note: this class is NOT a handle subclass. Every object is immutable,
+    %   all functions return new and independent Plan instances.
+    %
+    % See also qd.q.Q
     properties
         q
         recipe
@@ -14,14 +23,29 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = send_sms(obj)
+        % Send an sms when the job is complete. 
+        %
+        % The recipient is given by the cellphone property of the associated
+        % qd.q.Q object.
             obj.sms_flag = true;
         end
 
         function obj = verbose(obj)
+        % Print what is being done when the job is executing.
             obj.verbose_flag = true;
         end
 
         function obj = as(obj, name, varargin)
+        % Change the name job will get.
+        %
+        % If more than one arguments are given, sprintf is called with all the
+        % arguments to generate a name. For instance
+        %
+        %   obj.as('Gate sweep at %g mT', 12.56)
+        %
+        % is equivalent to
+        %
+        %   obj.as(sprintf('Gate sweep at %g mT', 12.56))
             if isempty(varargin)
                 obj.name = name;
             else
@@ -30,6 +54,13 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = with(obj, name_or_channel, varargin)
+        % obj.with(input1, [input2, ...])
+        %
+        % Add one or more inputs to the current set. Arguments can be names or
+        % channel objects. Names are looked up in the setup of the associated
+        % qd.q.Q object.
+        %
+        % See also qd.q.Plan.without and qd.q.Plan.with_only.
             obj.inputs = obj.inputs.with(obj.q.resolve_channel(name_or_channel));
             if ~isempty(varargin)
                 obj = obj.with(varargin{:});
@@ -37,6 +68,12 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = without(obj, name, varargin)
+        % obj.without(input1, [input2, ...])
+        %
+        % Remove one or more inputs to the current set. Arguments should be
+        % names only.
+        %
+        % See also qd.q.Plan.with and qd.q.Plan.with_only.
             obj.inputs = obj.inputs.without(name);
             if ~isempty(varargin)
                 obj = obj.without(varargin{:});
@@ -44,6 +81,15 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = with_only(obj, varargin)
+        % obj.with_only(input1, [input2, ...])
+        %
+        % Completely override the current set of inputs. Arguments can be
+        % channel objects or names of inputs. If names are given, they are
+        % first looked up in the current set, then in the setup of the
+        % associated qd.q.Q object.
+        %  
+        % See also qd.q.Plan.with and qd.q.Plan.without.
+
             % We make a map of the old inputs.
             m = containers.Map();
             for inp = obj.inputs.inputs
@@ -62,6 +108,9 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = do(obj, recipe)
+        % obj.do(r) appends to the current recipe.
+        %
+        % If the current recipe was s before, it will be (s|r) after.
             if isempty(obj.recipe)
                 obj.recipe = recipe;
             else
@@ -70,10 +119,27 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = sw(obj, varargin)
+        % obj.sw(...) calls obj.do(qd.q.sw(...)) to add a sweep to the recipe.
             obj = obj.do(qd.q.sw(varargin{:}));
         end
 
         function go(obj, varargin)
+        % obj.go([name, ...]) executes the plan.
+        %
+        % This function does the following:
+        %
+        % 1. If arguments are given to this function, they are first forwarded
+        %    to qd.q.Plan.as to set the name of the job.
+        % 2. A job is then contructed by applying the current recipe to a job
+        %    which reads the current inputs once.
+        % 3. An output location is created using the associated store.
+        % 4. The describe method is called and the output is written to the
+        %    file meta.json.
+        % 5. The job is executed.
+        % 6. An sms is optionally sent to the operator.
+        %
+        % See also qd.q.abort and qd.q.eta.
+
             % We overload the go function slightly so the user can give
             % a name with the go function.
             if ~isempty(varargin)
@@ -147,6 +213,10 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function meta = describe(obj)
+        % obj.describe() creates a struct describing the plan.
+        %
+        % This is what goes into the meta.json file. The description includes
+        % a description of the job that qd.Plan.go() would currently execute.
             meta = struct;
             register = qd.classes.Register();
             meta.setup = obj.q.setup.describe(register);
@@ -161,13 +231,13 @@ classdef Plan < matlab.mixin.CustomDisplay
             meta.register = register.describe();
         end
 
-        % Measure how long this plan will take to execute.
+        function t = time(obj, varargin)
+        % obj.time() measures how long this plan will take to execute.
         % 
         % The following named arguments are supported:
         %   * 'read_inputs' (default: false) 
         %      If set to true, try reading inputs to figure out how
-        %      long it takes.
-        function t = time(obj, varargin)
+        %      long it that takes.
             options = struct(varargin{:});
             t = obj.make_job_().time(options, 0);
         end
