@@ -85,7 +85,7 @@ classdef SR830LockIn < qd.classes.ComInstrument
 
         end
 
-        function set_time_constant(obj,value)
+        function set_time_constant(obj, value)
             [c index] = min(abs(obj.time_const_choices-value));
             if c ~= 0
                 warning('Integration time %f not available. Using %f instead.', ...
@@ -94,12 +94,12 @@ classdef SR830LockIn < qd.classes.ComInstrument
             obj.sendf('OFLT %i', index-1);
         end
 
-        function val = get_time_constant(obj,value)
+        function val = get_time_constant(obj, value)
             index = obj.getc('oflt');
             val = obj.time_const_choices(index+1);
         end
 
-        function set_sensitivity(obj,value)
+        function set_sensitivity(obj, value)
             [c index] = min(abs(obj.sensitivity_volt-value));
             if c ~= 0
                 warning('Sensitivity of %f not available. Using %f instead.', ...
@@ -108,10 +108,17 @@ classdef SR830LockIn < qd.classes.ComInstrument
             obj.sendf('SENS %i', index-1);
         end
 
-        function val = get_sensitivity(obj,value)
+        function val = get_sensitivity(obj, value)
             senslist = obj.sensitivity_volt;
             index = obj.querym('SENS?', '%f');
             val = senslist(index+1);
+        end
+
+        function val = is_input_overloading(obj)
+            % First we clear the input overload bit in the status register.
+            obj.query('LIAS? 0');
+            % Now we check if it is immediately set again by the instrument.
+            val = logical(obj.querym('LIAS? 0', '%d'));
         end
 
         function r = describe(obj, register)
