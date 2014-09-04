@@ -24,7 +24,7 @@ classdef Repeat
 
         function r = reversed(obj)
             r = qd.q.impl.Repeat();
-            r.points = obj.repeats;
+            r.repeats = obj.repeats;
             r.job = obj.job.reversed();
         end
 
