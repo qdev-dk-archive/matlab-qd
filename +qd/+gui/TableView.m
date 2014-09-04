@@ -13,6 +13,7 @@ classdef TableView < handle
         header = ''
         loc
         editor
+        colormap = 2
     end
     properties(Constant)
         resolution_settings = [NaN 32 64 128 256 512 1024]
@@ -141,6 +142,11 @@ classdef TableView < handle
                 'Value', obj.zoom, ...
                 'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
             lists(end + 1) = uicontrol( ...
+                'Style', 'popupmenu', ...
+                'String', {'Hot', 'Warm', 'Symmetric'}, ...
+                'Value', obj.colormap, ...
+                'Callback', @(h, varargin) obj.set_colormap(get(h, 'Value')));
+            lists(end + 1) = uicontrol( ...
                 'Style', 'pushbutton', ...
                 'String', 'Copy figure', ...
                 'Callback', @(h, varargin) obj.copy_to_clipboard());
@@ -201,6 +207,7 @@ classdef TableView < handle
             obj.zoom = other.zoom;
             obj.limits = other.limits;
             obj.track = other.track;
+            obj.colormap = other.colormap;
         end
 
         function set_resolution(obj, res)
@@ -229,6 +236,11 @@ classdef TableView < handle
 
         function set_zoom(obj, zoom)
             obj.zoom = zoom;
+            obj.update();
+        end
+
+        function set_colormap(obj, cm)
+            obj.colormap = cm;
             obj.update();
         end
 
@@ -307,7 +319,6 @@ classdef TableView < handle
                 else
                     [data, extents] = obj.resample_data();
                 end
-                colormap(hot);
                 cb = colorbar();
                 plt = imagesc(extents(1,:), extents(2,:), data);
                 axis('tight');
@@ -315,7 +326,10 @@ classdef TableView < handle
                 ax = gca();
                 set(ax, 'XLim', obj.get_limits('x', extents(1,1), extents(1,2)));
                 set(ax, 'YLim', obj.get_limits('y', extents(2,1), extents(2,2)));
-                set(ax, 'CLim', obj.get_limits('z', min(min(data)), max(max(data))));
+                z_limits = obj.get_limits('z', min(min(data)), max(max(data)));
+                set(ax, 'CLim', z_limits);
+
+                colormap(obj.get_colormap(z_limits));
                 
                 xstr = obj.get_label(1);
                 ystr = obj.get_label(2);
@@ -399,6 +413,48 @@ classdef TableView < handle
                 obj.columns(dim) = 0;
             end
             obj.update();
+        end
+
+        function m = get_colormap(obj, limits)
+            function u = make_symmetric(v)
+                low = min(limits);
+                high = max(limits);
+                scale = max(abs(limits));
+                u = v;
+                for i = 1:size(v, 1)
+                    u(i, 1) = (v(i, 1) * 2 * scale - (low + scale)) / (high - low);
+                end
+            end
+            
+            switch obj.colormap
+                case 1
+                    m = hot;
+                    return;
+                case 2
+                    r = [0 0; 0.3 1.0; 1.0 1.0];
+                    g = [0 0; 0.2 0.0; 0.7 1.0; 1 1];
+                    b = [0 0; 0.6 0.0; 1.0 0.8];
+                case 3
+                    r = [0 0.6; 0.3 0.0; 0.5 0; 0.65 1.0; 1.00 1.0];
+                    g = [0 1.0; 0.2 0.8; 0.5 0; 0.60 0.0; 0.85 1.0; 1 1];
+                    b = [0 1.0; 0.4 0.8; 0.5 0; 0.80 0.0; 1.00 0.8];
+                    r = make_symmetric(r);
+                    g = make_symmetric(g);
+                    b = make_symmetric(b);
+            end
+            m = obj.colormapRGBmatrices(256, r, g, b);
+        end
+
+        function mymap = colormapRGBmatrices(obj, N, rm, gm, bm)
+            x = linspace(0,1, N);
+            rv = interp1( rm(:,1), rm(:,2), x);
+            gv = interp1( gm(:,1), gm(:,2), x);
+            mv = interp1( bm(:,1), bm(:,2), x);
+            mymap = [ rv', gv', mv'];
+            %exclude invalid values that could appear
+            mymap( isnan(mymap) ) = 0;
+            mymap( (mymap>1) ) = 1;
+            mymap( (mymap<0) ) = 0;
         end
     end
 end
