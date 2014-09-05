@@ -10,7 +10,7 @@ classdef Q < handle
         % Phone number of the operator. Used for notification texts.
         %
         % This should be a string with the area code, e.g. '+45 2664 2790'.
-        % See also qd.q.Plan.send_sms
+        % See also qd.q.Plan.sms
         cellphone = ''
     end
     methods
@@ -74,9 +74,9 @@ classdef Q < handle
             plan = qd.q.Plan(obj, obj.inputs);
         end
 
-        function plan = send_sms(obj, varargin)
-        % See also qd.q.Plan.send_sms
-            plan = obj.make_plan().send_sms(varargin{:});
+        function plan = sms(obj, varargin)
+        % See also qd.q.Plan.sms
+            plan = obj.make_plan().sms(varargin{:});
         end
         function plan = verbose(obj, varargin)
         % See also qd.q.Plan.verbose

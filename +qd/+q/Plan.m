@@ -22,7 +22,7 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj.inputs = inputs;
         end
 
-        function obj = send_sms(obj)
+        function obj = sms(obj)
         % Send an sms when the job is complete. 
         %
         % The recipient is given by the cellphone property of the associated
