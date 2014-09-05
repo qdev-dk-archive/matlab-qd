@@ -13,7 +13,7 @@ classdef TableView < handle
         header = ''
         loc
         editor
-        colormap = 2
+        colormap = 1
     end
     properties(Constant)
         resolution_settings = [NaN 32 64 128 256 512 1024]
@@ -143,7 +143,9 @@ classdef TableView < handle
                 'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
             lists(end + 1) = uicontrol( ...
                 'Style', 'popupmenu', ...
-                'String', {'Hot', 'Warm', 'Symmetric'}, ...
+                'String', { ...
+                    'Warm', 'Symmetric', 'Grayscale', 'Warm for overhead', ...
+                    'Symmetric for overhead', 'Hot'}, ...
                 'Value', obj.colormap, ...
                 'Callback', @(h, varargin) obj.set_colormap(get(h, 'Value')));
             lists(end + 1) = uicontrol( ...
@@ -425,22 +427,38 @@ classdef TableView < handle
                     u(i, 1) = (v(i, 1) * 2 * scale - (low + scale)) / (high - low);
                 end
             end
-            
+            symmetric = false;
             switch obj.colormap
-                case 1
-                    m = hot;
-                    return;
-                case 2
+                case 1 % Warm
                     r = [0 0; 0.3 1.0; 1.0 1.0];
                     g = [0 0; 0.2 0.0; 0.7 1.0; 1 1];
                     b = [0 0; 0.6 0.0; 1.0 0.8];
-                case 3
+                case 2 % Symmetric
                     r = [0 0.6; 0.3 0.0; 0.5 0; 0.65 1.0; 1.00 1.0];
                     g = [0 1.0; 0.2 0.8; 0.5 0; 0.60 0.0; 0.85 1.0; 1 1];
                     b = [0 1.0; 0.4 0.8; 0.5 0; 0.80 0.0; 1.00 0.8];
-                    r = make_symmetric(r);
-                    g = make_symmetric(g);
-                    b = make_symmetric(b);
+                    symmetric = true;
+                case 3 % Grayscale
+                    r = [0 0; 1 1];
+                    g = [0 0; 1 1];
+                    b = [0 0; 1 1];
+                case 4 % Warm for overhead
+                    r = [0 1; 0.3 0.50; 0.6 0.35; 1 0.1];
+                    g = [0 1; 0.3 0.15; 0.6 0.00; 1 0.0];
+                    b = [0 1; 0.3 0.00; 0.6 0.00; 1 0.0];
+                case 5 % Symmetric for overhead
+                    r = [0 0.0; 0.2 0.1; 0.35 0.2; 0.5 1; 0.65 0.50; 0.8 0.35; 1 0.1];
+                    g = [0 0.0; 0.2 0.1; 0.35 0.4; 0.5 1; 0.65 0.15; 0.8 0.00; 1 0.0];
+                    b = [0 0.2; 0.2 0.8; 0.35 0.9; 0.5 1; 0.65 0.00; 0.8 0.00; 1 0.0];
+                    symmetric = true;
+                case 6 % Hot
+                    m = hot;
+                    return;
+            end
+            if symmetric
+                r = make_symmetric(r);
+                g = make_symmetric(g);
+                b = make_symmetric(b);
             end
             m = obj.colormapRGBmatrices(256, r, g, b);
         end

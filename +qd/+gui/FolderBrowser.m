@@ -127,7 +127,9 @@ classdef FolderBrowser < handle
             end
             s = obj.discover_size_of_data(obj.loc);
             if s ~= obj.size_of_data
-                obj.load_and_plot(obj.loc);
+                try
+                    obj.load_and_plot(obj.loc);
+                end
             end
         end
 
