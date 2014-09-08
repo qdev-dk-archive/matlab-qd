@@ -63,7 +63,7 @@ classdef LinOutputMix < qd.classes.Instrument
             n = obj.get_chan_num(chan);
             obj.cached_values(n, 1) = val;
             base_values = obj.transform * obj.cached_values;
-            future = []
+            future = [];
             for i = 1:length(obj.base_channels)
                 future = future & obj.base_channels{i}.set_async(base_values(i, 1));
             end
