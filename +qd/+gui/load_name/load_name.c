@@ -7,7 +7,7 @@
 
 int main(int argc, char const *argv[])
 {
-    int rval = 0;
+    int rval = -1;
     struct json_object* root = NULL;
     if (argc != 2) error("Usage: %s FILENAME\n", argv[0]);
     root = json_object_from_file(argv[1]);
