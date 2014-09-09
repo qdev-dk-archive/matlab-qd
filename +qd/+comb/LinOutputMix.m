@@ -69,16 +69,6 @@ classdef LinOutputMix < qd.classes.Instrument
             end
             obj.future = future;
         end
-    end
-    methods(Access = private)
-        function n = get_chan_num(obj, chan)
-            n = find(strcmp(obj.derived_channel_names, chan));
-            if isempty(n)
-                error('Channel not found');
-            elseif length(n) ~= 1
-                error('Multiple channels have that name');
-            end
-        end
 
         function reinitialize(obj)
         % Normally, the LinOutputMix class caches the currently set values of
@@ -94,6 +84,15 @@ classdef LinOutputMix < qd.classes.Instrument
             end
             obj.cached_values = pinv(obj.transform) * base_values;
         end
-
+    end
+    methods(Access = private)
+        function n = get_chan_num(obj, chan)
+            n = find(strcmp(obj.derived_channel_names, chan));
+            if isempty(n)
+                error('Channel not found');
+            elseif length(n) ~= 1
+                error('Multiple channels have that name');
+            end
+        end
     end
 end
