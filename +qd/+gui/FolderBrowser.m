@@ -81,6 +81,17 @@ classdef FolderBrowser < handle
             close(obj.listbox_fig);
         end
 
+        function name = load_name(obj, meta_path)
+            [my_path, ~, ~] = fileparts(mfilename('fullpath'));
+            exe = fullfile(my_path, 'load_name', 'load_name.exe');
+            [status, output] = system(['"' exe '" "' meta_path '"']);
+            if status ~= 0
+                error('Could not load name of ''%s''', meta_path);
+            else
+                name = output;
+            end
+        end
+
         function update(obj)
             if obj.has_been_closed
                 return
@@ -99,11 +110,15 @@ classdef FolderBrowser < handle
                         continue;
                     end
                     try
-                        meta = json.read(meta_path);
+                        c.name = obj.load_name(meta_path);
                     catch
-                        continue;
+                        try
+                            meta = json.read(meta_path);
+                            c.name = meta.name;
+                        catch
+                            continue;
+                        end
                     end
-                    c.name = meta.name;
                     obj.cache(d.name) = c;
                 end
                 obj.content{end + 1} = c;
