@@ -4,9 +4,9 @@
 	ignore = dirty
 [submodule "dependencies/matlab-daemon"]
 	path = dependencies/matlab-daemon
-	url = git@qdev-data.fys.ku.dk:anders/matlab-daemon
+	url = git@github.com:qdev-dk/matlab-daemon.git
 	ignore = dirty
 [submodule "dependencies/zmqmat"]
 	path = dependencies/zmqmat
-	url = git@qdev-data.fys.ku.dk:anders/zmqmat
+	url = git@github.com:qdev-dk/zmqmat.git
 	ignore = dirty
