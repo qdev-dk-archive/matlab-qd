@@ -25,7 +25,6 @@ You can get and set channels using the commands `getc` and `setc`.
 
 ```matlab
 >> keithley.setc('v', 1.0); % The unit is volts.
-TODO, put output here.
 >> keithley.getc('i')
 TODO, put output here.
 ```
@@ -34,7 +33,6 @@ Not all channels support both setting and geting, for instance
 
 ```matlab
 >> keithley.setc('r', 1000);
-TODO, put output here.
 ```
 
 Furthermore, you should not expect `getc` to return the exact same value as is
@@ -55,7 +53,7 @@ To configure an instrument, use methods on its instance. For instance
 
 Only common configuration options are usually exposed. If you need something
 that is not there, you can either add it to the drivers (see below), or bypass
-it be talking to the instrument directly.
+it by talking to the instrument directly.
 
 ```matlab
 >> keithley.query('print(smua.measure.analogfilter)');
@@ -149,7 +147,7 @@ folder into which data can be stored.
 ```matlab
 >> store = qd.data.Store('D:\Data\Me\');
 >> store.cd('DeviceNr1959');
->> blank_dir = store.new_dir()
+>> blank_dir = store.new_dir();
 ```
 
 The class `qd.Setup` is a class that knows every instrument in your setup.
