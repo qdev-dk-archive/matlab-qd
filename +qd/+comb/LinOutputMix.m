@@ -54,7 +54,9 @@ classdef LinOutputMix < qd.classes.Instrument
             % The transform is invertible if it is square and has a non-zero
             % determinant. Here we check if the magnitude of the determinant
             % is much larger than zero compared to the machine precision.
-            obj.transform_has_inverse = transform_size(1) == transform_size(2) && abs(det(transform)) > eps*1E4
+            obj.transform_has_inverse = ...
+                transform_size(1) == transform_size(2) ...
+                && abs(det(transform)) > eps*1E4;
             obj.reinitialize();
         end
 
