@@ -2,19 +2,17 @@
 
 An object is a *job* if it supports the following operations.
 
-* `job.exec(ctx, future, settle, prefix)`
+* `job.exec(ctx, future, prefix)`
   
   Executes the job. The arguments are as follows
 
   * *ctx* — is the execution context. Described below.
   * *future* — is a *qd.classes.SetFuture*.
-  * *settle* — is a float.
   * *prefix* — is a list of floats.
 
-  Before reading any inputs, a job should call `future.exec()` and then
-  `pause(settle)`, or it should arange for another job to do so. When adding
-  points to the output datafile using `ctx.add_point(p)`. It should prefix the
-  values in *prefix*.
+  Before reading any inputs, a job should call `future.exec()`, or it should
+  arange for another job to do so. When adding points to the output datafile
+  using `ctx.add_point(p)`. It should prefix the values in *prefix*.
 
 * `columns = job.columns()`
   
@@ -30,13 +28,12 @@ An object is a *job* if it supports the following operations.
   The value *n* above can of course be zero if the job does not add any
   columns to the output.
 
-* `time_in_seconds = job.time(options, settle)`
+* `time_in_seconds = job.time(options)`
   
-  Estimate how long this job will take to execute. *settle* is the same value
-  as in the call to *exec*. *options* is a struct containing options affecting
-  the timing calculation. See `qd.q.Plan.time` for expected options. *options*
-  should be forwarded unchanged when calling *time* for subordinate jobs.
-  *time* may return *NaN* or *inf*.
+  Estimate how long this job will take to execute. *options* is a struct
+  containing options affecting the timing calculation. See `qd.q.Plan.time`
+  for expected options. *options* should be forwarded unchanged when calling
+  *time* for subordinate jobs. *time* may return *NaN* or *inf*.
 
 * `n = job.total_points()`
   

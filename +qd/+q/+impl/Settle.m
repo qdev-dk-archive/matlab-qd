@@ -4,12 +4,14 @@ classdef Settle
         job
     end
     methods
-        function exec(obj, ctx, future, settle, prefix)
-            obj.job.exec(ctx, future, max(obj.settle, settle), prefix);
+        function exec(obj, ctx, future, prefix)
+            future.exec();
+            pause(obj.settle);
+            obj.job.exec(ctx, [], prefix);
         end
 
-        function t = time(obj, options, settling_time)
-            t = obj.job.time(options, max(obj.settle, settling_time));
+        function t = time(obj, options)
+            t = obj.settle + obj.job.time(options);
         end
 
         function r = reversed(obj)

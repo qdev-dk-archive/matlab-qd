@@ -97,11 +97,10 @@ it is returned unchanged.
 
 The following recipes exists at the moment.
 
-* `qd.q.sw(channel, start, stop, n, settle)`
+* `qd.q.sw(channel, start, stop, n)`
 
   Sweeps *channel* from *start* to *stop* in *n* points. At each point, the
-  subordinate job is executed after waiting at least *settle* seconds for the
-  system settle. *channel* can be a string or a channel object. The *settle*
-  argument is optional, it defaults to zero.
+  subordinate job is executed. *channel* can be a string or a channel object.
 
 * `qd.q.repeat(n)` &mdash; repeats the subordinate job *n* times.
+* `qd.q.settle(t)` &mdash; wait *t* seconds.

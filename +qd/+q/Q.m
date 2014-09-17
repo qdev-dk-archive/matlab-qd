@@ -7,6 +7,9 @@ classdef Q < handle
         store
         meta = struct % This will be included in the generated meta.json file.
         inputs = qd.q.impl.Inputs()
+        % Default settling time after setting ouputs before reading inputs. In
+        % seconds.
+        default_settle = 0
         % Phone number of the operator. Used for notification texts.
         %
         % This should be a string with the area code, e.g. '+45 2664 2790'.
@@ -72,6 +75,7 @@ classdef Q < handle
         % Typically a user should not call this function directly, but call
         % functions like 'do' or 'sw' instead.
             plan = qd.q.Plan(obj, obj.inputs);
+            plan = plan.settle(obj.default_settle);
         end
 
         function plan = sms(obj, varargin)
@@ -105,6 +109,10 @@ classdef Q < handle
         function plan = sw(obj, varargin)
         % See also qd.q.Plan.sw
             plan = obj.make_plan().sw(varargin{:});
+        end
+        function plan = settle(obj, varargin)
+        % See also qd.q.Plan.settle
+            plan = obj.make_plan().settle(varargin{:});
         end
         function go(obj, varargin)
         % See also qd.q.Plan.go

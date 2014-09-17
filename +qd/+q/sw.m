@@ -4,7 +4,6 @@ classdef sw < qd.q.Recipe
         from
         to
         points
-        settle = 0
     end
     methods
         function obj = sw(chan, from, to, points, varargin)
@@ -12,10 +11,14 @@ classdef sw < qd.q.Recipe
             obj.from = from;
             obj.to = to;
             obj.points = points;
-            if length(varargin) == 1
-                obj.settle = varargin{1};
+            if length(varargin) ~= 0
+                error(['qd.q.sw called with one argument too much. The '...
+                    'fith argument used to be the settling time, but '...
+                    'you can no longer specify a settling time for a '...
+                    'sweep. Use the qd.q.settle recipe, the settle '...
+                    'function on the Plan class, or set default_settle '...
+                    'on the Q object.']);
             end
-            qd.util.assert(length(varargin) < 2);
         end
 
         function job = apply(obj, ctx, sub_job)
@@ -24,7 +27,6 @@ classdef sw < qd.q.Recipe
             job.from = obj.from;
             job.to = obj.to;
             job.points = obj.points;
-            job.settle = obj.settle;
             job.job = sub_job;
         end
     end

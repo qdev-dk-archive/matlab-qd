@@ -14,6 +14,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         inputs
         sms_flag = false
         verbose_flag = false
+        settling_time = 0
         name
     end
     methods
@@ -123,6 +124,14 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj = obj.do(qd.q.sw(varargin{:}));
         end
 
+        function obj = settle(obj, seconds)
+        % obj.settle(seconds) sets the settling time.
+        %
+        % The settling time is the time to wait after setting outputs before
+        % reading inputs.
+            obj.settling_time = seconds;
+        end
+
         function go(obj, varargin)
         % obj.go([name, ...]) executes the plan.
         %
@@ -155,9 +164,8 @@ classdef Plan < matlab.mixin.CustomDisplay
                 start_time = tic();
             end
             future = qd.classes.SetFuture.do_nothing_future();
-            settle = 0;
             prefix = [];
-            job.exec(ctx, future, settle, prefix);
+            job.exec(ctx, future, prefix);
             if obj.verbose_flag
                 fprintf('job took %s.\n', qd.util.format_seconds(toc(start_time)));
             end
@@ -171,7 +179,11 @@ classdef Plan < matlab.mixin.CustomDisplay
         function job = make_job_(obj)
             qd.util.assert(~isempty(obj.recipe));
             ctx = struct('resolve_channel', @(x) obj.q.resolve_channel(x));
-            job = obj.recipe.apply(ctx, obj.inputs);
+            recipe = obj.recipe;
+            if obj.settling_time ~= 0
+                recipe = recipe | qd.q.settle(obj.settling_time);
+            end
+            job = recipe.apply(ctx, obj.inputs);
         end
 
         function ctx = make_ctx_for_job_(obj, job)
@@ -239,7 +251,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         %      If set to true, try reading inputs to figure out how
         %      long it that takes.
             options = struct(varargin{:});
-            t = obj.make_job_().time(options, 0);
+            t = obj.make_job_().time(options);
         end
     end
     methods (Access = protected)

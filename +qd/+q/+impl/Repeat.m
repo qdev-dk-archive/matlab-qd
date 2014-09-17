@@ -4,22 +4,15 @@ classdef Repeat
         job
     end
     methods
-        function exec(obj, ctx, future, settle, prefix)
+        function exec(obj, ctx, future, prefix)
             for i = 1:obj.repeats
-                obj.job.exec(ctx, future, settle, [prefix i]);
+                obj.job.exec(ctx, future, [prefix i]);
                 future = [];
-                settle = 0;
             end
         end
 
-        function t = time(obj, options, settling_time)
-            if obj.repeats == 0
-                t = 0
-                return
-            end
-            time_for_first = obj.job.time(options, settling_time);
-            time_for_remaining = obj.job.time(options, 0);
-            t = time_for_first + time_for_remaining*(obj.repeats - 1);
+        function t = time(obj, options)
+            t = obj.job.time(options)*obj.repeats;
         end
 
         function r = reversed(obj)

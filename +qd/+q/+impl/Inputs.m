@@ -46,16 +46,15 @@ classdef Inputs
             end
         end
 
-        function exec(obj, ctx, future, settle, prefix)
+        function exec(obj, ctx, future, prefix)
             future.exec();
-            pause(settle);
             p = obj.read();
             ctx.add_point([prefix p]);
             ctx.periodic_hook();
         end
 
-        function t = time(obj, options, settling_time)
-            t = settling_time;
+        function t = time(obj, options)
+            t = 0;
             if isfield(options, 'read_inputs') && options.read_inputs
                 m = tic;
                 obj.read();

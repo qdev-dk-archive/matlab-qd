@@ -4,29 +4,19 @@ classdef Sweep
         from
         to
         points
-        settle
         job
     end
     methods
-        function exec(obj, ctx, future, settle, prefix)
+        function exec(obj, ctx, future, prefix)
             for value = linspace(obj.from, obj.to, obj.points)
                 future = future & obj.chan.set_async(value);
-                settle = max(settle, obj.settle);
-                obj.job.exec(ctx, future, settle, [prefix value]);
+                obj.job.exec(ctx, future, [prefix value]);
                 future = [];
-                settle = 0;
             end
         end
 
-        function t = time(obj, options, settling_time)
-            if obj.points == 0
-                t = 0;
-                return;
-            end
-            time_for_first = obj.job.time(options, ...
-                max(settling_time, obj.settle));
-            time_for_remaining = obj.job.time(options, obj.settle);
-            t = time_for_first + time_for_remaining*(obj.points - 1);
+        function t = time(obj, options)
+            t = obj.job.time(options)*obj.points;
         end
 
         function r = reversed(obj)
@@ -35,7 +25,6 @@ classdef Sweep
             r.from = obj.to;
             r.to = obj.from;
             r.points = obj.points;
-            r.settle = obj.settle;
             r.job = obj.job.reversed();
         end
 
@@ -51,7 +40,6 @@ classdef Sweep
             meta.to = obj.to;
             meta.points = obj.points;
             meta.repeats = obj.points;
-            meta.settle = obj.settle;
             meta.job = obj.job.describe(register);
         end
 
