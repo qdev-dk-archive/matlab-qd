@@ -4,11 +4,6 @@ A framework to write high-level instrument drivers, to do basic measurement,
 and to quickly browse the resulting data. This is a direct competitor to
 [special-measure](https://code.google.com/p/special-measure/).
 
-This file is written in the [markdown format][mdcheat]. If you use, for
-instance, the chrome extension [Markdown Preview Plus][mdpreview], and enable
-local file-system access, you will have a pleasant reading experience, with
-all links working.
-
 ## Important notice
 
 The API is under development. Changes likely to cause problems for users will
