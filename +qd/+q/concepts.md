@@ -62,10 +62,12 @@ using the *go* method. It does the following
 4. It writes a meta file.
 5. It executes the job.
 
+For more information, type `doc qd.q.Plan` in Matlab.
+
+### Jobs
+
 The full details of what constitutes a *job* can be read in [a separate
 file](jobs.md).
-
-For more information, type `doc qd.q.Plan` in Matlab.
 
 ### Recipes
 

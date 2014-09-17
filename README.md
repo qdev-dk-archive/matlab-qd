@@ -47,6 +47,9 @@ Find help and information here:
 * The `doc` command in MATLAB. E.g. type `doc qd.classes.Instrument`
 * [List of breaking changes](BREAKING_CHANGES.md)
 * [Configuring Daemons][daemons]
+* Usage of the `qd.q` module is documented in the [the tutorial](Tutorial.md),
+  in [+qd/+q/concepts.md](+qd/+q/concepts.md) and in
+  [+qd/+q/jobs.md](+qd/+q/jobs.md).
 * A sequential run example: [SequentialRun.md](SequentialRun.md)
 * [Markdown Cheatsheet][mdcheat] for writing documentation
 * The code itself (don't be afraid).
