@@ -75,7 +75,7 @@ classdef Q < handle
         % Typically a user should not call this function directly, but call
         % functions like 'do' or 'sw' instead.
             plan = qd.q.Plan(obj, obj.inputs);
-            plan = plan.settle(obj.default_settle);
+            plan = plan.input_settle(obj.default_settle);
         end
 
         function plan = sms(obj, varargin)
@@ -110,9 +110,9 @@ classdef Q < handle
         % See also qd.q.Plan.sw
             plan = obj.make_plan().sw(varargin{:});
         end
-        function plan = settle(obj, varargin)
-        % See also qd.q.Plan.settle
-            plan = obj.make_plan().settle(varargin{:});
+        function plan = input_settle(obj, varargin)
+        % See also qd.q.Plan.input_settle
+            plan = obj.make_plan().input_settle(varargin{:});
         end
         function go(obj, varargin)
         % See also qd.q.Plan.go

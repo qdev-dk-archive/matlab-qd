@@ -14,7 +14,10 @@ classdef Plan < matlab.mixin.CustomDisplay
         inputs
         sms_flag = false
         verbose_flag = false
-        settling_time = 0
+        % If input_settle_val is non-zero and go() or time() is called, then
+        % qd.q.settle(obj.input_settle_val) is added to the recipe before
+        % reading the inputs.
+        input_settle_val = 0
         name
     end
     methods
@@ -124,12 +127,13 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj = obj.do(qd.q.sw(varargin{:}));
         end
 
-        function obj = settle(obj, seconds)
-        % obj.settle(seconds) sets the settling time.
+        function obj = input_settle(obj, seconds)
+        % obj.input_settle(seconds) sets the settling time.
         %
         % The settling time is the time to wait after setting outputs before
-        % reading inputs.
-            obj.settling_time = seconds;
+        % reading inputs. Use obj.do(qd.q.settle(seconds)) to add settling
+        % time at a specific point in the recipe instead.
+            obj.input_settle_val = seconds;
         end
 
         function go(obj, varargin)
@@ -180,8 +184,8 @@ classdef Plan < matlab.mixin.CustomDisplay
             qd.util.assert(~isempty(obj.recipe));
             ctx = struct('resolve_channel', @(x) obj.q.resolve_channel(x));
             recipe = obj.recipe;
-            if obj.settling_time ~= 0
-                recipe = recipe | qd.q.settle(obj.settling_time);
+            if obj.input_settle_val ~= 0
+                recipe = recipe | qd.q.settle(obj.input_settle_val);
             end
             job = recipe.apply(ctx, obj.inputs);
         end
