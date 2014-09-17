@@ -7,6 +7,16 @@ classdef sw < qd.q.Recipe
     end
     methods
         function obj = sw(chan, from, to, points, varargin)
+        % recipe = sw(chan, from, to, points) 
+        %
+        % Constructs a recipe that sweeps an output channel. chan can be a
+        % channel object or the name of a channel. If chan is a name, it will
+        % be looked up at the time the recipe is applied.
+        %
+        % Note: you often need to add one to the number of points to get nice
+        %   values, e.g. sw(chan, 0, 10, 10) would set chan to the values [0,
+        %   1.11, 2.22, ..., 10] for a total of 10 linearly spaced points.
+        %   sw(chan, 0, 10, 11) would set chan to [0, 1, 2, ..., 10].
             obj.chan = chan;
             obj.from = from;
             obj.to = to;

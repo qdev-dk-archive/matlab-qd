@@ -124,7 +124,19 @@ classdef Plan < matlab.mixin.CustomDisplay
 
         function obj = sw(obj, varargin)
         % obj.sw(...) calls obj.do(qd.q.sw(...)) to add a sweep to the recipe.
+        %
+        % See also qd.q.sw.
             obj = obj.do(qd.q.sw(varargin{:}));
+        end
+
+        function obj = swd(obj, varargin)
+        % obj.swd(...) calls obj.do(qd.q.swd(...)) to add a sweep to the recipe.
+        %
+        % In contrast to obj.sw(...) this lets you specify the point density
+        % rather than the number of points.
+        %
+        % See also qd.q.swd.
+            obj = obj.do(qd.q.swd(varargin{:}));
         end
 
         function obj = input_settle(obj, seconds)

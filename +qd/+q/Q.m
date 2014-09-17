@@ -110,6 +110,10 @@ classdef Q < handle
         % See also qd.q.Plan.sw
             plan = obj.make_plan().sw(varargin{:});
         end
+        function plan = swd(obj, varargin)
+        % See also qd.q.Plan.swd
+            plan = obj.make_plan().swd(varargin{:});
+        end
         function plan = input_settle(obj, varargin)
         % See also qd.q.Plan.input_settle
             plan = obj.make_plan().input_settle(varargin{:});
