@@ -47,7 +47,9 @@ classdef Inputs
         end
 
         function exec(obj, ctx, future, prefix)
-            future.exec();
+            if ~isempty(future)
+                future.exec();
+            end
             p = obj.read();
             ctx.add_point([prefix p]);
             ctx.periodic_hook();

@@ -5,7 +5,9 @@ classdef Settle
     end
     methods
         function exec(obj, ctx, future, prefix)
-            future.exec();
+            if ~isempty(future)
+                future.exec();
+            end
             pause(obj.settle);
             obj.job.exec(ctx, [], prefix);
         end

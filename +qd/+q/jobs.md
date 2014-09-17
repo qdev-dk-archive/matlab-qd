@@ -7,12 +7,13 @@ An object is a *job* if it supports the following operations.
   Executes the job. The arguments are as follows
 
   * *ctx* — is the execution context. Described below.
-  * *future* — is a *qd.classes.SetFuture*.
+  * *future* — is a *qd.classes.SetFuture* or `[]`.
   * *prefix* — is a list of floats.
 
-  Before reading any inputs, a job should call `future.exec()`, or it should
-  arange for another job to do so. When adding points to the output datafile
-  using `ctx.add_point(p)`. It should prefix the values in *prefix*.
+  Before reading any inputs, if *future* is not empty, a job should call
+  `future.exec()`, or it should arange for another job to do so. When adding
+  points to the output datafile using `ctx.add_point(p)`. It should prefix the
+  values in *prefix*.
 
 * `columns = job.columns()`
   
