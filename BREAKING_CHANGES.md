@@ -1,5 +1,10 @@
 # Breaking changes
 
+## Version 0.6
+
+* The DecaDAC2 drivers no longer touches the mode by default. You need to call
+  set_all_to_4channel_mode if this is what you want.
+
 ## Version 0.5
 
 * New class hierarchy for runs. I.e. RunWithInputs is now an ancestor of StandardRun.
