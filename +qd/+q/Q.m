@@ -15,6 +15,13 @@ classdef Q < handle
         % This should be a string with the area code, e.g. '+45 2664 2790'.
         % See also qd.q.Plan.sms
         cellphone = ''
+
+        % smtp server used for sending emails.
+        smtp_server
+        % From-address of emails send with this q-object.
+        email_sender
+        % Email of the operator.
+        email_recipient
     end
     methods
 
@@ -78,9 +85,31 @@ classdef Q < handle
             plan = plan.input_settle(obj.default_settle);
         end
 
+        function send_sms_(obj, content)
+        % Use the settings in this q object to send an sms.
+            qd.util.send_sms(obj.cellphone, content);
+        end
+
+        function send_email_(obj, subject, content)
+        % Use the settings in this q object to send an email.
+            if ~isempty(obj.email_sender)
+                sender = obj.email_sender;
+            else
+                [~, hostname] = system('hostname');
+                sender = sprintf('q@%s', hostname);
+            end
+            cleanup1 = temp_setpref('Internet','SMTP_Server', obj.smtp_server);
+            cleanup2 = temp_setpref('Internet','E_mail', sender);
+            sendmail(obj.email_recipient, subject, content);
+        end
+
         function plan = sms(obj, varargin)
         % See also qd.q.Plan.sms
             plan = obj.make_plan().sms(varargin{:});
+        end
+        function plan = email(obj, varargin)
+        % See also qd.q.Plan.email
+            plan = obj.make_plan().email(varargin{:});
         end
         function plan = verbose(obj, varargin)
         % See also qd.q.Plan.verbose
@@ -123,4 +152,14 @@ classdef Q < handle
             obj.make_plan().go(varargin{:});
         end
     end
+end
+
+function cleanup = temp_setpref(group, pref, value)
+    if ispref(group, pref)
+        prev = getpref(group, pref);
+        cleanup = onCleanup(@()setpref(group, pref, prev));
+    else
+        cleanup = onCleanup(@()rmpref(group, pref));
+    end
+    setpref(group, pref, value);
 end

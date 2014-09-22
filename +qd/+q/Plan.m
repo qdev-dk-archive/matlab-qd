@@ -13,6 +13,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         recipe
         inputs
         sms_flag = false
+        email_flag = false
         verbose_flag = false
         % If input_settle_val is non-zero and go() or time() is called, then
         % qd.q.settle(obj.input_settle_val) is added to the recipe before
@@ -32,6 +33,14 @@ classdef Plan < matlab.mixin.CustomDisplay
         % The recipient is given by the cellphone property of the associated
         % qd.q.Q object.
             obj.sms_flag = true;
+        end
+
+        function obj = email(obj)
+        % Send an email when the job is complete. 
+        %
+        % The recipient is given by the email_recipient property of the
+        % associated qd.q.Q object.
+            obj.email_flag = true;
         end
 
         function obj = verbose(obj)
@@ -161,7 +170,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         % 4. The describe method is called and the output is written to the
         %    file meta.json.
         % 5. The job is executed.
-        % 6. An sms is optionally sent to the operator.
+        % 6. An sms or email is optionally sent to the operator.
         %
         % See also qd.q.abort and qd.q.eta.
 
@@ -175,20 +184,25 @@ classdef Plan < matlab.mixin.CustomDisplay
             qd.util.assert(~isempty(obj.name));
             job = obj.make_job_();
             ctx = obj.make_ctx_for_job_(job);
+            start_time = tic();
             if obj.verbose_flag
                 disp(obj);
-                start_time = tic();
             end
             future = qd.classes.SetFuture.do_nothing_future();
             prefix = [];
             job.exec(ctx, future, prefix);
+            time_string = sprintf('job took %s', qd.util.format_seconds(toc(start_time)));
             if obj.verbose_flag
-                fprintf('job took %s.\n', qd.util.format_seconds(toc(start_time)));
+                disp(time_string);
             end
             if obj.sms_flag
-                qd.util.send_sms( ...
-                    obj.q.cellphone, ...
-                    sprintf('Job complete: "%s".', obj.name));
+                obj.q.send_sms_(sprintf('Job complete: "%s".', obj.name));
+            end
+            if obj.email_flag
+                obj.q.send_email_(...
+                    sprintf('Job complete: "%s".', obj.name), ...
+                    sprintf('%s\n%s\n', obj.pprint(), time_string) ...
+                )
             end
         end
 
@@ -269,20 +283,24 @@ classdef Plan < matlab.mixin.CustomDisplay
             options = struct(varargin{:});
             t = obj.make_job_().time(options);
         end
-    end
-    methods (Access = protected)
-        function displayScalarObject(obj)
+
+        function s = pprint(obj)
             if isempty(obj.name)
-                disp('# do');
+                header = '# do';
             else
-                fprintf('# as ''%s'', do\n', obj.name);
+                header = sprintf('# as ''%s'', do', obj.name);
             end
             if isempty(obj.recipe)
                 j = obj.inputs;
             else
                 j = obj.make_job_();
             end
-            disp(qd.util.indent(j.pprint()));
+            s = sprintf('%s\n%s', header, qd.util.indent(j.pprint()));
+        end
+    end
+    methods (Access = protected)
+        function displayScalarObject(obj)
+            disp(obj.pprint());
         end
     end
 end
