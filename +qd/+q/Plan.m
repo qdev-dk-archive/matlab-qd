@@ -196,7 +196,7 @@ classdef Plan < matlab.mixin.CustomDisplay
                 disp(time_string);
             end
             if obj.sms_flag
-                obj.q.send_sms_(sprintf('Job complete: "%s".', obj.name));
+                obj.q.send_sms_(sprintf('Job complete: "%s" (%s).', obj.name, time_string));
             end
             if obj.email_flag
                 obj.q.send_email_(...
