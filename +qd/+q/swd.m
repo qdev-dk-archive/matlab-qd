@@ -8,5 +8,5 @@ function r = swd(chan, from, to, point_density)
 %
 % Such that the points in the constructed sweep are no further apart than
 % (1/point_density).
-    r = qd.q.sw(chan, from, to, ceil(abs(to - from)*point_density) + 1)
+    r = qd.q.sw(chan, from, to, ceil(abs(to - from)*point_density) + 1);
 end
