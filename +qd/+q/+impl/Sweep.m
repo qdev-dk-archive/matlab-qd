@@ -16,7 +16,15 @@ classdef Sweep
         end
 
         function t = time(obj, options)
-            t = obj.job.time(options)*obj.points;
+            time_to_set = 0;
+            if isfield(options, 'set_outputs') && options.set_outputs
+                values = linspace(obj.from, obj.to, obj.points);
+                obj.chan.set(values(1));
+                tic;
+                obj.chan.set(values(2));
+                time_to_set = toc();
+            end
+            t = (time_to_set + obj.job.time(options))*obj.points;
         end
 
         function r = reversed(obj)

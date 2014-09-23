@@ -277,10 +277,16 @@ classdef Plan < matlab.mixin.CustomDisplay
         % obj.time() measures how long this plan will take to execute.
         % 
         % The following named arguments are supported:
-        %   * 'read_inputs' (default: false) 
+        %   * 'read_inputs' (default: true) 
         %      If set to true, try reading inputs to figure out how
-        %      long it that takes.
+        %      long that takes.
+        %   * 'set_outputs' (default: false) 
+        %      If set to true, try setting outputs to figure out how
+        %      long that takes.
             options = struct(varargin{:});
+            if ~isfield(options, 'read_inputs')
+                options.read_inputs = true;
+            end
             t = obj.make_job_().time(options);
         end
 
