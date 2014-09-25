@@ -83,7 +83,13 @@ classdef FolderBrowser < handle
 
         function name = load_name(obj, meta_path)
             [my_path, ~, ~] = fileparts(mfilename('fullpath'));
-            exe = fullfile(my_path, 'load_name', 'load_name.exe');
+            arch = computer('arch');
+            if isunix()
+                exe_name = 'load_name';
+            else
+                exe_name = 'load_name.exe';
+            end
+            exe = fullfile(my_path, 'load_name', arch, exe_name);
             [status, output] = system(['"' exe '" "' meta_path '"']);
             if status ~= 0
                 error('Could not load name of ''%s''', meta_path);
