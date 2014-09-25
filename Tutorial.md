@@ -230,6 +230,10 @@ nest multiple sweeps.
 This will do 20 IV curves, one for each value of the gate. The output will be
 placed in one file.
 
+To cancel a running job, execute `qd.q.abort` in a seperate instance of
+matlab. To find out when a running job will finish, execute `qd.q.eta` in a
+seperate instance of matlab.
+
 The *Q* class and the *q* module in general contains many interesting ways to
 piece together more advanced jobs. These are explained in detail in the
 document [+qd/+q/concepts.md](+qd/+q/concepts.md). You can get a quick
@@ -300,7 +304,7 @@ at the prompt). The above code could look like
 
 function brw = load_my_folder_browser(device_name)
     brw = qd.gui.FolderBrowser(['D:\Data\Me\' device_name]);
-    brw.add_pseudo_column(@conductance);
+    brw.add_pseudo_column(@conductance, '');
     % @conductance is a handle to the function below
 end
 

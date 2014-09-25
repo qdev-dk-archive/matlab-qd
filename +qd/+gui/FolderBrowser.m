@@ -209,6 +209,9 @@ classdef FolderBrowser < handle
         end
 
         function add_pseudo_column(obj, func, name)
+            if nargin == 2
+                name = func2str(func);
+            end
             function r = pseudo(tbls, meta)
                 c = struct();
                 c.name = name;
