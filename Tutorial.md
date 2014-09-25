@@ -234,7 +234,9 @@ The *Q* class and the *q* module in general contains many interesting ways to
 piece together more advanced jobs. These are explained in detail in the
 document [+qd/+q/concepts.md](+qd/+q/concepts.md). You can get a quick
 reference for the *Q* class, the *Plan* class, and the *q* module by typing
-`doc qd.q.Q`, `doc qd.q.Plan`, or `doc qd.q` in the Matlab prompt.
+`doc qd.q.Q`, `doc qd.q.Plan`, or `doc qd.q` in the Matlab prompt, but
+arguably, the comments in the sources are easier to read than the generated
+documentation.
 
 TODO, show an example here of more advanced usage.
 
@@ -370,15 +372,13 @@ a linear transformation on gate channels to eliminate capacitive cross-talk.
 For instances such as these, *matlab-qd* has channel combinator, which take
 one or more base channels to generate a new set of channels.
 
-TODO
+TODO. For now, look at the sources in *qd.comb*.
 
 ### Writing instrument drivers
 
-TODO
-
-### Subclassing or forgoing the run classes
-
-TODO
+TODO. For now see *qd.ins.SR830LockIn* for a standard instrument, and
+*qd.ins.Keithley2600* and *qd.ins.AgilentDMM* for instruments using the async
+interface.
 
 ### Daemons
 

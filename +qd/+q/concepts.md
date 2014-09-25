@@ -11,9 +11,11 @@ object holds configuration that changes little between different jobs. This
 includes
 
 * A list of inputs used by default in every job.
+* A default settle time.
 * A *qd.Setup* object which knows about equipment connected to the system.
 * A *qd.data.Store* to use for output files.
 * A cellphone number for sms notifications.
+* An email address for email notifications.
 
 The *Setup* object is used to resolve channel names and to add description of
 the experimental setup to the `meta.json` output file.
@@ -35,6 +37,7 @@ important pieces of information
 * A list of inputs, which is initially copied from the default inputs defined
   by the *Q* object.
 * A recipe.
+* A default settle time.
 
 A *recipe* is an object which is applied to a *job* to create a more advanced
 job. An example of a recipe is `qd.q.repeat(10)` which when applied to a job,
@@ -55,12 +58,13 @@ using the *go* method. It does the following
 
 1. It creates a trivial job which simply reads the inputs once and writes the
    resulting point to a data file.
-2. It applies the recipe to the trivial job to create the job the user wants
-   to execute.
-3. It sets up an output location using the *Store* of the *Q* object it was
+2. If the default settle time is not zero, it applies a *settle* recipe to the
+   job.
+3. It applies the configured recipe to the job.
+4. It sets up an output location using the *Store* of the *Q* object it was
    created from.
-4. It writes a meta file.
-5. It executes the job.
+5. It writes a meta file.
+6. It executes the job.
 
 For more information, type `doc qd.q.Plan` in Matlab.
 

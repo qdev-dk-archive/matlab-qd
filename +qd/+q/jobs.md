@@ -59,4 +59,11 @@ An object is a *job* if it supports the following operations.
 
 ## The execution context
 
-TODO
+The execution context, *ctx*, is an object with the following methods:
+
+* `ctx.add_point(p)` &mdash; Puts an array of floats in the ouput file (as a single row).
+* `ctx.add_divider()` &mdash; Gnuplot expects a divider between each line in a
+  2D-sweep. This hook exists to make that happen.
+* `ctx.periodic_hook()` &mdash; Should be called once in a while. May raise an
+  exception if the user requested that the job be aborted. This function also
+  communicates eta updates to the user. See `qd.q.abort` and `qd.q.eta`.
