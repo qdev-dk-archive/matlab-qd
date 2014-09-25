@@ -14,11 +14,9 @@ and clear your matlab workspaces after updating (unless you know better).
 ## Installation
 
 *matlab-qd* depends on a few other libraries. To install them, run the
-following commands in a git shell:
+following command in a git shell:
 
-`git submodule init`
-
-`git submodule update --recursive`
+`git submodule update --init`
 
 Then add the root folder of the library to the MATLAB past, as well as all the
 folders immediately inside the `dependencies` folder. Run the command
