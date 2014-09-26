@@ -121,15 +121,14 @@ volt at 0.1 volt/second, ramping one at a time with `setc` would take 1 min.
 However, this piece of code
 
 ```matlab
+f = [];
 % First we initate all the ramping.
-futures = {};
 for i = 1:length(gates)
-    futures{i} = gates{i}.set_async(1.0);
+    % Two futures, or a future and a [], can be combined with the & operator.
+    f = f & gates{i}.set_async(1.0);
 end
-% Then we wait for the ramps to finish
-for i = 1:length(gates)
-    futures{i}.exec();
-end
+% Wait until all the ramps finish
+f.exec();
 ```
 
 would only take 10 seconds. This method is used throughout *matlab-qd*. Note,
