@@ -60,7 +60,7 @@ classdef Inputs
             if isfield(options, 'read_inputs') && options.read_inputs
                 m = tic;
                 obj.read();
-                t = t + toc(m);
+                t = toc(m);
             end
         end
 

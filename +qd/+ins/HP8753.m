@@ -59,7 +59,22 @@ classdef HP8753 < qd.classes.ComInstrument
             end
         end
 
-        function fillOutputBuffer(obj,channel)
+        function fillOutputBuffer(obj, channel)
+            [mag, phase] = obj.read_waveform();
+
+            % Save data for output
+            switch lower(channel)
+                case 'mag'
+                    % Calculate magnitude and store in outputbuffer
+                    obj.outputBuffer = mag;
+                case 'phase'
+                    % Calculate phase and store in outputbuffer
+                    obj.outputBuffer = phase;
+            end
+        end
+
+        function [mag, phase] = read_waveform(obj)
+
             % Set data return format and trigger a single measurement
             success = obj.query(['FORM5; OPC?; NUMG ' num2str(obj.numberOfAverages) ';']);
             if ~success
@@ -88,16 +103,8 @@ classdef HP8753 < qd.classes.ComInstrument
             data(:,1) = rawData(1:2:end); % Odd points
             data(:,2) = rawData(2:2:end); % Even points
 
-
-            % Save data for output
-            switch lower(channel)
-                case 'mag'
-                    % Calculate magnitude and store in outputbuffer
-                    obj.outputBuffer = 20*log10(sqrt(data(:,1).^2+data(:,2).^2));
-                case 'phase'
-                    % Calculate phase and store in outputbuffer
-                    obj.outputBuffer = unwrap(angle(data(:,1)+1i*data(:,1)));
-            end
+            mag = 20*log10(sqrt(data(:,1).^2+data(:,2).^2));
+            phase = unwrap(angle(data(:,1)+1i*data(:,1)));
         end
 
 
@@ -163,7 +170,7 @@ classdef HP8753 < qd.classes.ComInstrument
 
         function numberOfPoints = getNumberOfPoints(obj)
             % Get number of points
-            numberOfPoints = str2double(obj.query('POIN?;'));
+            numberOfPoints = round(str2double(obj.query('POIN?;')));
 
             % Store in object
             obj.numberOfPoints = numberOfPoints;
