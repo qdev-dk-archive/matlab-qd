@@ -13,8 +13,8 @@ classdef TableWriter < handle
         function obj = TableWriter(directory, name)
             obj.meta_path = fullfile(directory, [name '.json']);
             obj.data_path = fullfile(directory, [name '.dat']);
-            qd.util.assert(~exist(obj.meta_path));
-            qd.util.assert(~exist(obj.data_path));    
+            qd.util.assert(~exist(obj.meta_path,'file'));
+            qd.util.assert(~exist(obj.data_path,'file'));    
         end
 
         function add_column(obj, name)
