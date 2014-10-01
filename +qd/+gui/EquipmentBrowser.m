@@ -474,7 +474,9 @@ classdef EquipmentBrowser < handle
             end
             set(obj.variableTable,'Data',vdata);        % update the table in the GUI
             
-            % setting Input List parameters
+            % updatin g inputList
+            % update every input that was already in the inputList
+            % inputs that are not presently in the inputList will NOT BE ADDED
             inputListName = fieldnames(inputList);
             for i = 1:numel(inputListName)
                 if any(strcmp(inputListName{i},fieldnames(obj.inputList)))
@@ -482,7 +484,7 @@ classdef EquipmentBrowser < handle
                 end
             end
             
-            % setting Input List parameters
+            % the table in the GUI
             irnames = get(obj.inputTable,'RowName');
             idata = get(obj.inputTable,'Data');
             for i = 1:numel(inputTableName)
@@ -490,6 +492,8 @@ classdef EquipmentBrowser < handle
                 if (~isempty(rnum) && ~isempty(variableTableData{i,2}))
                     input = obj.inputList.(inputTableName{i});
                     idata{rnum,1} = inputTableData{i,1};
+                    % activate/deactivate channels it necessary, depending
+                    % on loaded data
                     is_active = any(strcmp(input.id, obj.activeInputsNames));
                     if (inputTableData{i,1} && ~is_active)
                         obj.q.add_input(input.id);
@@ -506,27 +510,41 @@ classdef EquipmentBrowser < handle
         % perform 1d scan
         function do1dCallback(obj, pb, eventdata)
             display('Measuring...')
+            % read name sof avaliable variables
             allNames = get(obj.Xpopup,'String');
-            
+            % get parameters of the sweep freom the gui
             Xchnum = get(obj.Xpopup,'Value');
             Xch = strrep(allNames{Xchnum},'_','/');
             Xmin = str2double(get(obj.Xminedit,'String'));
             Xmax = str2double(get(obj.Xmaxedit,'String'));
             Xstep = str2double(get(obj.Xstepedit,'String'));
             
+            % add custom suffix to the name of the sweep
             suffix = get(obj.CustomSuffixedit,'String');
-            sweepName = [Xch ' ' suffix];
+            if strcmp(suffix, '')
+                sweepName = [Xch ' ' suffix];
+            else
+                sweepName = Xch
+            end
+            
+            % run the sweep
             obj.q.sw(Xch,Xmin,Xmax,Xstep).go(sweepName);
             display('Done!')
+            
+            % if user checked the 'Set X to:' box than set value of the
+            % variable after the sweep
             if get(obj.Xsetfinishbox,'Value')
                 variable = obj.variableList.(Xchnum);
                 variable.setval(str2double(get(obj.Xsetfinishedit,'String')));
             end
+            
+            % update the variable table
             obj.updateVariableTable();
         end
         
         % perform 2d scan
         function do2dCallback(obj, pb, eventdata)
+            % works just like 1d, but does 2d sweep...
             display('Measuring...')
             allNames = get(obj.Xpopup,'String');
             
