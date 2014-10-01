@@ -25,6 +25,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         % Ramp rates of all channels. Format: ramp_rates.CH0 = 0.5. In V/s.
         % Default is 0.1. Set to [] to disable ramping.
         ramp_rates = struct
+        defaultRate = 0.1;
 
         % When setting a channel, the instrument does not ramp if the distance
         % from the current value to the value to set is less than the
@@ -61,7 +62,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
                 obj.limits.(ch{1}) = [-10, 10];
                 obj.offset.(ch{1}) = 0;
                 obj.divider.(ch{1}) = 1;
-                obj.ramp_rates.(ch{1}) = 0.1;
+                obj.ramp_rates.(ch{1}) = obj.defaultRate;
                 obj.skip_ramp_tolerance.(ch{1}) = 0;
                 obj.ranges.(ch{1}) = [-10, 10];
             end
@@ -101,6 +102,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
                 error('Not supported.')
             else
                 obj.divider.(channel) = divider;                            % Set divider
+                obj.ramp_rates.(channel) = obj.defaultRate*divider;         % Adjust the ramp rate
             end
         end
         
@@ -125,7 +127,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             
             % Commit calibration
             obj.setOffset(channel,fitObj.p2)
-            obj.setDivider(channel,fitObj.p1)
+            obj.setDivider(channel,1/fitObj.p1)
         end
         
         function r = channels(obj)
