@@ -37,7 +37,7 @@ classdef Sweep
         end
 
         function cs = columns(obj)
-            cs = [{struct('name', obj.chan.name())} obj.job.columns()];
+            cs = [{struct('name', obj.chan.name)} obj.job.columns()];
         end
 
         function meta = describe(obj, register)

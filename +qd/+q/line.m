@@ -6,7 +6,7 @@ classdef line < qd.q.Recipe
         points
     end
     methods
-        function obj = line(chans, from, to, points, varargin)
+        function obj = line(chans, from, to, points)
         % recipe = line(chan, from, to, points)
         %
         % Constructs a recipe that sweeps several channels along a line. chans
