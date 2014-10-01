@@ -60,7 +60,9 @@ classdef Alazar9440 < qd.classes.Instrument
                 % TODO implement support for multiple systems
             else
                 % Print the found systems to command window
-                display(sprintf('Found Alazar System, SystemID %u', obj.systemID));
+                if obj.verbose
+                    display(sprintf('Found Alazar System, SystemID %u', obj.systemID));
+                end
                 
                 ID = obj.boardID;
                 hBoard = calllib('ATSApi', 'AlazarGetBoardBySystemID', obj.systemID, ID);
