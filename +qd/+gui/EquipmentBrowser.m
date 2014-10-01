@@ -77,13 +77,13 @@ classdef EquipmentBrowser < handle
                 'ResizeFcn',@obj.resizeCallback);
             
             % creating table of variables
-            cnames = {'Value', 'Min', 'Max', 'Divider', 'Offset'};
-            cwidth = {'auto' 40 40 50 40};
+            cnames = {'Value', 'Min', 'Max', 'Divider', 'Offset','Polarity'};
+            cwidth = {'auto' 40 40 50 50 50};
             obj.variableTable = uitable('Parent',obj.browserFigure,...
                 'Units', 'normalized',...
                 'ColumnName', cnames,...
                 'ColumnWidth', cwidth,...
-                'ColumnEditable',[true true true true true],...
+                'ColumnEditable',[true true true true true true],...
                 'CellEditCallback',@obj.variableCellEditCallback);
             
             % creating table of inputs
@@ -269,6 +269,9 @@ classdef EquipmentBrowser < handle
                     obj.addVariable([chanName{1} '/' ch{1}],setup)  % add the variable
                 end
             else
+                instruments = setup.ins();                      % load structure with instruments
+                instrument = instruments.(chanName{1});         % pick up the instrument you want
+                
                 channel = setup.find_channel(id);               % find a channel you want to add in the setup
                 variable = struct();                            % create the struct for storing information about variable
                 variable.name = strrep(channel.name, '/', '_'); % set the variable name
@@ -276,18 +279,18 @@ classdef EquipmentBrowser < handle
                 variable.getval = @() channel.get();            %                               getting
                 variable.instrument_class = class(instrument);  % set the name of the instrument class this variable corresponds to
                 
-                instruments = setup.ins();                      % load structure with instruments
-                instrument = instruments.(chanName{1});         % pick up the instrument you want
                 % checking if given channel is a DecaDAC channel
                 % if yes then create set and get functions for the
                 % limits, offset and divider of the DAC channel
-                if strcmp(variable.instrument_class, 'multiple_DecaDAC')
+                if strcmp(variable.instrument_class, 'qd.ins.multiple_DecaDAC')
                     variable.setlimits  = @(limits) instrument.set_limits(chanName{2},limits);
                     variable.getlimits  = @() instrument.limits.(chanName{2});
                     variable.setdivider = @(divider) instrument.set_divider(chanName{2},divider);
                     variable.getdivider = @() instrument.divider.(chanName{2});
                     variable.setoffset  = @(offset) instrument.set_offset(chanName{2},offset);
                     variable.getoffset  = @() instrument.offset.(chanName{2});
+                    variable.setranges  = @(ranges) instrument.set_ranges(chanName{2},ranges);
+                    variable.getranges  = @() instrument.ranges.(chanName{2});
                 end
                 
                 obj.variableList.(variable.name) = variable;    % add the variable to struct holding the list of variables
@@ -314,6 +317,14 @@ classdef EquipmentBrowser < handle
                      table{i,3} = limits(2);
                      table{i,4} = var.getdivider();                          % put divider in the table
                      table{i,5} = var.getoffset();                           % put offset in the table
+                     ranges = var.getranges();
+                     if all(ranges == [-10 10])
+                         table{i,6} = 0;
+                     elseif all(ranges == [0 10])
+                         table{i,6} = 1;
+                     elseif all(ranges == [-10 0])
+                         table{i,6} = -1;
+                     end
                  end
             end
             set(obj.variableTable, 'Data', table)               % load newly created table into GUI
@@ -350,12 +361,24 @@ classdef EquipmentBrowser < handle
                     realVal = variable.getval();
                     data{indices(1),1} = realVal;
                     data{indices(1),4} = div;
-                case 5                                      % for column 2 set offset (assuming it is a variable corresponding to DAC channel!)
+                case 5                                      % for column 5 set offset (assuming it is a variable corresponding to DAC channel!)
                     off = str2double(eventdata.EditData); 
                     variable.setoffset(off);
                     realVal = variable.getval();
                     data{indices(1),1} = realVal;
                     data{indices(1),5} = off;
+                case 6                                      % for column 6 set the ranges of the DAC (corresponding to the switch)
+                    switch str2double(eventdata.EditData)
+                        case 0  % Range is [-10 10]
+                            variable.setranges([-10 10])
+                        case 1  % Range  is [0 10]
+                            variable.setranges([0 10])
+                        case -1  % Range is [-10 0]
+                            variable.setranges([-10 0])
+                        otherwise
+                            data{indices(1),6} = str2double(eventdata.PreviousData);
+                            
+                    end
             end
             set(obj.variableTable,'Data',data)      % load table int GUI
             obj.saveSettings()                      % save new settings in external file
@@ -447,6 +470,9 @@ classdef EquipmentBrowser < handle
             else
                 filename = varargin{1};
             end
+            if ~exist(filename,'file')
+                return;
+            end
             load(filename,'-mat')
             
             % setting Variable Table parameters
@@ -500,8 +526,8 @@ classdef EquipmentBrowser < handle
                     elseif ~inputTableData{i,1}
                         obj.q.remove_input(input.id)
                     end
-                    idata{rnum,2} = inputTableData{i,2};
-                    idata{rnum,3} = inputTableData{i,3};
+%                     idata{rnum,2} = inputTableData{i,2};
+%                     idata{rnum,3} = inputTableData{i,3};
                 end
             end
             set(obj.inputTable,'Data',idata);

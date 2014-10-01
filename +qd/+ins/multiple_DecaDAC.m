@@ -11,6 +11,7 @@ classdef multiple_DecaDAC < qd.classes.ComInstrument
         limits
         offset
         divider
+        ranges
     end
     
     methods
@@ -58,6 +59,17 @@ classdef multiple_DecaDAC < qd.classes.ComInstrument
                 end
             end
         end
+        function ranges = get.ranges(obj)
+            ranges = struct();                                              % Create structure for ranges
+            i = 0;                                                          % Create a counter
+            for DecaDAC = obj.DecaDACs                                      % Loop over DACs in the system
+                 names = fieldnames(DecaDAC{1}.ranges);                     % Get all channels from dac
+                 for n = names'                                             % Loop over the channels
+                     ranges.(['CH' num2str(i)]) = DecaDAC{1}.ranges.(n{:}); % Save the ranges
+                     i = i+1;                                               % Step the counter
+                 end
+            end
+        end
         
         % Functions to set dependent variables
         function set_limits(obj, ch, limits)
@@ -88,6 +100,21 @@ classdef multiple_DecaDAC < qd.classes.ComInstrument
                 DACno = floor(channel/20)+1;                                % Find the appropriate DAC
                 DACchannel = ['CH' num2str(mod(channel,20))];               % Calculate the channel number of DAC
                 obj.DecaDACs{DACno}.setOffset(DACchannel,offset)            % Set division factor
+            end
+        end
+        function set_ranges(obj, ch, ranges)
+            % Validate ranges
+            if ~(all(ranges==[-10 10]) || all(ranges==[-10 0]) || all(ranges==[0 10]))
+                error('Error: range has to be {[-10 10], [-10 0], [0 10]}')
+            end
+                
+            ch = str2double(ch(3:end));
+            if ( (ch >= numel(obj.DecaDACs)*20) || (ch < 0) )
+                error('Not supported.')
+            else
+                DACno = floor(ch/20)+1;
+                CHno = mod(ch,20);
+                obj.DecaDACs{DACno}.ranges.(['CH' num2str(CHno)]) = ranges;
             end
         end
         
