@@ -11,7 +11,7 @@ classdef HP8753 < qd.classes.ComInstrument
         function obj = HP8753(com)
                         
             % Increase InputBufferSize
-            set(com, 'InputBufferSize', 13000);
+            set(com, 'InputBufferSize', 30000);
             
             % Increase wait time
             set(com, 'Timeout', 30);
