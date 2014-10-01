@@ -114,19 +114,13 @@ classdef DecaDAC2 < qd.classes.ComInstrument
         end
         
         % Function to calibrate the offset and division
-        function calibrateChannel(obj,channel,data)
+        function calibrateChannel(obj,channel,dataNum)
             
-            % We only support 1D data, and only one channel
-            if length(data) > 2
-                error('DAC calibration supports just data of 1D single, channel measurements')
-            end
-
-            % Perform fitting
-            fitObj = fit(data{1}.data,data{2}.data,'poly1');
+            
             
             % Commit calibration
-            obj.setOffset(channel,fitObj.p2)
-            obj.setDivider(channel,fitObj.p1)
+            obj.setOffset(channel,offset)
+            obj.setDivider(channel,divider)
         end
         
         function r = channels(obj)

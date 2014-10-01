@@ -116,7 +116,9 @@ classdef FolderBrowser < handle
                         continue;
                     end
                     try
-                        c.name = obj.load_name(meta_path);
+                        % edit by Filip
+                        c.name = [d.name ' ' obj.load_name(meta_path)];
+                        % c.name = obj.load_name(meta_path);
                     catch
                         try
                             meta = json.read(meta_path);

@@ -6,7 +6,7 @@ classdef Store < handle
         timestamp
         datestamp
         datainfo
-        latestDataID = 0;
+        latestDataID
     end
     methods
         function obj = Store(loc, name)
@@ -44,10 +44,8 @@ classdef Store < handle
                     
                     % Store the latest data ID
                     num = str2double(num{2});
-                    if num > obj.latestDataID
-                        obj.latestDataID = num;
-                    end
-                    
+                    if num 
+                    obj.latestDataID = 
                 end
             end
         end
@@ -71,17 +69,10 @@ classdef Store < handle
                 
                 dataID = obj.latestDataID + 1;
                 directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', dataID)]);
+                mkdir(directory);
                 
-                                
                 % Save directory of new data
                 obj.datainfo.(['x' sprintf('%03d', dataID)]) = directory;
-                
-                % Make directory
-                if exist(directory,'dir')
-                    return;
-                end
-                mkdir(directory);
-
             else
                 % Date and time-style data directories
                 datestamp = strcat(datestr(now,10),strrep(datestr(now, 6), '/',''));

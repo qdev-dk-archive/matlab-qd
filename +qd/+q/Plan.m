@@ -12,6 +12,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         q
         recipe
         inputs
+        job_override
         sms_flag = false
         email_flag = false
         verbose_flag = false
@@ -157,6 +158,15 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj.input_settle_val = seconds;
         end
 
+        function obj = job(obj, job)
+        % obj.job(job) changes the job that recipes are applied to.
+        %
+        % obj.go(..) applies the current recipe to a trivial job that reads
+        % one input point, after calling this method, obj.go(..) will apply
+        % the current recipe to the supplied job instead.
+            obj.job_override = job;
+        end
+
         function go(obj, varargin)
         % obj.go([name, ...]) executes the plan.
         %
@@ -213,7 +223,11 @@ classdef Plan < matlab.mixin.CustomDisplay
             if obj.input_settle_val ~= 0
                 recipe = recipe | qd.q.settle(obj.input_settle_val);
             end
-            job = recipe.apply(ctx, obj.inputs);
+            if ~isempty(obj.job_override)
+                job = recipe.apply(ctx, obj.job_override);
+            else
+                job = recipe.apply(ctx, obj.inputs);
+            end
         end
 
         function ctx = make_ctx_for_job_(obj, job)

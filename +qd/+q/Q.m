@@ -40,7 +40,13 @@ classdef Q < handle
             chan = obj.resolve_channel(name_or_channel);
             obj.inputs = obj.inputs.with(chan);
         end
-
+        
+        function remove_input(obj, name_or_channel)
+        % Remove a default input for jobs spawned from this Q.
+            chan = obj.resolve_channel(name_or_channel);
+            obj.inputs = obj.inputs.without(chan);
+        end
+        
         function channels = list_inputs(obj)
         % Returns a cell array of default inputs.
         %
@@ -139,6 +145,11 @@ classdef Q < handle
         % See also qd.q.Plan.sw
             plan = obj.make_plan().sw(varargin{:});
         end
+        function plan = job(obj, varargin)
+        % See also qd.q.Plan.job
+            plan = obj.make_plan().job(varargin{:});
+        end
+        
         function plan = swd(obj, varargin)
         % See also qd.q.Plan.swd
             plan = obj.make_plan().swd(varargin{:});
@@ -150,6 +161,11 @@ classdef Q < handle
         function go(obj, varargin)
         % See also qd.q.Plan.go
             obj.make_plan().go(varargin{:});
+        end
+        
+        function data = getData(obj,varargin)
+            % See also qd.data.Store
+            data = obj.store.getData(varargin{:});
         end
     end
 end

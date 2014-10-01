@@ -10,7 +10,8 @@ classdef Inputs
         end
 
         % Create a new Inputs object where all channels named chan_name are omitted.
-        function r = without(obj, chan_name)
+        function r = without(obj, chan)
+            chan_name = chan.name;
             r = qd.q.impl.Inputs();
             for inp = obj.inputs
                 inp = inp{1};

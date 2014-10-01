@@ -11,24 +11,42 @@ classdef AgilentAWG < qd.classes.ComInstrument
         function r = model(obj)
             r = 'Agilent';
             idn = obj.query('*IDN?');
-            if strfind(idn, '33210A') ~= -1
-                r = ['Agilent33210A'];
+            for m = {'33210A', '33250A'}
+                if strfind(idn, m{1}) ~= -1
+                    r = ['Agilent' m{1}];
+                end
             end
         end
 
         function r = channels(obj)
-            r = {'dev','freq','volt'};
+            r = {'freq','ampl','offs','dev','volt','func'};
         end
-
+           
+        function r = fuctions(obj)
+            r = {'SIN', 'SQU', 'RAMP', 'PULS', 'NOIS', 'DC', 'USER'};
+        end
+        
         function setc(obj, channel, value)
             switch channel
                 case 'freq'
                     obj.sendf('FREQ %.16E', value);
+                case 'ampl'
+                    obj.sendf('VOLT:UNIT VPP'); % setting units to peak-peak voltage
+                    obj.sendf('VOLT %.16E', value);
+                case 'offs'
+                    obj.sendf('VOLT:OFFS %.16E', value);
                 case 'dev'
                     obj.sendf('FM:DEV %.16E', value);
                 case 'volt'
                     obj.sendf('VOLT:UNIT VPP'); % setting units to peak-peak voltage
                     obj.sendf('VOLT %.16E', value);
+                case 'func'
+                    avaliable = {'SIN', 'SQU', 'RAMP', 'PULS', 'NOIS', 'DC', 'USER'};
+                    if any(ismember(avaliable,value))
+                        obj.sendf('FUNC %s', value)
+                    else
+                        error('not supported.')
+                    end
                 otherwise
                     error('not supported.')
             end
@@ -46,10 +64,16 @@ classdef AgilentAWG < qd.classes.ComInstrument
             switch channel
                 case 'freq'
                     val = obj.querym('FREQ?', '%f');
+                case 'ampl'
+                    val = obj.querym('VOLT?', '%f');
+                case 'offs'
+                    val = obj.querym('VOLT:OFFS?', '%f');
                 case 'dev'
                     val = obj.querym('FM:DEV?', '%f');
                 case 'volt'
                     val = obj.querym('VOLT?', '%f');
+                case 'func'
+                    val = obj.querym('FUNC?', '%s');
                 otherwise
                     error('not supported.')
             end

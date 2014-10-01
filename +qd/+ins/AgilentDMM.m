@@ -83,5 +83,15 @@ classdef AgilentDMM < qd.classes.ComInstrument
             r.config.NPLC = obj.get_NPLC();
         end
         
+        function val = getc(obj, channel)
+            switch channel
+                case 'in'
+                    res = obj.querym(':READ?', '%g');
+                    val = res(1);
+                otherwise
+                    error('not supported.')
+            end
+        end
+        
     end
 end

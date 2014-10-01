@@ -25,10 +25,19 @@ classdef TableView < handle
             p = inputParser();
             p.addOptional('fig', []);
             p.parse(varargin{:});
-            obj.fig = p.Results.fig;
-            if isempty(obj.fig)
-                obj.fig = figure();
-            end
+            
+            % Change made by Rasmus Eriksen, 30 Sep. 2014
+            % The code below uses a single figure to display the data.
+            % My revision uses a new figure window for each graph to allow
+            % comparison
+            % obj.fig = p.Results.fig;
+            % if isempty(obj.fig)
+            %    obj.fig = figure();
+            % end
+            obj.fig = figure();
+            % End of change:
+            
+            
             obj.tables = tables;
             obj.limits = struct();
             obj.limits.x = '*:*';

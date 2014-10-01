@@ -16,7 +16,7 @@ classdef SR830LockIn < qd.classes.ComInstrument
         end
 
         function r = channels(obj)
-            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'oflt' 'ampl' 'auxout1' 'auxout2' 'auxout3' 'auxout4'};
+            r = {'X' 'Y' 'R' 'theta' 'freq' 'display1' 'display2' 'slvl' 'oflt' 'ampl' 'phas' 'auxout1' 'auxout2' 'auxout3' 'auxout4'};
         end
 
         function val = getc(obj, channel)
@@ -35,6 +35,8 @@ classdef SR830LockIn < qd.classes.ComInstrument
                     val = obj.querym('SLVL?', '%f');
                 case 'ampl'
                     val = obj.querym('SLVL?', '%f');
+                case 'phas'
+                    val = obj.querym('PHAS?', '%f');
                 case 'display1'
                     val = obj.querym('OUTR?1', '%f');
                 case 'display2'
@@ -59,28 +61,30 @@ classdef SR830LockIn < qd.classes.ComInstrument
 
         function setc(obj, channel, value)
             switch channel
-            case 'freq'
-                obj.sendf('FREQ %.10f', value);
-            case 'oflt'
-                obj.sendf('OFLT %.10f', value);
-            case 'sens'
-                obj.sendf('SENS %.10f', value);
-            case 'slvl'
-                % amplitude
-                obj.sendf('SLVL %.10f', value);
-            case 'ampl'
-                % amplitude
-                obj.sendf('SLVL %.10f', value);
-            case 'auxout1'
+                case 'freq'
+                    obj.sendf('FREQ %.10f', value);
+                case 'oflt'
+                    obj.sendf('OFLT %.10f', value);
+                case 'sens'
+                    obj.sendf('SENS %.10f', value);
+                case 'slvl'
+                    % amplitude
+                    obj.sendf('SLVL %.10f', value);
+                case 'ampl'
+                    % amplitude
+                    obj.sendf('SLVL %.10f', value);
+                case 'phas'
+                    obj.sendf('PHAS %.10f', value);
+                case 'auxout1'
                     obj.sendf('AUXV1, %.10f', value);
-            case 'auxout2'
+                case 'auxout2'
                     obj.sendf('AUXV2, %.10f', value);
-            case 'auxout3'
+                case 'auxout3'
                     obj.sendf('AUXV3, %.10f', value);
-            case 'auxout4'
+                case 'auxout4'
                     obj.sendf('AUXV4, %.10f', value);
-            otherwise
-                error('Not supported');
+                otherwise
+                    error('Not supported');
             end
 
         end
