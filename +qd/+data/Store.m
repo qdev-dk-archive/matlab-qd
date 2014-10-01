@@ -81,6 +81,7 @@ classdef Store < handle
                     return;
                 end
                 mkdir(directory);
+                obj.latestDataID = obj.latestDataID + 1;
 
             else
                 % Date and time-style data directories
