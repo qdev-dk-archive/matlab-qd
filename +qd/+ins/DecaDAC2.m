@@ -89,7 +89,6 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             if isfield(obj.futures, ch)
                 obj.futures.(ch).resolve();
             end
-            rate = obj.ramp_rates.(ch);
             if ~isempty(obj.ramp_rates.(ch))
                 future = obj.set_ramp(ch, n, value);
             else
