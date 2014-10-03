@@ -1,7 +1,6 @@
 classdef Store < handle
     properties(GetAccess=public)
         loc
-        name
         directory
         timestamp
         datestamp
@@ -9,95 +8,112 @@ classdef Store < handle
         latestDataID = 0;
     end
     methods
-        function obj = Store(loc, name)
-            qd.util.assert(exist(loc, 'file'));
+        function obj = Store(loc)
+            
+            % Check if file location exists
+            qd.util.assert(exist(loc, 'dir'));
+            
+            % Construct absolute path
             obj.loc = qd.util.absdir(loc);
-            if nargin == 2
-                obj.name = name;
-            end
+                       
+            % Store the location
             obj.directory = obj.loc;
             
             % Get data from current directory
             obj.dataInCurrentDirectory()
         end
+        % This is just the constructor function, and this stores the
+        % location of the current data acquisition (loc)
 
         function cd(obj, d)
+            % Create pathname to change to
             d = fullfile(obj.loc, d);
-            if ~exist(d, 'file')
+            
+            % Check if folder exists
+            if ~exist(d, 'dir')
+                % Create directory if it does not exist
                 mkdir(d);
             end
+            
+            % Update the location to the new directory
             obj.loc = qd.util.absdir(d);
             
+            % Check for data in the folder
             obj.dataInCurrentDirectory()
         end
-        
+        % A function to change directory. 
+        % Updates loc and calls function dataInCurrentDirectory
+     
+
         function dataInCurrentDirectory(obj)
-            % Fill in information on existing data objects:
+            % Get files in the current folder:
             files = dir(obj.loc);
             
-            % Save directory
+            % Loop over the files
             for i = 1:length(files)
+                
                 % Check if it is in fact a data folder
                 if ~isempty(regexp(files(i).name,'\w*#\w*','ONCE'))
-                    num = strsplit(files(i).name,'#');
-                    obj.datainfo.(['x' num{2}]) = fullfile(obj.loc,files(i).name);
+                    
+                    % Find the ID number
+                    string = strsplit(files(i).name,'#');
+                    ID = str2double(string{2});
+                    
+                    % Store the directory of the data
+                    obj.datainfo.(['x' ID]) = fullfile(obj.loc,files(i).name);
                     
                     % Store the latest data ID
-                    num = str2double(num{2});
-                    if num > obj.latestDataID
-                        obj.latestDataID = num;
+                    if ID > obj.latestDataID
+                        obj.latestDataID = ID;
                     end
                     
                 end
             end
         end
+        % A function that scans loc for folders matching the naming pattern
+        % (date#dataID) and stores their path in the datainfo property, and
+        % the number of the highest dataID in the latestDataID
+
 
         function data = getData(obj,varargin)
             % Set default data ID
-            dataNum = obj.latestDataID;
+            dataID = obj.latestDataID;
             
             % Check if varargin has been set
             if ~isempty(varargin)
-                dataNum = varargin{1};
+                dataID = varargin{1};
             end
             
             % Load data from directory.
-            data = qd.data.load_table(obj.datainfo.(['x' sprintf('%03d',dataNum)]), 'data');
+            data = qd.data.load_table(obj.datainfo.(['x' sprintf('%03d',dataID)]), 'data');
         end
+        % A function that retrieves the data from the latestDataID (default)
+        % or from an ID specified by varargin
         
         function directory = new_dir(obj)
-            if isempty(obj.name)
-                % Time and counter-style data directories
-                
-                dataID = obj.latestDataID + 1;
-                directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', dataID)]);
-                
-                                
-                % Save directory of new data
-                obj.datainfo.(['x' sprintf('%03d', dataID)]) = directory;
-                
-                % Make directory
-                if exist(directory,'dir')
-                    return;
-                end
-                mkdir(directory);
-                obj.latestDataID = obj.latestDataID + 1;
-
-            else
-                % Date and time-style data directories
-                datestamp = strcat(datestr(now,10),strrep(datestr(now, 6), '/',''));
-                timestamp = strrep(datestr(now, 13), ':','');
-                directory = strcat(obj.loc, '\', datestamp, '\', timestamp, '_', obj.name);
-
-                if ~exist(strcat(obj.loc, '\', datestamp), 'dir')
-                  mkdir(strcat(obj.loc, '\', datestamp));
-                end
-                mkdir(directory);
-                obj.directory = directory;
-                obj.datestamp = datestamp;
-                obj.timestamp = timestamp;
+            % Time and counter-style data directories
+            
+            % Assing a new dataID
+            dataID = obj.latestDataID + 1;
+            
+            % Create directory name
+            directory = fullfile(obj.loc, [datestr(clock(), 29) '#' sprintf('%03d', dataID)]);
+            
+            % Save directory of new data
+            obj.datainfo.(['x' sprintf('%03d', dataID)]) = directory;
+            
+            % Make directory
+            if exist(directory,'dir')
+                return;
             end
+            mkdir(directory);
+            
+            % Update latestDataID
+            obj.latestDataID = obj.latestDataID + 1;
         end
+        % A function to create a new folder for a data measurement. 
+        % Updates the latestDataID and datainfo
+
 
     end
 end
