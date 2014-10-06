@@ -104,6 +104,13 @@ classdef Setup < handle
         function setc(obj, id, val)
             obj.find_channel(id).set(val);
         end
+
+        % Set a channel asynchronously.
+        %
+        % Convenience function to do obj.find_channel(id).set_async(val).
+        function future = setc_async(obj, id, val)
+            future = obj.find_channel(id).set_async(val);
+        end
     end
     methods(Access=private)
         function chan = find_in_instruments(obj, id)
