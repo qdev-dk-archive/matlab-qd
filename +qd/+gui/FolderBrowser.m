@@ -185,7 +185,9 @@ classdef FolderBrowser < handle
                         for column = new_columns
                             assert(isfield(column{1}, 'data'));
                             assert(isfield(column{1}, 'name'));
-                            tbl{end + 1} = column{1};
+                            if ~isempty(column{1}.data)
+                                tbl{end + 1} = column{1};
+                            end
                         end
                     catch err
                         warning('Error while computing column pseudo columns. Error was:\n%s', ...
