@@ -6,12 +6,14 @@ classdef LiveplotRun < qd.run.SafeRun
         variables_colnames = {} % save original equation for metadata & post-analysis
         data = [] %Data matrix for plotting
         zdata = [] %Data matrix for 2d surface plot
-        width = 3     % Width in inches
-        height = 3    % Height in inches
+        width = 5     % Width in inches
+        height = 6    % Height in inches
         alw = 0.75    % AxesLineWidth
         fsz = 11      % Fontsize
         lw = 1      % LineWidth
         msz = 8       % MarkerSize
+        pos = [0 500] % Position of first figure
+        table = []
     end
     methods
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
@@ -67,8 +69,11 @@ classdef LiveplotRun < qd.run.SafeRun
                 clf();
 
                 % change figure size
-                pos = get(gcf, 'Position');
-                set(gcf, 'Position', [pos(1) pos(2) obj.width*100, obj.height*100]); %<- Set size
+                if pnum < 5
+                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-1)*obj.width*72 obj.pos(2) obj.width*72, obj.height*72]); %<- Set size
+                else
+                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-5)*obj.width*72 obj.pos(2)-obj.height*80 obj.width*72, obj.height*72]); %<- Set size
+                end
                 set(gca, 'FontSize', obj.fsz, 'LineWidth', obj.alw); %<- Set properties
                 
                 varargin = obj.plots{pnum}.('varargin');
