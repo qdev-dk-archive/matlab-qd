@@ -58,6 +58,8 @@ classdef LiveplotRun < qd.run.SafeRun
         end
 
         function create_plots(obj)
+            fig_per_row = 0;
+            sz = get(0, 'ScreenSize');
             for pnum = 1:length(obj.plots)
                 fignum = obj.plots{pnum}.('fignum');
                 if fignum>0
@@ -68,11 +70,15 @@ classdef LiveplotRun < qd.run.SafeRun
                 end
                 clf();
 
-                % change figure size
-                if pnum < 5
-                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-1)*obj.width*72 obj.pos(2) obj.width*72, obj.height*72]); %<- Set size
+                % change figure size and distrubute on screen
+                if pnum*obj.width*72 <= sz(3) && obj.height*72 <= sz(4)
+                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-1)*obj.width*72 obj.pos(2) obj.width*72, obj.height*72]); %<- Set size and position
+                    fig_per_row = fig_per_row + 1;
+                elseif pnum*obj.width*72 > sz(3) && ceil(pnum/(fig_per_row))*obj.height*72 <= sz(4)
+                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-(fig_per_row+1))*obj.width*72 obj.pos(2)-obj.height*80 obj.width*72, obj.height*72]); %<- Set size and position
                 else
-                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-5)*obj.width*72 obj.pos(2)-obj.height*80 obj.width*72, obj.height*72]); %<- Set size
+                    % Put the rest on top of the first
+                    set(gcf, 'OuterPosition', [obj.pos(1) obj.pos(2) obj.width*72, obj.height*72]); %<- Set size and position
                 end
                 set(gca, 'FontSize', obj.fsz, 'LineWidth', obj.alw); %<- Set properties
                 
