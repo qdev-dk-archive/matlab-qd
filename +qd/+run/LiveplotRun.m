@@ -12,7 +12,7 @@ classdef LiveplotRun < qd.run.SafeRun
         fsz = 11      % Fontsize
         lw = 1      % LineWidth
         msz = 8       % MarkerSize
-        pos = [0 500] % Position of first figure
+        sz = get(0,'ScreenSize'); % Get Screen size
         table = []
     end
     methods
@@ -59,6 +59,7 @@ classdef LiveplotRun < qd.run.SafeRun
 
         function create_plots(obj)
             fig_per_row = 0;
+            pos = [0 obj.sz(4)];
             sz = get(0, 'ScreenSize');
             for pnum = 1:length(obj.plots)
                 fignum = obj.plots{pnum}.('fignum');
@@ -71,14 +72,14 @@ classdef LiveplotRun < qd.run.SafeRun
                 clf();
 
                 % change figure size and distrubute on screen
-                if pnum*obj.width*72 <= sz(3) && obj.height*72 <= sz(4)
-                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-1)*obj.width*72 obj.pos(2) obj.width*72, obj.height*72]); %<- Set size and position
+                if pnum*obj.width*72 <= obj.sz(3) && obj.height*72 <= obj.sz(4)
+                    set(gcf, 'OuterPosition', [pos(1)+(pnum-1)*obj.width*72 pos(2) obj.width*72, obj.height*72]); %<- Set size and position
                     fig_per_row = fig_per_row + 1;
-                elseif pnum*obj.width*72 > sz(3) && ceil(pnum/(fig_per_row))*obj.height*72 <= sz(4)
-                    set(gcf, 'OuterPosition', [obj.pos(1)+(pnum-(fig_per_row+1))*obj.width*72 obj.pos(2)-obj.height*80 obj.width*72, obj.height*72]); %<- Set size and position
+                elseif pnum*obj.width*72 > obj.sz(3) && ceil(pnum/(fig_per_row))*obj.height*72 <= obj.sz(4)
+                    set(gcf, 'OuterPosition', [pos(1)+(pnum-(fig_per_row+1))*obj.width*72 pos(2)-(obj.height*80) obj.width*72, obj.height*72]); %<- Set size and position
                 else
                     % Put the rest on top of the first
-                    set(gcf, 'OuterPosition', [obj.pos(1) obj.pos(2) obj.width*72, obj.height*72]); %<- Set size and position
+                    set(gcf, 'OuterPosition', [pos(1) pos(2) obj.width*72, obj.height*72]); %<- Set size and position
                 end
                 set(gca, 'FontSize', obj.fsz, 'LineWidth', obj.alw); %<- Set properties
                 
