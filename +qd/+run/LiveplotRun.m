@@ -6,8 +6,8 @@ classdef LiveplotRun < qd.run.SafeRun
         variables_colnames = {} % save original equation for metadata & post-analysis
         data = [] %Data matrix for plotting
         zdata = [] %Data matrix for 2d surface plot
-        width = 5     % Width in inches
-        height = 6    % Height in inches
+        width = 4     % Width in inches
+        height = 4    % Height in inches
         alw = 0.75    % AxesLineWidth
         fsz = 11      % Fontsize
         lw = 1      % LineWidth
@@ -71,13 +71,13 @@ classdef LiveplotRun < qd.run.SafeRun
 
                 % change figure size and distrubute on screen
                 if pnum*obj.width*72 <= obj.sz(3) && obj.height*72 <= obj.sz(4)
-                    set(gcf, 'OuterPosition', [0+(pnum-1)*obj.width*72 obj.sz(4) obj.width*72, obj.height*72]); %<- Set size and position
+                    set(gcf, 'OuterPosition', [0+(pnum-1)*obj.width*72 obj.sz(4)-(obj.height*72) obj.width*72, obj.height*72]); %<- Set size and position
                     fig_per_row = fig_per_row + 1;
                 elseif pnum*obj.width*72 > obj.sz(3) && ceil(pnum/(fig_per_row))*obj.height*72 <= obj.sz(4)
-                    set(gcf, 'OuterPosition', [0+(pnum-(fig_per_row+1))*obj.width*72 (obj.sz(4)/2)-(obj.height*72) obj.width*72, obj.height*72]); %<- Set size and position
+                    set(gcf, 'OuterPosition', [0+(pnum-((fig_per_row*(ceil(pnum/fig_per_row)-1))+1))*obj.width*72 obj.sz(4)-(ceil(pnum/(fig_per_row))*obj.height*72) obj.width*72, obj.height*72]); %<- Set size and position
                 else
                     % Put the rest on top of the first
-                    set(gcf, 'OuterPosition', [0 obj.sz(4) obj.width*72, obj.height*72]); %<- Set size and position
+                    set(gcf, 'OuterPosition', [0 obj.sz(4)-(obj.height*72) obj.width*72 obj.height*72]); %<- Set size and position
                 end
                 set(gca, 'FontSize', obj.fsz, 'LineWidth', obj.alw); %<- Set properties
                 
