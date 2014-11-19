@@ -16,6 +16,17 @@ classdef LiveplotRun < qd.run.SafeRun
         table = []
     end
     methods
+        
+        % change the width of the plots (in inches)
+        function plot_width(obj, width)
+            obj.width = width;
+        end
+        
+        % change the width of the plots (in inches)
+        function plot_height(obj, height)
+            obj.height = height;
+        end
+        
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
         function add_plot(obj, xname, yname, title, fignum, varargin)
             p = struct();
