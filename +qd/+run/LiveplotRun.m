@@ -14,8 +14,40 @@ classdef LiveplotRun < qd.run.SafeRun
         msz = 8       % MarkerSize
         sz = get(0,'ScreenSize'); % Get Screen size
         table = []
+        number = '+4561774499'
+        send_text = false % If true, a text will be send on completion of sweep
+        send_mail = false % If true, a mail will be send on completion of sweep
+        mail = 'oxtriton2@gmail.com';    % Sending email
+        password = 'qdevtriton2';          % Sending email password
+        smtp_server = 'smtp.gmail.com';     % Sending email SMTP server
+        recive_mail = 'CJS.Olsen@nbi.dk'    % Reciving email
     end
     methods
+
+        function setup_mail(obj)
+            props = java.lang.System.getProperties;
+            props.setProperty('mail.smtp.port','465');
+            pp=props.setProperty('mail.smtp.auth','true'); %#ok
+            pp=props.setProperty('mail.smtp.socketFactory.class','javax.net.ssl.SSLSocketFactory'); %#ok
+            pp=props.setProperty('mail.smtp.socketFactory.port','465'); %#ok
+            % Apply prefs and props
+            setpref('Internet','E_mail',obj.mail);
+            setpref('Internet','SMTP_Server',obj.smtp_server);
+            setpref('Internet','SMTP_Username',obj.mail);
+            setpref('Internet','SMTP_Password',obj.password);
+        end
+        
+        function sweep_done(obj)
+            if obj.send_text && obj.send_mail
+                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+            elseif obj.send_mail
+                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+            elseif obj.send_text
+                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+            end
+        end
+        
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
         function add_plot(obj, xname, yname, title, fignum, varargin)
             p = struct();
@@ -333,6 +365,10 @@ classdef LiveplotRun < qd.run.SafeRun
             % Now perform all the measurements.
             obj.handle_sweeps(obj.sweeps, [], table);
             close(hMeasControl);
+            if obj.send_text || obj.send_mail
+                obj.setup_mail();
+                obj.sweep_done();
+            end
         end
         
         function init_columns(obj)
