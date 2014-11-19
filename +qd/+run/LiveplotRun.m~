@@ -14,23 +14,22 @@ classdef LiveplotRun < qd.run.SafeRun
         msz = 8       % MarkerSize
         sz = get(0,'ScreenSize'); % Get Screen size
         table = []
-        number = '+4561774499'
         send_text = false % If true, a text will be send on completion of sweep
     end
     methods
         
-%         % change the width of the plots (in inches)
-%         function plot_width(obj, width)
-%             obj.width = width;
-%         end
-%         
-%         % change the width of the plots (in inches)
-%         function plot_height(obj, height)
-%             obj.height = height;
-%         end
+        % change the width of the plots (in inches)
+        function plot_width(obj, width)
+            obj.width = width;
+        end
+        
+        % change the width of the plots (in inches)
+        function plot_height(obj, height)
+            obj.height = height;
+        end
         
         function sweep_done(obj)
-            qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+            qd.util.send_sms(obj.number, )
         end
         
         % varargin defines the plottype, points, line, color ..., e.g. 'r.-'
@@ -350,9 +349,6 @@ classdef LiveplotRun < qd.run.SafeRun
             % Now perform all the measurements.
             obj.handle_sweeps(obj.sweeps, [], table);
             close(hMeasControl);
-            if obj.send_text
-                obj.sweep_done()
-            end
         end
         
         function init_columns(obj)
