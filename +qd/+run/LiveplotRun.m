@@ -21,7 +21,6 @@ classdef LiveplotRun < qd.run.SafeRun
         password = 'qdevtriton2';          % Sending email password
         smtp_server = 'smtp.gmail.com';     % Sending email SMTP server
         recive_mail = 'CJS.Olsen@nbi.dk'    % Reciving email
-        
     end
     methods
 
