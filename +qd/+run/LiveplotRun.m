@@ -14,15 +14,16 @@ classdef LiveplotRun < qd.run.SafeRun
         msz = 8       % MarkerSize
         sz = get(0,'ScreenSize'); % Get Screen size
         table = []
-        number = '+4561774499'
+        number = ''
         send_text = false % If true, a text will be send on completion of sweep
         send_mail = false % If true, a mail will be send on completion of sweep
         copy_data = false % If true data folder will be copied to "external_path"
-        external_path = '~/Google Drive/Test';
+        external_path = '';
         mail = 'oxtriton2@gmail.com';    % Sending email
         password = 'qdevtriton2';          % Sending email password
         smtp_server = 'smtp.gmail.com';     % Sending email SMTP server
-        recive_mail = 'CJS.Olsen@nbi.dk'    % Reciving email
+        recive_mail = '';   % Reciving email
+        user = '';
         out_dir
     end
     methods
@@ -42,12 +43,12 @@ classdef LiveplotRun < qd.run.SafeRun
         
         function sweep_done(obj)
             if obj.send_text && obj.send_mail
-                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
-                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+                qd.util.send_sms(obj.number, sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+                sendmail(obj.recive_mail,sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
             elseif obj.send_mail
-                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+                sendmail(obj.recive_mail,sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
             elseif obj.send_text
-                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+                qd.util.send_sms(obj.number, sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')))
             end
         end
         
