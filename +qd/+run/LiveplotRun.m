@@ -14,13 +14,17 @@ classdef LiveplotRun < qd.run.SafeRun
         msz = 8       % MarkerSize
         sz = get(0,'ScreenSize'); % Get Screen size
         table = []
-        number = '+4561774499'
+        number = ''
         send_text = false % If true, a text will be send on completion of sweep
         send_mail = false % If true, a mail will be send on completion of sweep
+        copy_data = false % If true data folder will be copied to "external_path"
+        external_path = '';
         mail = 'oxtriton2@gmail.com';    % Sending email
         password = 'qdevtriton2';          % Sending email password
         smtp_server = 'smtp.gmail.com';     % Sending email SMTP server
-        recive_mail = 'CJS.Olsen@nbi.dk'    % Reciving email
+        recive_mail = '';   % Reciving email
+        user = '';
+        out_dir
     end
     methods
 
@@ -39,12 +43,12 @@ classdef LiveplotRun < qd.run.SafeRun
         
         function sweep_done(obj)
             if obj.send_text && obj.send_mail
-                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
-                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+                qd.util.send_sms(obj.number, sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+                sendmail(obj.recive_mail,sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
             elseif obj.send_mail
-                sendmail(obj.recive_mail,sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
+                sendmail(obj.recive_mail,sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')),'Same as above;)')
             elseif obj.send_text
-                qd.util.send_sms(obj.number, sprintf('Sweep done at %s',datestr(clock,'yyyy-mm-dd HH:MM:SS')))
+                qd.util.send_sms(obj.number, sprintf('Hi %s, your sweep finished at %s',obj.user,datestr(clock,'yyyy-mm-dd HH:MM:SS')))
             end
         end
         
@@ -256,7 +260,15 @@ classdef LiveplotRun < qd.run.SafeRun
                 end
             end
         end
-
+        
+        % Copy data folder to external location
+        function copy_data_to_external_path(obj)
+            dir_path = strsplit(obj.out_dir,'/20');
+            dir_path = dir_path(2);
+            dir = strjoin({'20',dir_path{1}},'');
+            copyfile(obj.out_dir,strjoin({obj.external_path,dir},'/'))
+        end
+        
         function save_plots(obj)
             for plot = obj.plots
                 figure(plot{1}.('fignum'));
@@ -338,10 +350,10 @@ classdef LiveplotRun < qd.run.SafeRun
             pause(10e-3); % Pause to update the GUI
         end
     end
-    
 
     methods(Access=protected)
         function perform_run(obj, out_dir)
+            obj.out_dir = out_dir;
             % This table will hold the data collected.
             table = qd.data.TableWriter(out_dir, 'data');
             for sweep = obj.sweeps
@@ -368,6 +380,9 @@ classdef LiveplotRun < qd.run.SafeRun
             if obj.send_text || obj.send_mail
                 obj.setup_mail();
                 obj.sweep_done();
+            end
+            if obj.copy_data
+                obj.copy_data_to_external_path();
             end
         end
         
