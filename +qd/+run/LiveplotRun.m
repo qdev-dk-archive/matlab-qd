@@ -61,6 +61,16 @@ classdef LiveplotRun < qd.run.SafeRun
         	% Write new data file and new json file
         	json.write(json_file,json_path);
         	dlmwrite(data_path,data_store,'delimiter','\t','precision','%.16G');
+            if obj.copy_data
+                dir_path = strsplit(obj.out_dir,'20');
+                dir_path = dir_path(2);
+                dir = strjoin({'20',dir_path{1}},'');
+                folder_path = strjoin({obj.external_path,dir},'\');
+                new_data_path = sprintf('%s/data.dat',folder_path);
+                new_json_path = sprintf('%s/data.json',folder_path);
+                json.write(json_file,new_json_path);
+                dlmwrite(new_data_path,data_store,'delimiter','\t','precision','%.16G');
+            end
         end
 
         function setup_mail(obj)
@@ -298,10 +308,10 @@ classdef LiveplotRun < qd.run.SafeRun
         
         % Copy data folder to external location
         function copy_data_to_external_path(obj)
-            dir_path = strsplit(obj.out_dir,'/20');
+            dir_path = strsplit(obj.out_dir,'20');
             dir_path = dir_path(2);
             dir = strjoin({'20',dir_path{1}},'');
-            copyfile(obj.out_dir,strjoin({obj.external_path,dir},'/'))
+            copyfile(obj.out_dir,strjoin({obj.external_path,dir},'\'),'f')
         end
         
         function save_plots(obj)
