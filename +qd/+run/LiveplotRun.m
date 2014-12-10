@@ -4,6 +4,7 @@ classdef LiveplotRun < qd.run.SafeRun
         columns = {}
         variables = {}
         variables_colnames = {} % save original equation for metadata & post-analysis
+        new_columns = {} %Cell array containing new columns, to be calculated after sweep is done
         data = [] %Data matrix for plotting
         zdata = [] %Data matrix for 2d surface plot
         width = 4     % Width in inches
@@ -25,8 +26,42 @@ classdef LiveplotRun < qd.run.SafeRun
         recive_mail = '';   % Reciving email
         user = '';
         out_dir
+        post_analysis = false % If true, calculate new data colums based on raw data and add to data file
     end
     methods
+
+    	function obj = new_column(obj, new_name, equation, varargin)
+    		new_column = struct;
+    		new_column.new_name = new_name;
+    		new_column.equation = equation;
+    		new_column.channels = varargin{:};
+    		obj.new_columns{end+1} = new_column;
+    	end
+
+        function post_data_analysis(obj)
+            data_path = sprintf('%s/data.dat',obj.out_dir);
+            data_path_raw = sprintf('%s/data_raw.dat',obj.out_dir);
+            data_store = load(data_path);
+            % Keep raw data in seperate file.
+            dlmwrite(data_path_raw,data_store,'delimiter','\t','precision','%.16G');
+            json_path = sprintf('%s/data.json',obj.out_dir);
+            json_file = json.read(json_path);
+            for i = 1:length(obj.new_columns)
+            	channels = obj.new_columns{i}.channels;
+            	channel_cell = cell(1,length(channels));
+            	json_names = fieldnames(json_file);
+            	for j = 1:length(channels)
+            		channel_cell{j} = find(strcmp(channels(j),{json_file.(json_names{:})}));
+            	end
+            	column_equation = sprintf(strrep(obj.new_columns{i}.equation,'%d','data_store(:,%d)'),channel_cell{:});
+            	calc_column = eval(column_equation);
+            	data_store(:,end+1) = calc_column;
+            	json_file(end+1).name = obj.new_columns{i}.new_name;
+            end
+        	% Write new data file and new json file
+        	json.write(json_file,json_path);
+        	dlmwrite(data_path,data_store,'delimiter','\t','precision','%.16G');
+        end
 
         function setup_mail(obj)
             props = java.lang.System.getProperties;
@@ -383,6 +418,9 @@ classdef LiveplotRun < qd.run.SafeRun
             end
             if obj.copy_data
                 obj.copy_data_to_external_path();
+            end
+            if obj.post_analysis
+                obj.post_data_analysis();
             end
         end
         
