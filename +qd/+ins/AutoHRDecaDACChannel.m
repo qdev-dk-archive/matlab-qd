@@ -24,6 +24,8 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             obj.mode = mode;
             obj.range_low = -10.0;
             obj.range_high = 10.0;
+            obj.limit_low = -10.0;
+            obj.limit_high = 10.0;
             obj.ramp_rate = 0.1;
             obj.slope = 1;
             obj.offset = 0;
@@ -48,7 +50,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
         function val = get(obj)
             obj.select();
             if obj.mode == 3
-            	raw = obj.instrument.querym('d;', 'd%.4f!');
+            	raw = obj.instrument.querym('d;', 'd%f!');
             else
             	raw = obj.instrument.querym('d;', 'd%d!');
             end
@@ -61,7 +63,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             ins = obj.instrument;
             
             % Validate the input for common errors.
-            obj.check_val();
+            obj.check_val(val);
 
             % setting the output
             % if ramp_rate is empty just set the output (be careful!)
@@ -82,7 +84,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             else
             	% calculate the required slope
             	if obj.mode == 3
-            		current = ins.querym('d;', 'd%.4f!');
+            		current = ins.querym('d;', 'd%f!');
             		% get bin
             		autof_bin = get_autofinebin(val);
             		r_slope = ceil((obj.ramp_rate/obj.range_span()*obj.ramp_clock*1e-6)*(2^32));
@@ -90,9 +92,11 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
                 	% initiate ramp
                 	ins.queryf('L%.4f;U%.4f;T%d;G0;S%d;', autof_bin, autof_bin, obj.ramp_clock, r_slope);
                 	if obj.wait_for_ramp
+                        val = -1;
                 		while true
-                			val = ins.querym('d;', 'd%.4f!');
-                        	if val == autof_bin
+                            oldval = val;
+                			val = ins.querym('d;', 'd%f!');
+                        	if oldval == val
                             	break;
                         	end
                         	pause(3*obj.ramp_clock*1e-6); % wait a few ramp_clock periods
@@ -117,14 +121,14 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
 
                 	% initiate ramp
                 	obj.select();
-                	ins.queryf('L%d;U%d;T%d;G0;S%d;', bin, bin, ramp_clock, r_slope);
+                	ins.queryf('L%d;U%d;T%d;G0;S%d;', bin, bin, obj.ramp_clock, r_slope);
                     if obj.wait_for_ramp
                     	while true
                         	val = ins.querym('d;', 'd%d!');
                         	if val == bin
                             	break;
                         	end
-                        	pause(ramp_clock * 1E-6 * 3); % wait a few ramp_clock periods
+                        	pause(obj.ramp_clock * 1E-6 * 3); % wait a few ramp_clock periods
                     	end
                     end
                     if obj.wait_for_ramp && obj.mode == 1
@@ -243,7 +247,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
         	binrange = 2^16-1;
         	nval = val - obj.range_low;
         	frac = nval/obj.range_span();
-        	autof_bin = round(frac*binrange,4);
+        	autof_bin = round(frac*binrange,3);
         end
 	
 	        
