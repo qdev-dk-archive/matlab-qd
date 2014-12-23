@@ -247,7 +247,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
         	binrange = 2^16-1;
         	nval = val - obj.range_low;
         	frac = nval/obj.range_span();
-        	autof_bin = round(frac*binrange,3);
+        	autof_bin = round(frac*binrange,4);
         end
 	
 	        
