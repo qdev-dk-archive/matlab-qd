@@ -12,6 +12,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
         wait_for_ramp = true
         slope
         offset
+        ramp_clock
         fine_limits_disabled = false;
     end
     methods
