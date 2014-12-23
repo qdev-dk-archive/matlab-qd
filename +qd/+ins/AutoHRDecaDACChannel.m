@@ -28,7 +28,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             obj.offset = 0;
             obj.ramp_clock = 1000;
             if isempty(warning_issued)
-                warning(['DecaDAC drivers: Only use Mode 3 if the Dac supports the mode and it has been calibrated!'])
+                warning('DecaDAC drivers: Only use Mode 3 if the Dac supports the mode and it has been calibrated!')
                 warning_issued = true;
             end
         end
@@ -50,7 +50,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             	raw = obj.instrument.querym('d;', 'd%.4f!');
             else
             	raw = obj.instrument.querym('d;', 'd%d!');
-        	end
+            end
         	val = raw / 2^16 * obj.range_span() + obj.range_low;
             val = val*obj.slope+obj.offset;
         end
@@ -68,10 +68,10 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             obj.select();
             if isempty(obj.ramp_rate) || obj.mode == 0
             	if obj.mode == 1
-            		[bin,c_bin,f_bin] = obj.get_manbins(val);
+            		[~,c_bin,f_bin] = obj.get_manbins(val);
             		ins.queryf('D%d;B%d;C%d;D%d;', c_bin, obj.board, obj.chan+2, f_bin);
-            	elseif obj.mode = 2 || obj.mode == 0
-            		[bin,c_bin,f_bin] = obj.get_manbins(val);
+            	elseif obj.mode == 2 || obj.mode == 0
+            		[bin,~,~] = obj.get_manbins(val);
             		ins.queryf('D%d;',bin);
             	elseif obj.mode == 3
             	 	autof_bin = get_autofinebin(val);
@@ -85,7 +85,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             		% get bin
             		autof_bin = get_autofinebin(val);
             		r_slope = ceil((obj.ramp_rate/obj.range_span()*obj.ramp_clock*1e-6)*(2^32));
-                	r_slope = r_slope * sign(bin - current);
+                	r_slope = r_slope * sign(autof_bin - current);
                 	% initiate ramp
                 	ins.queryf('L%.4f;U%.4f;T%d;G0;S%d;', autof_bin, autof_bin, obj.ramp_clock, r_slope);
                 	if obj.wait_for_ramp
@@ -117,7 +117,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
                 	% initiate ramp
                 	obj.select();
                 	ins.queryf('L%d;U%d;T%d;G0;S%d;', bin, bin, ramp_clock, r_slope);
-                	if obj.wait_for_ramp
+                    if obj.wait_for_ramp
                     	while true
                         	val = ins.querym('d;', 'd%d!');
                         	if val == bin
