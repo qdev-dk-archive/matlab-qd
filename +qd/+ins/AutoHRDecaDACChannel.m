@@ -86,7 +86,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             	if obj.mode == 3
             		current = ins.querym('d;', 'd%f!');
             		% get bin
-            		autof_bin = get_autofinebin(val);
+            		autof_bin = obj.get_autofinebin(val);
             		r_slope = ceil((obj.ramp_rate/obj.range_span()*obj.ramp_clock*1e-6)*(2^32));
                 	r_slope = r_slope * sign(autof_bin - current);
                 	% initiate ramp
