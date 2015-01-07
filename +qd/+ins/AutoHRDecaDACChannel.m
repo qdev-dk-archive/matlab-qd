@@ -14,6 +14,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
         offset
         ramp_clock
         fine_limits_disabled = false;
+        binrange = 2^16-1;
     end
     methods
     	function obj = AutoHRDecaDACChannel(num,mode)
@@ -54,7 +55,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             else
             	raw = obj.instrument.querym('d;', 'd%d!');
             end
-        	val = raw / 2^16 * obj.range_span() + obj.range_low;
+        	val = raw / obj.binrange * obj.range_span() + obj.range_low;
             val = val*obj.slope+obj.offset;
         end
 
@@ -230,24 +231,21 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             % channel does not span over the remaining steps, so the coarse
             % range (c_BinRange)is increased by 1.
             
-            binrange = 2^16 - 1;
-            
             nval = val - obj.range_low;
             frac = nval/obj.range_span();
             
-            bin = round(frac*binrange);
+            bin = round(frac*obj.binrange);
             c_bin = floor(frac*(2^8))*(2^8) - 1 ;
             
-            f_nval = (nval - ( c_bin * obj.range_span() / binrange) );
+            f_nval = (nval - ( c_bin * obj.range_span() / obj.binrange) );
             f_frac = f_nval/0.1;  % hard-coded range of 100mV
-            f_bin = round(f_frac*binrange);
+            f_bin = round(f_frac*obj.binrange);
         end
 
         function autof_bin = get_autofinebin(obj, val)
-        	binrange = 2^16-1;
         	nval = val - obj.range_low;
         	frac = nval/obj.range_span();
-        	autof_bin = round(frac*binrange,4);
+        	autof_bin = round(frac*obj.binrange,4);
         end
 	
 	        
