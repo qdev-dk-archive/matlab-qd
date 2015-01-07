@@ -78,7 +78,7 @@ classdef AutoHRDecaDACChannel < qd.classes.Channel
             		[bin,~,~] = obj.get_manbins(val);
             		ins.queryf('D%d;',bin);
             	elseif obj.mode == 3
-            	 	autof_bin = get_autofinebin(val);
+            	 	autof_bin = obj.get_autofinebin(val);
             		ins.queryf('D%.4f;',autof_bin);
             	end
             % Ramp output	
