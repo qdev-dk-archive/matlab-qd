@@ -355,10 +355,10 @@ classdef LiveplotRun < qd.run.SafeRun
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
             p = inputParser();
             p.addOptional('settle', 0);
-            p.addOptional('initial_settle', 0);
             p.addOptional('tolerance', []);
             p.addOptional('values', []);
             p.addOptional('alternate', false);
+            p.addOptional('initial_settle', 0);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;

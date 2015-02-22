@@ -26,10 +26,10 @@ classdef SafeRun < qd.run.StandardRun
         function obj = sweep(obj, name_or_channel, from, to, points, varargin)
             p = inputParser();
             p.addOptional('settle', 0);
-            p.addOptional('initial_settle', 0);
             p.addOptional('tolerance', []);
             p.addOptional('values', []);
             p.addOptional('alternate', false);
+            p.addOptional('initial_settle', 0);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
@@ -124,8 +124,7 @@ classdef SafeRun < qd.run.StandardRun
             % function with one less channel to sweep.
             sweep = sweeps{1};
             next_sweeps = sweeps(2:end);
-            % for the first iteration add the initial settle this is set to zero for all further iterations
-            settle = sweep.initial_settle;
+            
             if(obj.is_time_chan(sweep.chan) && (~sweep.points))
                 % This is supposed to run until sweep.to time has passed,
                 % and then measure as many points as possible during the given time.
@@ -159,8 +158,9 @@ classdef SafeRun < qd.run.StandardRun
                             end
                         end
                     else
-                        settle = max(settle, sweep.settle);
-                        pause(settle);
+                        pause(max(sweep.settle,sweep.initial_settle));
+                        % for the first iteration add the initial settle this is set to zero for all further iterations
+                        sweep.initial_settle = 0;
                     end
                     %settle = max(settle, sweep.settle);
                     obj.handle_sweeps(next_sweeps, [earlier_values value], table);
