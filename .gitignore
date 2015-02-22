@@ -1,3 +1,4 @@
 *.asv
 *.m~
 Datadump
+*.DS_Store
