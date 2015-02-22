@@ -9,7 +9,7 @@ classdef OxfMagnet1D < qd.classes.Instrument
         end
 
         function chans = channels(obj)
-            chans = {'fld'};
+            chans = {'fld', 'current'};
         end
 
         function r = describe(obj, register)
@@ -21,6 +21,8 @@ classdef OxfMagnet1D < qd.classes.Instrument
             switch chan
                 case 'fld'
                     val = obj.magnet.remote.get_field();
+                case 'current'
+                    val = obj.magnet.remote.get_current();
                 otherwise
                     error('No such channel.')
             end
@@ -33,6 +35,13 @@ classdef OxfMagnet1D < qd.classes.Instrument
             obj.magnet.remote.set_field_sweep_rate(value);
         end
 
+        function set_current_sweep_rate(obj, value)
+            if abs(value) > 2.893; %.3 T/MIN
+                error('Current ramp rate too high!')
+            end
+            obj.magnet.remote.set_current_sweep_rate(value);
+        end
+
         function switch_heater(obj, value)
             obj.magnet.remote.switch_heater(value);
         end
@@ -43,6 +52,10 @@ classdef OxfMagnet1D < qd.classes.Instrument
 
         function val = get_field_sweep_rate(obj)
             val = obj.magnet.remote.get_field_sweep_rate();
+        end
+
+        function val = get_current_sweep_rate(obj)
+            val = obj.magnet.remote.get_current_sweep_rate();
         end
 
         function val = system_report(obj)
@@ -60,6 +73,11 @@ classdef OxfMagnet1D < qd.classes.Instrument
                         error('Set point too high!')
                     end
                     obj.magnet.remote.set_field(value);
+                case 'current'
+                    if abs(value) > 115.72; %12 T
+                        error('Set point too high!')
+                    end
+                    obj.magnet.remote.set_current(value);
                 otherwise
                     error('No such channel.')
             end

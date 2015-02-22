@@ -62,9 +62,9 @@ classdef LiveplotRun < qd.run.SafeRun
         	json.write(json_file,json_path);
         	dlmwrite(data_path,data_store,'delimiter','\t','precision','%.16G');
             if obj.copy_data
-                dir_path = strsplit(obj.out_dir,'20');
+                dir_path = strsplit(obj.out_dir,'201');
                 dir_path = dir_path(2);
-                dir = strjoin({'20',dir_path{1}},'');
+                dir = strjoin({'201',dir_path{1}},'');
                 folder_path = strjoin({obj.external_path,dir},'\');
                 new_data_path = sprintf('%s/data.dat',folder_path);
                 new_json_path = sprintf('%s/data.json',folder_path);
@@ -180,13 +180,13 @@ classdef LiveplotRun < qd.run.SafeRun
                     ylabel(obj.plots{pnum}.('yname'));
                     title(mytitle);
                 else
-                    type = obj.plots{pnum}('type');
+                    type = obj.plots{pnum}.('type');
                     if strcmp(type,'1d') || strcmp(type,'waterfall')
                         h = plot(NaN,NaN,varargin{:});
                         obj.plots{pnum}('handle') = h;
-                        xname = obj.plots{pnum}('xname');
-                        yname = obj.plots{pnum}('yname');
-                        title1 = obj.plots{pnum}('title');
+                        xname = obj.plots{pnum}.('xname');
+                        yname = obj.plots{pnum}.('yname');
+                        title1 = obj.plots{pnum}.('title');
                         xlabel(xname);
                         ylabel(yname);
                         title(title1);
@@ -199,17 +199,18 @@ classdef LiveplotRun < qd.run.SafeRun
                         ydata = obj.sweeps{1,2}.values;
                         obj.zdata = nan(length(ydata),length(xdata));
                         h = imagesc(x_extents, y_extents, obj.zdata);
-                        colormap(varargin{:});
-                        obj.plots{pnum}('handle') = h;
+                        colormap(varargin{1});
+                        obj.plots{pnum}.('handle') = h;
                         cb = colorbar;
                         set(gca,'YDir','normal');
-                        xname = obj.plots{pnum}('xname');
-                        yname = obj.plots{pnum}('yname');
-                        zname = obj.plots{pnum}('zname');
+                        xname = obj.plots{pnum}.('xname');
+                        yname = obj.plots{pnum}.('yname');
+                        zname = obj.plots{pnum}.('zname');
+                        title1 = obj.plots{pnum}.('title');
                         xlabel(xname);
                         ylabel(yname);
                         ylabel(cb, zname);
-                        title(mytitle);
+%                         title(mytitle);
                         title(title1);
                     else
                         error('Supported plottypes is: 1d, surface and waterfall');
@@ -272,7 +273,7 @@ classdef LiveplotRun < qd.run.SafeRun
                 elseif strcmp(type,'surface')
                     inner_loop_points = obj.sweeps{1,2}.points;
                     outer_loop_points = obj.sweeps{1,1}.points;
-                    zname = p('zname');
+                    zname = p.('zname');
                     zindex = not(cellfun('isempty', strfind(obj.columns, zname)));
                     z = obj.data(:,zindex);
                     if ~mod(length(z),inner_loop_points)
@@ -308,9 +309,9 @@ classdef LiveplotRun < qd.run.SafeRun
         
         % Copy data folder to external location
         function copy_data_to_external_path(obj)
-            dir_path = strsplit(obj.out_dir,'20');
+            dir_path = strsplit(obj.out_dir,'201');
             dir_path = dir_path(2);
-            dir = strjoin({'20',dir_path{1}},'');
+            dir = strjoin({'201',dir_path{1}},'');
             copyfile(obj.out_dir,strjoin({obj.external_path,dir},'\'),'f')
         end
         

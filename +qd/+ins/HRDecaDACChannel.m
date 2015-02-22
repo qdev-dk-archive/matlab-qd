@@ -11,7 +11,7 @@ classdef HRDecaDACChannel < qd.classes.Channel
         ramp_rate % volts per second
         limit_low
         limit_high
-        wait_for_ramp = true
+        wait_for_ramp
         slope
         offset
         fine_limits_disabled = false;
@@ -25,9 +25,10 @@ classdef HRDecaDACChannel < qd.classes.Channel
             obj.mode = mode;
             obj.range_low = -10.0;
             obj.range_high = 10.0;
-            obj.ramp_rate = 0.1;
+            obj.ramp_rate = 0.5;
             obj.slope = 1;
             obj.offset = 0;
+            obj.wait_for_ramp = true;
             if isempty(warning_issued)
                 warning(['DecaDAC drivers: ' ...
                     'No handling of DecaDAC range yet, setting -10V to 10V. '])
@@ -40,6 +41,14 @@ classdef HRDecaDACChannel < qd.classes.Channel
             qd.util.assert((isnumeric(high) && isscalar(high)) || isempty(high))
             obj.limit_low = low;
             obj.limit_high = high;
+        end
+        
+        function set_wait_for_ramp(obj, wait_for_ramp)
+            if islogical(wait_for_ramp)
+                obj.wait_for_ramp = wait_for_ramp;
+            else
+                error('You must pass "true" or "false"')
+            end
         end
 
         function range = get_limits(obj)
