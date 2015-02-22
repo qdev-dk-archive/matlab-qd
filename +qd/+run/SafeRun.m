@@ -2,7 +2,6 @@ classdef SafeRun < qd.run.StandardRun
     properties
         running = false;
         stopnow = false;
-        initial_settle = 0;
     end
     properties(Access=private)
         columns
@@ -29,14 +28,12 @@ classdef SafeRun < qd.run.StandardRun
             p.addOptional('tolerance', []);
             p.addOptional('values', []);
             p.addOptional('alternate', false);
-            p.addOptional('initial_settle', 0);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
             sweep.to = to;
             sweep.points = points;
             sweep.settle = p.Results.settle;
-            sweep.initial_settle = p.Results.initial_settle;
             sweep.tolerance = p.Results.tolerance;
             sweep.alternate = p.Results.alternate;
             if(isempty(p.Results.values))
@@ -124,12 +121,11 @@ classdef SafeRun < qd.run.StandardRun
             % function with one less channel to sweep.
             sweep = sweeps{1};
             next_sweeps = sweeps(2:end);
-            
             if(obj.is_time_chan(sweep.chan) && (~sweep.points))
                 % This is supposed to run until sweep.to time has passed,
                 % and then measure as many points as possible during the given time.
-                % sometimes you don't know how long it takes to set a channe
-                % settle = 0; replaced by initial settle
+                % sometimes you don't know how long it takes to set a channel
+                settle = 0;
                 settle = max(settle, sweep.settle);
                 % Go to starting point and begin timer
                 sweep.chan.set(sweep.from);
@@ -158,11 +154,7 @@ classdef SafeRun < qd.run.StandardRun
                             end
                         end
                     else
-                        pause(max(sweep.settle,sweep.initial_settle));
-                        % for the first iteration add the initial settle this is set to zero for all further iterations
-                        % do not do the initial settle for the tolerance
-                        % thing, as it will wait anyways.
-                        sweep.initial_settle = 0;
+                        pause(sweep.settle);
                     end
                     %settle = max(settle, sweep.settle);
                     obj.handle_sweeps(next_sweeps, [earlier_values value], table);
