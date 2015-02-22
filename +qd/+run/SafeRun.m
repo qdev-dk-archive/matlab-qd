@@ -2,6 +2,7 @@ classdef SafeRun < qd.run.StandardRun
     properties
         running = false;
         stopnow = false;
+        initial_settle = 0;
     end
     properties(Access=private)
         columns
@@ -28,6 +29,7 @@ classdef SafeRun < qd.run.StandardRun
             p.addOptional('tolerance', []);
             p.addOptional('values', []);
             p.addOptional('alternate', false);
+            p.addOptional('initial_settle', 0);
             p.parse(varargin{:});
             sweep = struct();
             sweep.from = from;
@@ -154,7 +156,12 @@ classdef SafeRun < qd.run.StandardRun
                             end
                         end
                     else
-                        pause(sweep.settle);
+                        pause(max(sweep.settle,sweep.initial_settle));
+                        % for the first iteration add the initial settle,
+                        % this is set to zero for all futher iterations
+                        % the initial settle is not part of the tolerence
+                        % lopp, it will wait anyways.
+                        sweep.initial_settle = 0;
                     end
                     %settle = max(settle, sweep.settle);
                     obj.handle_sweeps(next_sweeps, [earlier_values value], table);
