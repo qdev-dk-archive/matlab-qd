@@ -160,6 +160,8 @@ classdef SafeRun < qd.run.StandardRun
                     else
                         pause(max(sweep.settle,sweep.initial_settle));
                         % for the first iteration add the initial settle this is set to zero for all further iterations
+                        % do not do the initial settle for the tolerance
+                        % thing, as it will wait anyways.
                         sweep.initial_settle = 0;
                     end
                     %settle = max(settle, sweep.settle);
