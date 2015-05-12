@@ -33,7 +33,7 @@ classdef SR5210LockIn < qd.classes.ComInstrument
         function r = channels(obj)
             r = {'X' 'Y' 'R', 'theta', 'freq', 'sensitivity'};
         end
-        
+
         function setc(obj, channel, value)
             switch channel
                 case 'OA'
@@ -84,6 +84,13 @@ classdef SR5210LockIn < qd.classes.ComInstrument
                         val = obj.querym('SEN', '%f');
                         val = obj.sensitivity_dict(val+1);
                         obj.sensitivity = val;
+                    catch Exception;
+                        warning(Exception.message);
+                        val = 0;
+                    end
+                case 'amplitude'
+                    try
+                        val = obj.querym('OA', '%f');
                     catch Exception;
                         warning(Exception.message);
                         val = 0;
