@@ -62,9 +62,6 @@ classdef Triton < qd.classes.Instrument
                         val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:ENAB', obj.control_channel), '%s');
                     case 'RATE'
                         val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RAMP:RATE', obj.control_channel), '%f');
-                    case 'MC_cernox'
-                        uid = 'T5';
-                        val = obj.triton.read(sprintf('DEV:%s:TEMP:SIG:TEMP', uid), '%f');
                     case 'RANGE'
                         val = obj.triton.read(sprintf('DEV:%s:TEMP:LOOP:RANGE', obj.control_channel), '%f');
                     case 'MODE'
