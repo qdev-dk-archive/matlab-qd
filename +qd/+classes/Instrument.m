@@ -1,5 +1,9 @@
 classdef Instrument < qd.classes.Nameable
 % The base class of all instruments.
+    properties(Dependent)
+        chans %  A struct of all the channels of the instrument. The values in
+              %  the struct are channel objects.
+    end
     methods
         function r = model(obj)
         % The name of the type of instrument as given by the manufacturer. For
@@ -15,6 +19,18 @@ classdef Instrument < qd.classes.Nameable
 
         function r = channels(obj)
             r = {};
+        end
+
+        function chans = get.chans(obj)
+            chans = struct();
+            for channel = obj.channels()
+                name = channel{1};
+                % Make sure we do not try to add invalidly named fields to the
+                % struct.
+                if isvarname(name)
+                    chans.(name) = obj.channel(name);
+                end
+            end
         end
 
         function r = describe(obj, register)
