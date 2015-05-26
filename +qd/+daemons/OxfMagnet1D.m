@@ -7,7 +7,7 @@ classdef OxfMagnet1D < handle
         % How often to check the temperature of the cryostat.
         % In seconds.
         check_period = 3*60
-        max_pt2_temp = 4.5
+        max_pt2_temp = 5.5
         max_cooling_water_temp = 21
         magnet_com = 'COM8'
         mail = 'guendata@gmail.com';    % Replace with your email address
@@ -19,6 +19,8 @@ classdef OxfMagnet1D < handle
         pt2_chan
         cool_water_chan
         debug = false
+        pt2
+        cw
     end
     
     properties(Access=private)
@@ -126,16 +128,16 @@ classdef OxfMagnet1D < handle
                 ok = false;
                 return;
             end
-            pt2 = obj.pt2_chan.get();
-            cw = obj.cool_water_chan.get();
-            ok = pt2 <= obj.max_pt2_temp ...
-                && cw <= obj.max_cooling_water_temp;
+            obj.pt2 = obj.pt2_chan.get();
+            obj.cw = obj.cool_water_chan.get();
+            ok = obj.pt2 <= obj.max_pt2_temp ...
+                && obj.cw <= obj.max_cooling_water_temp;
             if ~ok
                 pause(90);
-                pt2 = obj.pt2_chan.get();
-                cw = obj.cool_water_chan.get();
-                ok = pt2 <= obj.max_pt2_temp ...
-                    && cw <= obj.max_cooling_water_temp;
+                obj.pt2 = obj.pt2_chan.get();
+                obj.cw = obj.cool_water_chan.get();
+                ok = obj.pt2 <= obj.max_pt2_temp ...
+                    && obj.cw <= obj.max_cooling_water_temp;
             end
         end
         
@@ -174,7 +176,7 @@ classdef OxfMagnet1D < handle
             obj.send('A1');       % go to set point
             obj.status = 'tripped';
             body = sprintf('Temp. PT2: %f\nTemp. cooling water: %f.\n', ...
-                obj.triton.get_temp(1), obj.get_cooling_water_temp());
+                obj.get_pt2(), obj.get_cw());
             %obj.server.send_alert('Magnet too warm', body);
             obj.setup_mail();
             sendmail(obj.alert_email, 'Magnet too warm', body);
@@ -184,10 +186,18 @@ classdef OxfMagnet1D < handle
             if ~obj.temperature_ok()
                 error(['Temperature is not ok. ' ...
                     '(PT2: %.2fK, Cooling water: %.2fK, Status: %s).'], ...
-                    obj.triton.get_temp(1), ...
-                    obj.triton.get_cooling_water_temp(), ... 
+                    obj.get_pt2(), ...
+                    obj.get_cw(), ... 
                     obj.status );
             end
+        end
+        
+        function temp = get_pt2(obj)
+            temp = obj.pt2;
+        end
+        
+        function temp = get_cw(obj)
+            temp = obj.cw;
         end
 
         function status = get_status(obj)

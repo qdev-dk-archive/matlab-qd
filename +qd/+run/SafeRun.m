@@ -2,7 +2,7 @@ classdef SafeRun < qd.run.StandardRun
     properties
         running = false;
         stopnow = false;
-        initial_settle = 0;
+%         initial_settle = 0;
     end
     properties(Access=private)
         columns
@@ -38,6 +38,7 @@ classdef SafeRun < qd.run.StandardRun
             sweep.settle = p.Results.settle;
             sweep.tolerance = p.Results.tolerance;
             sweep.alternate = p.Results.alternate;
+            sweep.initial_settle = p.Results.initial_settle;
             if(isempty(p.Results.values))
                 sweep.values = linspace(from, to, points);
             else
