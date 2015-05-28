@@ -108,6 +108,7 @@ The following recipes exists at the moment.
   *channel* can be a string or a channel object.
 * `qd.q.repeat(n)` &mdash; repeats the subordinate job *n* times.
 * `qd.q.forever()` &mdash; repeats the subordinate job forever.
+* `qd.q.timed(t)` &mdash; repeats the subordinate job for t seconds.
 * `qd.q.settle(t)` &mdash; waits *t* seconds.
 * `qd.q.call(func)` &mdash; calls the function handle *func* after each
   execution of the subordinate job. *func* receives as an argument a matrix
