@@ -110,7 +110,9 @@ The following recipes exists at the moment.
 * `qd.q.forever()` &mdash; repeats the subordinate job forever.
 * `qd.q.timed(t)` &mdash; repeats the subordinate job for t seconds.
 * `qd.q.settle(t)` &mdash; waits *t* seconds.
-* `qd.q.call(func)` &mdash; calls the function handle *func* after each
+* `qd.q.call_before(func)` &mdash; calls the function handle *func* before each
+  execution of the subordinate job.
+* `qd.q.call_after(func)` &mdash; calls the function handle *func* after each
   execution of the subordinate job. *func* receives as an argument a matrix
   with one row for each point added by the subordinate job. If *func* throws
   an exception, the run is aborted.

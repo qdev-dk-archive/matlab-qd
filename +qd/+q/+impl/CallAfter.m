@@ -1,4 +1,4 @@
-classdef Call
+classdef CallAfter
     properties
         func
         job
@@ -23,7 +23,7 @@ classdef Call
         end
 
         function r = reversed(obj)
-            r = qd.q.impl.Call();
+            r = qd.q.impl.CallAfter();
             r.func = obj.func;
             r.job = obj.job.reversed();
         end
@@ -34,7 +34,7 @@ classdef Call
 
         function meta = describe(obj, register)
             meta = struct;
-            meta.type = 'Call';
+            meta.type = 'CallAfter';
             meta.func = func2str(obj.func);
             meta.job = obj.job.describe(register);
         end
