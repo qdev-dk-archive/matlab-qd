@@ -42,14 +42,14 @@ classdef TableView < handle
         % the meta-file as its only argument.
             obj.editor = editor;
         end
-        
+
         function update(obj)
             figure(obj.fig);
             clf();
-            
+
             set(obj.fig,'Units','characters',...
                 'ResizeFcn',@figResize);
-                
+
             botPanel = uipanel('BorderType','etchedin',...
                 'Units','characters',...
                 'Position',[0 0 1 1],...
@@ -61,15 +61,15 @@ classdef TableView < handle
                 'Position', [0 0 1 1],...
                 'Parent',obj.fig,...
                 'ResizeFcn',@centerPanelResize);
-                 
+
             function botPanelResize(src,evt)
                 bpos = get(botPanel,'Position');
             end
-            
+
             function centerPanelResize(src,evt)
                 cpos = get(centerPanel,'Position');
             end
-            
+
             function figResize(src,evt)
                 fpos = get(obj.fig,'Position');
                 botHeight = 4;
@@ -78,9 +78,9 @@ classdef TableView < handle
                 set(centerPanel,'Position',...
                     [0 botHeight fpos(3) fpos(4)-botHeight]);
             end
-                    
+
             axes('parent',centerPanel,'box','on');
-            
+
             hold('all');
             lists = [];
             if isempty(obj.tables)
@@ -171,7 +171,7 @@ classdef TableView < handle
                 disp(getReport(err));
             end
             align(lists, 'Fixed', 0, 'Bottom');
-            
+
             figResize();
             botPanelResize();
             centerPanelResize();
@@ -298,15 +298,15 @@ classdef TableView < handle
             end
         end
 
-        function do_plot(obj) 
+        function do_plot(obj)
             if obj.columns(3) == 0
                 for table = obj.tables
                     xdata = table{1}{obj.columns(1)}.data;
                     ydata = table{1}{obj.columns(2)}.data;
                     plot(xdata, ydata);
                     ax = gca();
-                    set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
-                    set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
+                    set(ax, 'XLim', obj.get_limits('x', nmin(xdata), nmax(xdata)));
+                    set(ax, 'YLim', obj.get_limits('y', nmin(ydata), nmax(ydata)));
                     xlabel(obj.get_label(1));
                     ylabel(obj.get_label(2));
                 end
@@ -328,19 +328,19 @@ classdef TableView < handle
                 ax = gca();
                 set(ax, 'XLim', obj.get_limits('x', extents(1,1), extents(1,2)));
                 set(ax, 'YLim', obj.get_limits('y', extents(2,1), extents(2,2)));
-                z_limits = obj.get_limits('z', min(min(data)), max(max(data)));
+                z_limits = obj.get_limits('z', nmin(nmin(data)), nmax(nmax(data)));
                 set(ax, 'CLim', z_limits);
 
                 colormap(obj.get_colormap(z_limits));
-                
+
                 xstr = obj.get_label(1);
                 ystr = obj.get_label(2);
                 zstr = obj.get_label(3);
-                
+
                 xl = xlabel(xstr);
                 yl = ylabel(ystr);
                 zl = ylabel(cb, zstr);
-                
+
                 if xstr(1)=='$' && xstr(end)=='$'
                     set(xl,'Interpreter','Latex');
                 end
@@ -353,7 +353,7 @@ classdef TableView < handle
             end
             if ~isempty(obj.header)
                 t = title(obj.header);
-                
+
                 if obj.header(1)=='$' && obj.header(end)=='$'
                     set(t,'Interpreter','Latex');
                 end
@@ -397,8 +397,8 @@ classdef TableView < handle
             c = table{obj.columns(3)}.data;
             res = obj.resolution_settings(obj.resolution);
             extents = [];
-            extents(1,:) = obj.get_limits('x', min(a), max(a));
-            extents(2,:) = obj.get_limits('y', min(b), max(b));
+            extents(1,:) = obj.get_limits('x', nmin(a), nmax(a));
+            extents(2,:) = obj.get_limits('y', nmin(b), nmax(b));
             xp = linspace(0, 1, res);
             yp = linspace(0, 1, res);
             [X, Y] = meshgrid(xp, yp);
@@ -475,4 +475,13 @@ classdef TableView < handle
             mymap( (mymap<0) ) = 0;
         end
     end
+end
+
+function v = nmin(data)
+    data(~isfinite(data)) = inf;
+    v = min(data);
+end
+function v = nmax(data)
+    data(~isfinite(data)) = -inf;
+    v = max(data);
 end
