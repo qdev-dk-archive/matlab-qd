@@ -12,12 +12,19 @@ classdef FolderBrowser < handle
         editor
     end
     properties
+        % The data that is currently being displayed.
         tbl
+        % A path to the current data.
         loc
+        % The current metadata
         meta
-        tables
-        table_views = {}
+        % The number of views to plot. (Set this to two to get several views of the same data).
         num_of_views = 1
+        % The current data in a more raw format.
+        tables
+        % Objects responsible for displaying each view.
+        table_views = {}
+        % Extra columns to derive when loading data.
         pseudo_columns = {}
         % This is a containers.Map mapping strings to strings.
         % The key is the name of a column, the value is the desired label
@@ -26,6 +33,7 @@ classdef FolderBrowser < handle
         % Set this to false if you do not want headers on plots.
         show_headers = true
         show_folder_names = true
+        % Size of data during last load (used to figure out when new data is appended).
         size_of_data = 0
     end
     methods
