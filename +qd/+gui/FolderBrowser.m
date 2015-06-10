@@ -287,9 +287,10 @@ classdef FolderBrowser < handle
                 if length(obj.table_views) >= i
                     old_view = obj.table_views{i};
                 else
-                    old_view = []
+                    old_view = [];
                 end
                 view = qd.gui.TableView(tables.values(), obj.figs{i});
+                view.meta = meta;
                 try
                     view.sweeps = meta.sweeps;
                 end
