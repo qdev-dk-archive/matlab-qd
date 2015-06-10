@@ -321,8 +321,6 @@ classdef TableView < handle
                         q = floor(n/m);
                         r = ceil(n/m);
                         padding = r*m - n;
-                        size(xdata)
-                        padding
                         xdata_r = [xdata; nan(padding, 1)];
                         ydata_r = [ydata; nan(padding, 1)];
                         xdata_r = reshape([xdata_r], m, r);
