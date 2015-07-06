@@ -9,6 +9,15 @@ classdef Keithley2400 < qd.classes.ComInstrument
         % are using it in this way (this enables workarounds for minor bugs
         % this introduces).
         is_2600_in_disguise = false;
+
+        % It is suspected that early firmware revisions do not support the
+        % ROUT:TERM commands. See
+        % http://forum.keithley.com/phpBB3/viewtopic.php?f=13&t=110540
+        % Updating the firmware is either hard or impossible. See
+        % http://forum.keithley.com/phpBB3/viewtopic.php?f=13&t=410
+        % Set the below variable to true if you want to disable the use of the
+        % ROUT:TERM command in the describe function.
+        has_old_firmware = false;
     end
 
     properties(Access=private)
@@ -171,7 +180,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
 
         function stop_autorange(obj)
             obj.send('SOUR:VOLT:RANG 210')
-            obj.send('SOUR:VOLT:AUTO 0')
+            obj.send('SOUR:VOLT:RANG:AUTO 0')
         end
 
         function r = describe(obj, register)
@@ -179,7 +188,7 @@ classdef Keithley2400 < qd.classes.ComInstrument
             r.config = struct();
             r.is_2600_in_disguise = obj.is_2600_in_disguise;
             queries = { ...
-                'FORM:ELEM', 'OUTP:STAT', 'OUTP:SMOD', 'ROUT:TERM', 'FUNC:CONC', ...
+                'FORM:ELEM', 'OUTP:STAT', 'OUTP:SMOD', 'FUNC:CONC', ...
                 'FUNC:ON', 'CURR:RANG:UPP', 'CURR:RANG:AUTO', 'CURR:NPLC', 'CURR:PROT', ...
                 'VOLT:RANG:UPP', 'VOLT:RANG:AUTO', 'VOLT:NPLC', 'VOLT:PROT', 'RES:RANG:UPP', ...
                 'RES:RANG:AUTO', 'RES:NPLC', 'AVER:STAT', 'AVER:COUN', 'AVER:TCON', ...
@@ -188,6 +197,10 @@ classdef Keithley2400 < qd.classes.ComInstrument
             if not(obj.is_2600_in_disguise)
                 % This query hangs for a 2600 running with the 2400 persona.
                 queries{end + 1} = 'SOUR:VOLT:PROT';
+            end
+            if not(obj.has_old_firmware)
+                % This query hang for a 2400 with firmware C03.
+                queries{end + 1} = 'ROUT:TERM';
             end
             for q = queries
                 question = [':' q{1} '?'];
