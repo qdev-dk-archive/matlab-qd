@@ -65,7 +65,7 @@ classdef DecaDAC2 < qd.classes.ComInstrument
             end
             obj.select(n);
             raw = obj.querym('d;', 'd%d!');
-            val = raw / (2^16 - 1) * obj.span(ch) + obj.low(ch);
+            val = obj.raw_to_float(ch, raw);
         end
 
         function future = setc_async(obj, ch, val)

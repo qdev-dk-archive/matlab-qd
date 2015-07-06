@@ -3,7 +3,7 @@
 An object is a *job* if it supports the following operations.
 
 * `job.exec(ctx, future, prefix)`
-  
+
   Executes the job. The arguments are as follows
 
   * *ctx* — is the execution context. Described below.
@@ -16,7 +16,7 @@ An object is a *job* if it supports the following operations.
   values in *prefix*.
 
 * `columns = job.columns()`
-  
+
   This method returns a cell-array of structs, each representing one column
   that the job needs in the output file. Each struct has at least a *name*
   field with the name of the column. If *A* is a job with a subordinate job
@@ -30,36 +30,36 @@ An object is a *job* if it supports the following operations.
   columns to the output.
 
 * `time_in_seconds = job.time(options)`
-  
+
   Estimate how long this job will take to execute. *options* is a struct
   containing options affecting the timing calculation. See `qd.q.Plan.time`
   for expected options. *options* should be forwarded unchanged when calling
   *time* for subordinate jobs. *time* may return *NaN* or *inf*.
 
 * `n = job.total_points()`
-  
+
   How many data points will this job output. *total_points* may return *NaN* or
   *inf*.
 
 * `reversed_job = job.reversed()`
-  
+
   Create a new job that does what this job does in reverse. Subordinate jobs
   should be reversed by this function also. If it does not make sense to
   reverse this job, return job itself unchanged.
 
 * `meta = job.describe(register)`
-  
+
   Create a description for this job for the `meta.json` file. `register` is a
   *qd.classes.Register* object.
 
 * `text = job.pprint()`
-  
+
   Create a string suitable for displaying this job to the user. The string may
   contain several lines, but should not end in a newline.
 
 ## The execution context
 
-The execution context, *ctx*, is an object with the following methods:
+The execution context, *ctx*, is a struct with the following methods:
 
 * `ctx.add_point(p)` &mdash; Puts an array of floats in the ouput file (as a single row).
 * `ctx.add_divider()` &mdash; Gnuplot expects a divider between each line in a

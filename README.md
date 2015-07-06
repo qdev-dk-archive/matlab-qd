@@ -18,7 +18,7 @@ following command in a git shell:
 
 `git submodule update --init`
 
-Then add the root folder of the library to the MATLAB past, as well as all the
+Then add the root folder of the library to the MATLAB path, as well as all the
 folders immediately inside the `dependencies` folder. Run the command
 `zmq.install_jar` in MATLAB.
 

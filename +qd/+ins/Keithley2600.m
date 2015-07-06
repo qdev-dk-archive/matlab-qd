@@ -1,5 +1,5 @@
 classdef Keithley2600 < qd.classes.ComInstrument
-    % Instrument driver for Keithley series 2600. 
+    % Instrument driver for Keithley series 2600.
     %
     % If the keithley has several physical channels, instantiate one object
     % for each channel and change smu. E.g.
@@ -30,6 +30,7 @@ classdef Keithley2600 < qd.classes.ComInstrument
         ramp_step_size = struct('i', 1E-12, 'v', 1E-3);
         % Currently executing future or [].
         current_future
+        limits = struct('i', [], 'v', []);
     end
 
     methods
@@ -95,6 +96,10 @@ classdef Keithley2600 < qd.classes.ComInstrument
             if not(ismember(channel, {'i', 'v'}))
                 error('not supported.');
             end
+            if ~isempty(obj.limits.(channel)) && abs(value)>obj.limits.(channel)
+                error('Requested a value above the limit. Aborting. ins: %s, chan: %s, limit: %f, request: %f.', ...
+                    obj.name, channel, obj.limits.(channel), value);
+            end
             if isempty(obj.ramp_rate.(channel))
                 obj.sendf('%s.source.level%s = %.16f', obj.smu, channel, value);
                 future = qd.classes.SetFuture.do_nothing_future();
@@ -102,6 +107,16 @@ classdef Keithley2600 < qd.classes.ComInstrument
                 obj.current_future = ramp(obj, channel, value);
                 future = obj.current_future;
             end
+        end
+
+        function set_limit(obj, channel, limit)
+            % ins.set_limit(channel, limit)
+            %
+            % Set software limit for channel. Set the limit to [] to disable.
+            if not(ismember(channel, {'i', 'v'}))
+                error('not supported.');
+            end
+            obj.limits.(channel) = limit;
         end
     end
 

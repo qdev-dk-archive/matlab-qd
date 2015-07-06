@@ -3,19 +3,19 @@ classdef Triton < handle
         % The address the triton proxy server will listen on.
         bind_address = 'tcp://127.0.0.1:9736/'
     end
-    
+
     properties
         address = ''
         password = ''
         channels
         server
     end
-    
+
     properties(Access=private)
         triton
         scpi
     end
-    
+
     methods
 
         function obj = Triton()
@@ -25,7 +25,7 @@ classdef Triton < handle
             obj.server.daemon_name = 'triton-daemon';
             obj.channels = containers.Map();
         end
-            
+
         function connect(obj)
             if ~isempty(obj.triton)
                 % already connected.
@@ -65,14 +65,33 @@ classdef Triton < handle
                 fclose(obj.triton);
             end
         end
-        
+
         function rep = talk(obj, req)
         % triton.talk(req)
         %
         %   Send a request to the triton, returns the reply.
         %   Do not include trailing newline in request.
-            rep = query(obj.triton, req, '%s\n', '%s\n');
+            while true
+                try
+                    if isempty(obj.triton)
+                        disp('Reconnecting...')
+                        obj.connect();
+                    end
+                    rep = query(obj.triton, req, '%s\n', '%s\n');
+                    if isempty(rep)
+                        error('qd:tritonEmptyReply', ...
+                            'Got an empty reply from triton.');
+                    end
+                    return
+                catch err
+                    disp(getReport(err));
+                    if ~strcmp(obj.triton.Status, 'closed')
+                        fclose(obj.triton);
+                    end
+                    obj.triton = [];
+                end
+            end
         end
-        
+
     end
 end

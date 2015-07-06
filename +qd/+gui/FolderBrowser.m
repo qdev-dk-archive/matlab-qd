@@ -4,7 +4,7 @@ classdef FolderBrowser < handle
         content
         listbox
         listbox_fig
-        fig
+        figs
         update_timer
         track_timer
         has_been_closed = false
@@ -12,11 +12,19 @@ classdef FolderBrowser < handle
         editor
     end
     properties
+        % The data that is currently being displayed.
         tbl
+        % A path to the current data.
         loc
+        % The current metadata
         meta
+        % The number of views to plot. (Set this to two to get several views of the same data).
+        num_of_views = 1
+        % The current data in a more raw format.
         tables
-        table_view
+        % Objects responsible for displaying each view.
+        table_views = {}
+        % Extra columns to derive when loading data.
         pseudo_columns = {}
         % This is a containers.Map mapping strings to strings.
         % The key is the name of a column, the value is the desired label
@@ -25,6 +33,7 @@ classdef FolderBrowser < handle
         % Set this to false if you do not want headers on plots.
         show_headers = true
         show_folder_names = true
+        % Size of data during last load (used to figure out when new data is appended).
         size_of_data = 0
     end
     methods
@@ -37,9 +46,7 @@ classdef FolderBrowser < handle
                 'Name', loc, ...
                 'NumberTitle', 'off', ...
                 'WindowStyle', 'docked');
-            w = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
-            set(get(obj.listbox_fig,'javaframe'), 'GroupName','FolderBrowser');
-            warning(w);
+            move_to_frame(obj.listbox_fig, 'FolderBrowser');
             obj.listbox = uicontrol( ...
                 'Style', 'listbox', ...
                 'Parent', obj.listbox_fig, ...
@@ -53,7 +60,7 @@ classdef FolderBrowser < handle
             obj.update_timer.TimerFcn = @(varargin)obj.update();
             start(obj.update_timer);
             obj.track_timer = timer();
-            obj.track_timer.Period = 0.5;
+            obj.track_timer.Period = 1;
             obj.track_timer.ExecutionMode = 'fixedSpacing';
             obj.track_timer.TimerFcn = @(varargin)obj.track_fcn();
             start(obj.track_timer);
@@ -138,9 +145,12 @@ classdef FolderBrowser < handle
 
         function track_fcn(obj)
             should_track = false;
-            try
-                if obj.table_view.track
-                    should_track = true;
+            for view = obj.table_views
+                view = view{1};
+                try
+                    if view.track
+                        should_track = true;
+                    end
                 end
             end
             if ~should_track
@@ -159,12 +169,14 @@ classdef FolderBrowser < handle
         end
 
         function clear_figure(obj)
-            try
-                close(obj.fig);
-            catch
+            for fig = obj.figs
+                try
+                    close(fig{1});
+                catch
+                end
             end
-            obj.fig = [];
-            obj.table_view = [];
+            obj.figs = {};
+            obj.table_views = {};
         end
 
         function select(obj, val)
@@ -257,7 +269,7 @@ classdef FolderBrowser < handle
         end
 
         % Updates the plot to view the supplied arguments.
-        % 
+        %
         % Params:
         %   tables: a Map mapping table names to tables.
         %   loc:    the path to the folder containing the data.
@@ -267,31 +279,40 @@ classdef FolderBrowser < handle
         % a name field and a data field. The data field is an array of
         % doubles.
         function plot_loc(obj, tables, loc, meta)
-            if isempty(obj.fig)
-                obj.fig = figure();
+            for i = [1:obj.num_of_views]
+                if length(obj.figs) < i
+                    obj.figs{i} = figure();
+                    move_to_frame(obj.figs{i}, sprintf('View #%i', i));
+                end
+                if length(obj.table_views) >= i
+                    old_view = obj.table_views{i};
+                else
+                    old_view = [];
+                end
+                view = qd.gui.TableView(tables.values(), obj.figs{i});
+                view.meta = meta;
+                try
+                    view.sweeps = meta.sweeps;
+                end
+                if obj.show_headers && isfield(meta, 'name')
+                    view.header = meta.name;
+                end
+                if obj.show_folder_names
+                    [pathstr, name, ext] = fileparts(loc);
+                    view.header = [view.header ' - ' name];
+                end
+                if ~isempty(old_view)
+                    view.mirror_settings(old_view);
+                end
+                view.loc = loc;
+                view.set_editor(obj.editor)
+                obj.table_views{i} = view;
+                view.update();
             end
-            old_view = obj.table_view;
-            obj.table_view = qd.gui.TableView(tables.values(), obj.fig);
-            try
-                obj.table_view.sweeps = meta.sweeps;
-            end
-            if obj.show_headers && isfield(meta, 'name')
-                obj.table_view.header = meta.name;
-            end
-            if obj.show_folder_names
-                [pathstr,name,ext] = fileparts(loc);
-                obj.table_view.header = [obj.table_view.header ' - ' name];
-            end
-            if ~isempty(old_view)
-                obj.table_view.mirror_settings(old_view);
-            end
-            obj.table_view.loc = loc;
-            obj.table_view.set_editor(obj.editor)
-            obj.table_view.update();
         end
 
         % Updates the obj.tbl property to reflect the supplied argument.
-        % 
+        %
         % Params:
         %   tables: a Map mapping table names to tables.
         %
@@ -324,4 +345,10 @@ classdef FolderBrowser < handle
         end
 
     end
+end
+
+function move_to_frame(fig, name)
+    w = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
+    set(get(fig,'javaframe'), 'GroupName', name);
+    warning(w);
 end

@@ -99,14 +99,20 @@ chan = ctx.resolve_channel(chan_name)
 where *chan_name* is a string and *chan* is a channel object. This lets the
 recipe look up channels by name at the time of application. *resolve_channel*
 is overloaded, such that if a channel object is supplied instead of a string,
-it is returned unchanged. 
+it is returned unchanged.
 
 The following recipes exists at the moment.
 
-* `qd.q.sw(channel, start, stop, n)`
-
-  Sweeps *channel* from *start* to *stop* in *n* points. At each point, the
-  subordinate job is executed. *channel* can be a string or a channel object.
-
+* `qd.q.sw(channel, start, stop, n)` &mdash; sweeps *channel* from *start* to
+  *stop* in *n* points. At each point, the subordinate job is executed.
+  *channel* can be a string or a channel object.
 * `qd.q.repeat(n)` &mdash; repeats the subordinate job *n* times.
-* `qd.q.settle(t)` &mdash; wait *t* seconds.
+* `qd.q.forever()` &mdash; repeats the subordinate job forever.
+* `qd.q.timed(t)` &mdash; repeats the subordinate job for t seconds.
+* `qd.q.settle(t)` &mdash; waits *t* seconds.
+* `qd.q.call_before(func)` &mdash; calls the function handle *func* before each
+  execution of the subordinate job.
+* `qd.q.call_after(func)` &mdash; calls the function handle *func* after each
+  execution of the subordinate job. *func* receives as an argument a matrix
+  with one row for each point added by the subordinate job. If *func* throws
+  an exception, the run is aborted.

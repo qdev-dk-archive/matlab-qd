@@ -1,5 +1,17 @@
 # Breaking changes
 
+## Version 0.7
+
+* Changed the API of the Triton instrument:
+    * Removed a few channels making them methods instead. These methods now
+      take and return booleans instead of 'ON' and 'OFF'. Unless you can
+      envision setting or getting something repeatedly in a meassurement loop,
+      it is not a channel.
+    * Removed duplicated functionality.
+    * Removed the last remnants of the MC_cernox hack. You can
+      configure extra channels when launching the triton daemon (see the config
+      example), also MC_cernox is assigned to 'COOL' on my Oxford pc.
+
 ## Version 0.6
 
 * The DecaDAC2 drivers no longer touches the mode by default. You need to call

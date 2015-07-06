@@ -42,14 +42,14 @@ classdef TableView < handle
         % the meta-file as its only argument.
             obj.editor = editor;
         end
-        
+
         function update(obj)
             figure(obj.fig);
             clf();
-            
+
             set(obj.fig,'Units','characters',...
                 'ResizeFcn',@figResize);
-                
+
             botPanel = uipanel('BorderType','etchedin',...
                 'Units','characters',...
                 'Position',[0 0 1 1],...
@@ -61,15 +61,15 @@ classdef TableView < handle
                 'Position', [0 0 1 1],...
                 'Parent',obj.fig,...
                 'ResizeFcn',@centerPanelResize);
-                 
+
             function botPanelResize(src,evt)
                 bpos = get(botPanel,'Position');
             end
-            
+
             function centerPanelResize(src,evt)
                 cpos = get(centerPanel,'Position');
             end
-            
+
             function figResize(src,evt)
                 fpos = get(obj.fig,'Position');
                 botHeight = 4;
@@ -78,9 +78,9 @@ classdef TableView < handle
                 set(centerPanel,'Position',...
                     [0 botHeight fpos(3) fpos(4)-botHeight]);
             end
-                    
+
             axes('parent',centerPanel,'box','on');
-            
+
             hold('all');
             lists = [];
             if isempty(obj.tables)
@@ -134,13 +134,6 @@ classdef TableView < handle
                 'Value', obj.resolution, ...
                 'TooltipString', 'Resampling resolution', ...
                 'Callback', @(h, varargin) obj.set_resolution(get(h, 'Value')));
-            zoom = qd.util.map(@(n)['Enlarge ' num2str(n) '%'], obj.zoom_settings);
-            zoom{end+1} = 'Tight inset';
-            lists(end + 1) = uicontrol( ...
-                'Style', 'popupmenu', ...
-                'String', zoom, ...
-                'Value', obj.zoom, ...
-                'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
             lists(end + 1) = uicontrol( ...
                 'Style', 'popupmenu', ...
                 'String', { ...
@@ -148,6 +141,17 @@ classdef TableView < handle
                     'Symmetric for overhead', 'Hot'}, ...
                 'Value', obj.colormap, ...
                 'Callback', @(h, varargin) obj.set_colormap(get(h, 'Value')));
+            lists(end + 1) = uicontrol( ...
+                'Style', 'pushbutton', ...
+                'String', 'Zoom', ...
+                'Callback', @(h, varargin) obj.zoom_button());
+            zoom = qd.util.map(@(n)['Enlarge ' num2str(n) '%'], obj.zoom_settings);
+            zoom{end+1} = 'Tight inset';
+            lists(end + 1) = uicontrol( ...
+                'Style', 'popupmenu', ...
+                'String', zoom, ...
+                'Value', obj.zoom, ...
+                'Callback', @(h, varargin) obj.set_zoom(get(h, 'Value')));
             lists(end + 1) = uicontrol( ...
                 'Style', 'pushbutton', ...
                 'String', 'Copy figure', ...
@@ -171,7 +175,7 @@ classdef TableView < handle
                 disp(getReport(err));
             end
             align(lists, 'Fixed', 0, 'Bottom');
-            
+
             figResize();
             botPanelResize();
             centerPanelResize();
@@ -212,6 +216,13 @@ classdef TableView < handle
             obj.colormap = other.colormap;
         end
 
+        function zoom_button(obj)
+            vals = ginput(2);
+            obj.limits.x = sprintf('%.7f:%.7f', vals(1,1), vals(2,1));
+            obj.limits.y = sprintf('%.7f:%.7f', vals(1,2), vals(2,2));
+            obj.update();
+        end
+
         function set_resolution(obj, res)
             obj.resolution = res;
             obj.update();
@@ -246,7 +257,17 @@ classdef TableView < handle
             obj.update();
         end
 
-        function aspect = get_aspect_ratio(obj)
+        function aspect = get_aspect_ratio(obj, extent_x, extent_y, data)
+            % TODO: document this.
+            if strcmp(strtrim(obj.aspect), 'res')
+                [rows, cols] = size(data);
+                aspect = [ ...
+                    abs(extent_x(2) - extent_x(1))/cols, ...
+                    abs(extent_y(2) - extent_y(1))/rows, ...
+                    1, ...
+                ];
+                return;
+            end
             parts = qd.util.strsplit(obj.aspect, ':');
             if length(parts) ~= 2
                 aspect = 'auto';
@@ -298,15 +319,29 @@ classdef TableView < handle
             end
         end
 
-        function do_plot(obj) 
+        function do_plot(obj)
             if obj.columns(3) == 0
                 for table = obj.tables
                     xdata = table{1}{obj.columns(1)}.data;
                     ydata = table{1}{obj.columns(2)}.data;
-                    plot(xdata, ydata);
+                    shape = qd.q.shape_from_meta(obj.meta);
+                    if length(shape) > 0
+                        m = shape(1);
+                        n = numel(xdata);
+                        q = floor(n/m);
+                        r = ceil(n/m);
+                        padding = r*m - n;
+                        xdata_r = [xdata; nan(padding, 1)];
+                        ydata_r = [ydata; nan(padding, 1)];
+                        xdata_r = reshape([xdata_r], m, r);
+                        ydata_r = reshape([ydata_r], m, r);
+                        plot(xdata_r, ydata_r);
+                    else
+                        plot(xdata, ydata);
+                    end
                     ax = gca();
-                    set(ax, 'XLim', obj.get_limits('x', min(xdata), max(xdata)));
-                    set(ax, 'YLim', obj.get_limits('y', min(ydata), max(ydata)));
+                    set(ax, 'XLim', obj.get_limits('x', nmin(xdata), nmax(xdata)));
+                    set(ax, 'YLim', obj.get_limits('y', nmin(ydata), nmax(ydata)));
                     xlabel(obj.get_label(1));
                     ylabel(obj.get_label(2));
                 end
@@ -324,23 +359,23 @@ classdef TableView < handle
                 cb = colorbar();
                 plt = imagesc(extents(1,:), extents(2,:), data);
                 axis('tight');
-                daspect(obj.get_aspect_ratio());
+                daspect(obj.get_aspect_ratio(extents(1,:), extents(2,:), data));
                 ax = gca();
                 set(ax, 'XLim', obj.get_limits('x', extents(1,1), extents(1,2)));
                 set(ax, 'YLim', obj.get_limits('y', extents(2,1), extents(2,2)));
-                z_limits = obj.get_limits('z', min(min(data)), max(max(data)));
+                z_limits = obj.get_limits('z', nmin(nmin(data)), nmax(nmax(data)));
                 set(ax, 'CLim', z_limits);
 
                 colormap(obj.get_colormap(z_limits));
-                
+
                 xstr = obj.get_label(1);
                 ystr = obj.get_label(2);
                 zstr = obj.get_label(3);
-                
+
                 xl = xlabel(xstr);
                 yl = ylabel(ystr);
                 zl = ylabel(cb, zstr);
-                
+
                 if xstr(1)=='$' && xstr(end)=='$'
                     set(xl,'Interpreter','Latex');
                 end
@@ -353,7 +388,7 @@ classdef TableView < handle
             end
             if ~isempty(obj.header)
                 t = title(obj.header);
-                
+
                 if obj.header(1)=='$' && obj.header(end)=='$'
                     set(t,'Interpreter','Latex');
                 end
@@ -397,8 +432,8 @@ classdef TableView < handle
             c = table{obj.columns(3)}.data;
             res = obj.resolution_settings(obj.resolution);
             extents = [];
-            extents(1,:) = obj.get_limits('x', min(a), max(a));
-            extents(2,:) = obj.get_limits('y', min(b), max(b));
+            extents(1,:) = obj.get_limits('x', nmin(a), nmax(a));
+            extents(2,:) = obj.get_limits('y', nmin(b), nmax(b));
             xp = linspace(0, 1, res);
             yp = linspace(0, 1, res);
             [X, Y] = meshgrid(xp, yp);
@@ -475,4 +510,13 @@ classdef TableView < handle
             mymap( (mymap<0) ) = 0;
         end
     end
+end
+
+function v = nmin(data)
+    data(~isfinite(data)) = inf;
+    v = min(data);
+end
+function v = nmax(data)
+    data(~isfinite(data)) = -inf;
+    v = max(data);
 end
