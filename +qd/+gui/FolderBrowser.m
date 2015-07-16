@@ -74,6 +74,10 @@ classdef FolderBrowser < handle
             set(obj.listbox_fig, 'DeleteFcn', @on_close);
         end
 
+        function location = get_location(obj)
+            location = obj.location;
+        end
+
         function set_editor(obj, editor)
         % See qd.gui.TableView.set_editor.
             obj.editor = editor;
