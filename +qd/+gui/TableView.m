@@ -167,6 +167,10 @@ classdef TableView < handle
                 'String', 'track', ...
                 'Value', obj.track, ...
                 'Callback', @(h, varargin) obj.set_track(get(h, 'Value')));
+            lists(end + 1) = uicontrol( ...
+                'Style', 'pushbutton', ...
+                'String', 'Open folder', ...
+                'Callback', @(h, varargin) obj.open_folder());
             try
                 obj.do_plot();
             catch err
@@ -192,6 +196,16 @@ classdef TableView < handle
             runtime = java.lang.Runtime.getRuntime();
             fullfile(obj.loc, 'meta.json')
             runtime.exec({obj.editor, fullfile(obj.loc, 'meta.json')});
+        end
+
+        function open_folder(obj)
+            if ispc
+                winopen(obj.loc);
+            elseif isunix
+                str = ['Open folder command is not supported ' ...
+                        'on non-Windows operating systems.'];
+                warning(str);
+            end
         end
 
         function mirror_settings(obj, other)
