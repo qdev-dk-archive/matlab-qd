@@ -466,6 +466,17 @@ classdef TableView < handle
             obj.update();
         end
 
+        function select_from_name(obj, dim, column_name)
+            columns = obj.tables{1};
+            for i=1:length(columns)
+                if strcmp(column_name, columns{i}.name)
+                    obj.select(dim, i);
+                    return
+                end
+            end
+            error(['Specified column ' column_name ' not found.'])
+        end
+
         function m = get_colormap(obj, limits)
             function u = make_symmetric(v)
                 low = min(limits);
