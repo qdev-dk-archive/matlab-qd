@@ -29,7 +29,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = sms(obj)
-        % Send an sms when the job is complete. 
+        % Send an sms when the job is complete.
         %
         % The recipient is given by the cellphone property of the associated
         % qd.q.Q object.
@@ -37,7 +37,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function obj = email(obj)
-        % Send an email when the job is complete. 
+        % Send an email when the job is complete.
         %
         % The recipient is given by the email_recipient property of the
         % associated qd.q.Q object.
@@ -101,7 +101,7 @@ classdef Plan < matlab.mixin.CustomDisplay
         % channel objects or names of inputs. If names are given, they are
         % first looked up in the current set, then in the setup of the
         % associated qd.q.Q object.
-        %  
+        %
         % See also qd.q.Plan.with and qd.q.Plan.without.
 
             % We make a map of the old inputs.
@@ -147,6 +147,17 @@ classdef Plan < matlab.mixin.CustomDisplay
         %
         % See also qd.q.swd.
             obj = obj.do(qd.q.swd(varargin{:}));
+        end
+
+        function obj = sww(obj, varargin)
+        % obj.sww(...) calls obj.do(qd.q.sww(...)) to add a sweep to the recipe.
+        %
+        % In contrast to obj.sw(...) this lets you specify a waiting time which
+        % is inserted between ramping the channel to its initial value and
+        % starting the sweep.
+        %
+        % See also qd.q.sww.
+            obj = obj.do(qd.q.sww(varargin{:}));
         end
 
         function obj = input_settle(obj, seconds)
@@ -289,12 +300,12 @@ classdef Plan < matlab.mixin.CustomDisplay
 
         function t = time(obj, varargin)
         % obj.time() measures how long this plan will take to execute.
-        % 
+        %
         % The following named arguments are supported:
-        %   * 'read_inputs' (default: true) 
+        %   * 'read_inputs' (default: true)
         %      If set to true, try reading inputs to figure out how
         %      long that takes.
-        %   * 'set_outputs' (default: false) 
+        %   * 'set_outputs' (default: false)
         %      If set to true, try setting outputs to figure out how
         %      long that takes.
             options = struct(varargin{:});
