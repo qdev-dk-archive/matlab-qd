@@ -9,7 +9,7 @@ classdef SweepWait
     end
     methods
         function exec(obj, ctx, future, prefix)
-            obj.chan.set_async(obj.from);
+            obj.chan.set(obj.from);
             pause(obj.wait_before_start);
             for value = linspace(obj.from, obj.to, obj.points)
                 future = future & obj.chan.set_async(value);
