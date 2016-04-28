@@ -160,6 +160,18 @@ classdef Plan < matlab.mixin.CustomDisplay
             obj = obj.do(qd.q.sww(varargin{:}));
         end
 
+        function obj = swb(obj, varargin)
+        % obj.swb(...) calls obj.do(qd.q.swb(...)) to add a sweep to the recipe.
+        %
+        % In contrast to obj.sw(...) swb sweeps from->to->from.
+        % The 'b' stands for 'boomerang'.
+        % is inserted between ramping the channel to its initial value and
+        % starting the sweep.
+        %
+        % See also qd.q.swb.
+            obj = obj.do(qd.q.swb(varargin{:}));
+        end
+
         function obj = input_settle(obj, seconds)
         % obj.input_settle(seconds) sets the settling time.
         %

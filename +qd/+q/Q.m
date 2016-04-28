@@ -147,6 +147,10 @@ classdef Q < handle
         % See also qd.q.Plan.sww
             plan = obj.make_plan().sww(varargin{:});
         end
+        function plan = swb(obj, varargin)
+        % See also qd.q.Plan.swb
+            plan = obj.make_plan().swb(varargin{:});
+        end
         function plan = job(obj, varargin)
         % See also qd.q.Plan.job
             plan = obj.make_plan().job(varargin{:});
