@@ -32,7 +32,7 @@ classdef swb < qd.q.Recipe
         end
 
         function job = apply(obj, ctx, sub_job)
-            job = qd.q.impl.Sweepfoo();
+            job = qd.q.impl.Sweep();
             job.chan = ctx.resolve_channel(obj.chan);
             job.from = obj.from;
             job.to = obj.to;
