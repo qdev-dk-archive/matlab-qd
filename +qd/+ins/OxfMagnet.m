@@ -58,6 +58,7 @@ classdef OxfMagnet < qd.classes.Instrument
             qd.util.assert(ismember(ax, obj.axes));
             obj.check_limits(ax, value);
             obj.abort(ax);
+            obj.daemon.set(ax, 'ACTN', 'HOLD');
             obj.daemon.set(ax, 'SIG:FSET', value, '%.10f');
             if value == 0
                 obj.daemon.set(ax, 'ACTN', 'RTOZ');
