@@ -118,6 +118,24 @@ classdef Keithley2600 < qd.classes.ComInstrument
             end
             obj.limits.(channel) = limit;
         end
+
+        function beep(obj)
+            % ins.beep()
+            %
+            % Makes the instrument beep.
+            obj.send('beeper.beep(0.1, 400); beeper.beep(0.1, 800); beeper.beep(0.1, 400); beeper.beep(0.2, 800);');
+        end
+
+        function alarm(obj)
+            % ins.alarm()
+            %
+            % Causes the instrument to make angry noises.
+            obj.send('beeper.beep(0.5, 2500); beeper.beep(0.5, 3055); ');
+            obj.send('beeper.beep(0.5, 2500); beeper.beep(0.5, 3055); ');
+            obj.send('beeper.beep(0.5, 2500); beeper.beep(0.5, 3055); ');
+            obj.send('beeper.beep(0.5, 2500); beeper.beep(0.5, 3055); ');
+            obj.send('beeper.beep(0.5, 2500); beeper.beep(0.5, 3055); ');
+        end
     end
 
     methods(Access=private)
