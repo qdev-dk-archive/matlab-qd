@@ -220,12 +220,14 @@ classdef Plan < matlab.mixin.CustomDisplay
             start_time = tic();
             if obj.verbose_flag
                 disp(obj);
+                disp(sprintf('Started: %s.', datestr(now, 'yyyy-mm-dd HH:MM:SS')));
             end
             future = qd.classes.SetFuture.do_nothing_future();
             prefix = [];
             job.exec(ctx, future, prefix);
-            time_string = sprintf('job took %s', qd.util.format_seconds(toc(start_time)));
+            time_string = sprintf('Job took %s.', qd.util.format_seconds(toc(start_time)));
             if obj.verbose_flag
+                disp(sprintf('Completed: %s.', datestr(now, 'yyyy-mm-dd HH:MM:SS')));
                 disp(time_string);
             end
             if obj.sms_flag
@@ -313,12 +315,11 @@ classdef Plan < matlab.mixin.CustomDisplay
         function t = time(obj, varargin)
         % obj.time() measures how long this plan will take to execute.
         %
+        % This returns the number of seconds the plan will take to execute.
+        %
         % The following named arguments are supported:
         %   * 'read_inputs' (default: true)
         %      If set to true, try reading inputs to figure out how
-        %      long that takes.
-        %   * 'set_outputs' (default: false)
-        %      If set to true, try setting outputs to figure out how
         %      long that takes.
             options = struct(varargin{:});
             if ~isfield(options, 'read_inputs')
@@ -328,6 +329,9 @@ classdef Plan < matlab.mixin.CustomDisplay
         end
 
         function s = pprint(obj)
+        % obj.pprint() create a string describing the plan.
+        %
+        % Note, that this is used when disp(obj) is called.
             if isempty(obj.name)
                 header = '# do';
             else
@@ -339,6 +343,32 @@ classdef Plan < matlab.mixin.CustomDisplay
                 j = obj.make_job_();
             end
             s = sprintf('%s\n%s', header, qd.util.indent(j.pprint()));
+        end
+
+        function explain(obj, varargin)
+        % obj.explain() prints the plan and how long it will take.
+        %
+        % Arguments are forwarded to obj.time().
+            estimated_duration = obj.time(varargin{:});
+            estimated_finish = now() + estimated_duration / 24.0 / 60 / 60;
+
+            % Format estimated finish based on how far in the future it is.
+            if estimated_finish - now() > 0.5
+                % more than 12 hours away
+                finish_string = datestr(estimated_finish, 'yyyy-mm-dd HH:MM');
+            elseif estimated_finish - now() > 5.0/24/60
+                % more than 5 minutes away
+                finish_string = datestr(estimated_finish, 'HH:MM');
+            else
+                finish_string = datestr(estimated_finish, 'HH:MM:ss');
+            end
+
+            disp(sprintf( ...
+                '%s\nEstimated duration: %s\nEstimated finish: %s', ...
+                obj.pprint(), ...
+                qd.util.format_seconds(obj.time(varargin{:})), ...
+                finish_string ...
+            ));
         end
     end
     methods (Access = protected)
